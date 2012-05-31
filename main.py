@@ -13,7 +13,9 @@ class Home(BaseHandler):
             'page_title': 'Home',
             'user': self.get_user()
         }
-        self.render('home.html', **data)
+        self.redirect('/competitions')
+
+        #self.render('home.html', **data)
 
 app = webapp2.WSGIApplication([('/', Home)],
                               debug=True)
