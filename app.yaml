@@ -51,6 +51,10 @@ handlers:
   script: competition.app
   secure: never
 
+- url: /_admin
+  script: test.app
+  secure: never
+
 - url: .*
   script: main.app
   secure: never
