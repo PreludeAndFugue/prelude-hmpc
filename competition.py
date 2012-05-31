@@ -92,6 +92,11 @@ class CompHandler(BaseHandler):
         comp = self.get_comp(year, month)
         results = self.parse_scores(self.request.POST)
 
+        if not user or not comp:
+            # stop some unauthorised post submissions.
+            self.redirect('/competitions')
+            return
+
         #self.write(results)
         #self.write(self.request.POST)
 
