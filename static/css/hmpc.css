@@ -2,6 +2,10 @@ section {
     margin-bottom: 30px;
 }
 
+.centred {
+    text-align: center;
+}
+
 .photo-score {
     text-align: center;
     margin: 10px;

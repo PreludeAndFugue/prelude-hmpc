@@ -11,43 +11,45 @@
     </h4>
     <br />
 
-
-    {% for photo, title, username, url, thumb, position, total_score in photos %}
     <ul class="thumbnails">
+    {% for photo, title, username, url, thumb, position, total_score in photos %}
         <li class="span2">
             <a href="{{url}}" class="thumbnail" rel="lightbox[comp]"
-                title="{{username}}: {{title}}">
+                title="{{title}} submitted by {{username}}, position: {{position}}">
                 <img id="thumb" src="{{thumb}}" alt="{{title}}" />
             </a>
         </li>
+    {% endfor %}
     </ul>
-    <table class="table">
-        <tr>
-            <td class="span2">Title</td>
-            <td>{{title}}</td>
-        </tr>
-        <tr>
-            <td>User</td>
-            <td>{{username}}</td>
-        </tr>
-        <tr>
-            <td>Position</td>
-            <td><span class="badge
-                {% if position == '1st' %}
+
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th class="span1">Position</th>
+                <th class="span1"><span class="pull-right">Score</span></th>
+                <th class="span2">User</th>
+                <th>Title</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for photo, title, username, url, thumb, position, total_score in photos %}
+            <tr>
+                <td class="centred"><span class="centred badge
+                    {% if position == '1st' %}
                     badge-first
                 {% elif position == '2nd' %}
                     badge-second
                 {% elif position == '3rd' %}
                     badge-third
-                {% endif %}
-                    ">{{position}}</span></td>
-        </tr>
-        <tr>
-            <td>Score</td>
-            <td>{{total_score}}</td>
-        </tr>
+                {% endif %}">
+                    {{position}}</td>
+                <td><span class="pull-right">{{total_score}}</span></td>
+                <td>{{username}}</td>
+                <td>{{title}}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
     </table>
-    {% endfor %}
 
 
 {% endblock %}
