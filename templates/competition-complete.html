@@ -11,19 +11,28 @@
     </h4>
     <br />
 
-    <ul class="thumbnails">
+
     {% for photo, title, username, url, thumb, position, total_score in photos %}
+    <ul class="thumbnails">
         <li class="span2">
             <a href="{{url}}" class="thumbnail" rel="lightbox[comp]"
                 title="{{username}}: {{title}}">
                 <img id="thumb" src="{{thumb}}" alt="{{title}}" />
             </a>
-            <div class="photo-score">
-                <b>{{title}}</b>
-                <br />
-                <span class="label">{{username}}</span>
-                <br />
-                <b>Position:</b> <span class="badge
+        </li>
+    </ul>
+    <table class="table">
+        <tr>
+            <td class="span2">Title</td>
+            <td>{{title}}</td>
+        </tr>
+        <tr>
+            <td>User</td>
+            <td>{{username}}</td>
+        </tr>
+        <tr>
+            <td>Position</td>
+            <td><span class="badge
                 {% if position == '1st' %}
                     badge-first
                 {% elif position == '2nd' %}
@@ -31,13 +40,15 @@
                 {% elif position == '3rd' %}
                     badge-third
                 {% endif %}
-                    ">{{position}}</span>
-                <br />
-                <b>Score:</b> {{total_score}}
-            </div>
-        </li>
+                    ">{{position}}</span></td>
+        </tr>
+        <tr>
+            <td>Score</td>
+            <td>{{total_score}}</td>
+        </tr>
+    </table>
     {% endfor %}
-    </ul>
+
 
 {% endblock %}
 
