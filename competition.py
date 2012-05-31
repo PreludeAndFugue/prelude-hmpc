@@ -167,14 +167,6 @@ class CompHandler(BaseHandler):
             return UserComp.get_usercomp(user, comp)
         # otherwise return None
 
-    def parse_scores(self, scores):
-        '''take the raw POST data MultiDict and convert to dict of photo ids (keys)
-        and scores (values).'''
-        results = {}
-        for photo_id, score in scores.iteritems():
-            results[int(photo_id)] = int(score)
-        return results
-
 class CompAdmin(BaseHandler):
     def get(self):
         user = self.get_user()
