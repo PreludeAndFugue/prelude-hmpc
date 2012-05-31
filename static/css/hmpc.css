@@ -6,3 +6,15 @@ section {
     text-align: center;
     margin: 10px;
 }
+
+.badge-first {
+    background-color: #D4AF37;
+}
+
+.badge-second {
+    background-color: #C9C0BB;
+}
+
+.badge-third {
+    background-color: #CD7F32;
+}

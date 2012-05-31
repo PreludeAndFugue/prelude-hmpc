@@ -23,7 +23,15 @@
                 <br />
                 <span class="label">{{username}}</span>
                 <br />
-                <b>Position:</b> {{position}}
+                <b>Position:</b> <span class="badge
+                {% if position == '1st' %}
+                    badge-first
+                {% elif position == '2nd' %}
+                    badge-second
+                {% elif position == '3rd' %}
+                    badge-third
+                {% endif %}
+                    ">{{position}}</span>
                 <br />
                 <b>Score:</b> {{total_score}}
             </div>
