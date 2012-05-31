@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Competition: {{month}} {{year}} {% endblock %}
+{% block css%}
+<link href="/static/css/lightbox.css" rel="stylesheet" type="text/css" />
+{% endblock %}
+{% block nav_comps %} active{% endblock %}
+{% block content %}
+
+    <h4>
+        {{comp.title}}
+    </h4>
+    <br />
+    <form method="post" class="form-inline">
+
+    <ul class="thumbnails">
+    {% for photo, title, url, thumb, score, user_photo in photos %}
+        <li class="span2">
+            <a href="{{url}}" class="thumbnail" rel="lightbox[comp]"
+                title="{{title}}">
+                <img id="thumb" src="{{thumb}}" alt="{{title}}" />
+            </a>
+            <div class="photo-score">
+                {% if to_score and not user_photo %}
+                    <label for="score" class="control-label">Score</label>
+                    <select name="{{photo.key().id()}}" class="span1">
+                        <option>1</option>
+                        <option>2</option>
+                        <option>3</option>
+                        <option>4</option>
+                        <option>5</option>
+                        <option>6</option>
+                        <option>7</option>
+                        <option>8</option>
+                        <option>9</option>
+                        <option>10</option>
+                    </select>
+                {% elif not to_score and not user_photo %}
+                    <b>Score:</b> {{score}}
+                {% endif %}
+            </div>
+        </li>
+    {% endfor %}
+    </ul>
+
+    {% if to_score %}
+        <input type="submit" class="btn btn-primary" value="Submit Scores" />
+    {% endif %}
+
+{% endblock %}
+
+{% block js %}
+<script src="/static/js/lightbox.js"></script>
+{% endblock %}

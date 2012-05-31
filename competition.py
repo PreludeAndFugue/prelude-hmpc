@@ -54,39 +54,29 @@ class CompHandler(BaseHandler):
             self.redirect('/competitions')
             return
 
-        usercomp = self.get_usercomp(user, comp)
-
         month_str = MONTHS[comp.month]
-        photos = []
-        for p in Photo.competition_photos(comp):
-            title, url, thumb, date = p.data(128)
-
-            if usercomp and usercomp.submitted_scores and comp.status == 1:
-                s = Scores.score_from_user(p, user)
-                score = s.score if s else None
-            else:
-                score = None
-
-            my_photo = True if user and p.user == user else False
-            photos.append((p, title, url, thumb, score, my_photo))
-
-        # can the user submit scores
-        scoring = usercomp and comp.status == 1 and not usercomp.submitted_scores
-        # has the user submitted scores
-        scored = usercomp and comp.status == 1 and usercomp.submitted_scores
-
         data = {
-                'year': comp.year,
-                'month': month_str,
-                'page_title': 'Competition: %s %d' % (month_str, comp.year),
-                'page_subtitle': comp.get_status(),
-                'user': user,
-                'comp': comp,
-                'photos': photos,
-                'scoring': scoring,
-                'scored': scored
+            'user': user,
+            'comp': comp,
+            'year': year,
+            'month': month_str,
+            'page_title': 'Competition: %s %d' % (month_str, comp.year),
+            'page_subtitle': comp.get_status(),
         }
-        self.render('competition.html', **data)
+
+        if comp.status == 0:
+            # open
+            self.view_open(user, comp, data)
+        elif comp.status == 1:
+            # scoring
+            user_comp = self.get_usercomp(user, comp)
+            if not user or not user_comp:
+                self.view_open(user, comp, data)
+            else:
+                self.view_scoring(user, comp, user_comp, data)
+        else:
+            # completed
+            self.view_complete(user, comp, data)
 
     def post(self, year=0, month=0):
         user = self.get_user()
@@ -109,6 +99,43 @@ class CompHandler(BaseHandler):
         usercomp.put()
 
         self.redirect('/competition/current')
+
+    def view_open(self, user, comp, data):
+        photos = []
+        for p in Photo.competition_photos(comp):
+            title, url, thumb, date = p.data(128)
+            photos.append((p, title, url, thumb))
+
+        data.update({
+            'photos': photos
+        })
+        self.render('competition-open.html', **data)
+
+    def view_scoring(self, user, comp, user_comp, data):
+        to_score = user_comp and not user_comp.submitted_scores
+
+        photos = []
+        for p in Photo.competition_photos(comp):
+            title, url, thumb, date = p.data(128)
+            user_photo = p.user == user
+            if not to_score:
+                s = Scores.score_from_user(p, user)
+                score = s.score if s else None
+            else:
+                score = None
+            photos.append((p, title, url, thumb, score, user_photo))
+
+        data.update({
+            'photos': photos,
+            'to_score': to_score
+        })
+        self.render('competition-scoring.html', **data)
+
+
+    def view_complete(self, user, comp, data):
+
+
+        self.render('competition-complete.html', **data)
 
     def get_comp(self, year, month):
         if year == 0 and month == 0:

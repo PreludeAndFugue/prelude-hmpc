@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Competition: {{month}} {{year}} {% endblock %}
+
+{% block css%}
+<link href="/static/css/lightbox.css" rel="stylesheet" type="text/css" />
+{% endblock %}
+
+{% block nav_comps %} active{% endblock %}
+
+{% block content %}
+    <h4>
+        {{comp.title}}
+    </h4>
+    <br />
+
+    <ul class="thumbnails">
+    {% for photo, title, url, thumb in photos %}
+        <li class="span2">
+            <a href="{{url}}" class="thumbnail" rel="lightbox[comp]">
+                <img id="thumb" src="{{thumb}}" alt="{{title}}" />
+                <div class="caption"><h5>{{title}}</h5></div>
+            </a>
+        </li>
+    {% endfor %}
+    </ul>
+{% endblock %}
+
+{% block js %}
+    <script src="/static/js/lightbox.js"></script>
+{% endblock %}

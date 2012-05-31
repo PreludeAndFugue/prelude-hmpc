@@ -16,10 +16,12 @@ class User(db.Model):
 
     @classmethod
     def user_from_name(cls, name):
+        '''Return the user from the name attribute.'''
         query = cls.gql('WHERE username = :name', name=name)
         return query.get()
 
     def __eq__(self, other):
+        '''Compare to users for equality.'''
         return self.username == other.username
 
 class Competition(db.Model):
@@ -34,13 +36,16 @@ class Competition(db.Model):
 
     @classmethod
     def get_by_date(cls, month, year):
+        '''Return competition based on its month and year.'''
         query = cls.gql('WHERE month = :1 AND year = :2', month, year)
         return query.get()
 
     def get_status(self):
+        '''Return the status of the competition as a meaningful str.'''
         return {0: 'Open', 1: 'Scoring', 2: 'Completed'}[self.status]
 
     def __eq__(self, other):
+        '''Compare competitions for equality.'''
         return self.year == other.year and self.month == other.month
 
 class UserComp(db.Model):
@@ -55,6 +60,7 @@ class UserComp(db.Model):
 
     @classmethod
     def get_usercomp(cls, user, comp):
+        '''Return details about a user's participation in a competition.'''
         query = cls.gql('WHERE user = :1 AND comp = :2', user, comp)
         return query.get()
 
@@ -76,6 +82,7 @@ class Photo(db.Model):
 
     @classmethod
     def user_photos(cls, user, limit=6):
+        '''Return all photos of a user.'''
         query = cls.gql('WHERE user = :user ORDER BY upload_date DESC', user=user)
         if limit is not None:
             return query.run(limit=limit)
@@ -84,15 +91,18 @@ class Photo(db.Model):
 
     @classmethod
     def competition_photos(cls, competition):
+        '''Return all photos entered into a competition.'''
         query = cls.gql('WHERE competition = :c', c=competition)
         return query.run()
 
     @classmethod
     def competition_user(cls, competition, user):
+        '''Return the photo entered by user into competition.'''
         query = cls.gql('WHERE competition = :c AND user = :u', c=competition, u=user)
         return query.get()
 
     def data(self, size=288):
+        '''Return information about photo and urls for image and thumb.'''
         title = self.title if self.title else 'Untitled'
         url = get_serving_url(self.blob, size=MAX_SIZE)
         thumb = get_serving_url(self.blob, size=size, crop=True)
@@ -106,16 +116,19 @@ class Scores(db.Model):
 
     @classmethod
     def photo_score(cls, photo):
+        '''Return the total score for a photo.'''
         query = cls.gql('WHERE photo = :photo', photo=photo)
         return sum(s.score for s in query)
 
     @classmethod
     def scores_from_user(cls, user, comp):
+        '''Return all scores submitted by a user for a particular competition.'''
         query = cls.gql('WHERE user_from = :1 AND photo.competition = :2', user, comp)
         return query.run()
 
     @classmethod
     def score_from_user(cls, photo, user):
+        '''Return the score submitted by a user for a particular photo.'''
         query = cls.gql('WHERE photo = :1 AND user_from = :2', photo, user)
         return query.get()
 
