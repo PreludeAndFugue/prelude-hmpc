@@ -10,43 +10,26 @@
         {{comp.title}}
     </h4>
     <br />
-    <form method="post" class="form-inline">
 
     <ul class="thumbnails">
-    {% for photo, title, url, thumb, score, my_photo in photos %}
+    {% for photo, title, username, url, thumb, position, total_score in photos %}
         <li class="span2">
             <a href="{{url}}" class="thumbnail" rel="lightbox[comp]"
-                title="{{title}}">
+                title="{{username}}: {{title}}">
                 <img id="thumb" src="{{thumb}}" alt="{{title}}" />
             </a>
             <div class="photo-score">
-                {% if scoring and not my_photo %}
-                    <label for="score" class="control-label">Score</label>
-                    <select name="{{photo.key().id()}}" class="span1">
-                        <option>1</option>
-                        <option>2</option>
-                        <option>3</option>
-                        <option>4</option>
-                        <option>5</option>
-                        <option>6</option>
-                        <option>7</option>
-                        <option>8</option>
-                        <option>9</option>
-                        <option>10</option>
-                    </select>
-                {% elif scored %}
-                    <b>Score:</b> {{score}}
-                {% elif user and comp.status == 2 %}
-                    <b>Score:</b> 5
-                {% endif %}
+                <b>{{title}}</b>
+                <br />
+                <span class="label">{{username}}</span>
+                <br />
+                <b>Position:</b> {{position}}
+                <br />
+                <b>Score:</b> {{total_score}}
             </div>
         </li>
     {% endfor %}
     </ul>
-
-    {% if scoring %}
-        <input type="submit" class="btn btn-primary" value="Submit Scores" />
-    {% endif %}
 
 {% endblock %}
 

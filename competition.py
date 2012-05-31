@@ -25,6 +25,13 @@ MONTHS = {
     12: 'December'
 }
 
+def ordinal(n):
+    '''Return ordinal number string from input integer.'''
+    if 10 <= n % 100 < 20:
+        return str(n) + 'th'
+    else:
+       return  str(n) + {1 : 'st', 2 : 'nd', 3 : 'rd'}.get(n % 10, "th")
+
 class Comps(BaseHandler):
     def get(self):
         user = self.get_user()
@@ -133,7 +140,15 @@ class CompHandler(BaseHandler):
 
 
     def view_complete(self, user, comp, data):
+        photos = []
+        for p in Photo.competition_result(comp):
+            title, url, thumb, date = p.data(128)
+            photos.append((p, title, p.user.username, url, thumb,
+                ordinal(p.position), p.total_score))
 
+        data.update({
+            'photos': photos
+        })
 
         self.render('competition-complete.html', **data)
 

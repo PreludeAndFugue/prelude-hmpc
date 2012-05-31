@@ -96,6 +96,15 @@ class Photo(db.Model):
         return query.run()
 
     @classmethod
+    def competition_result(cls, competition):
+        '''Return all photos entered in a competition and order by total score
+        descending.'''
+        query = cls.all()
+        query.filter('competition = ', competition)
+        query.order('-total_score')
+        return query.run()
+
+    @classmethod
     def competition_user(cls, competition, user):
         '''Return the photo entered by user into competition.'''
         query = cls.gql('WHERE competition = :c AND user = :u', c=competition, u=user)
