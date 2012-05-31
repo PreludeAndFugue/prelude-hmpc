@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}User{% endblock %}
+{% block nav_user %}active{% endblock %}
+{% block content %}
+    <div class="alert alert-error">
+        No user currently logged-in.
+    </div>
+    <a class="btn btn-primary" href="/login">Login</a>
+{% endblock %}

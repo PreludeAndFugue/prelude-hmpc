@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Registration{% endblock %}
+{% block nav_register %}active{% endblock %}
+{% block content %}
+    <div class="row">
+        <div class="span4">
+            <form method="post">
+
+                <label for="username">Username</label>
+                <input type="text" name="username" id="username"
+                    value="{{username}}" class="span4" />
+
+                <label for="email">Email</label>
+                <input type="text" name="email" id="email"
+                    value="{{email}}" class="span4" />
+
+                <label for="password">Password</label>
+                <input type="password" name="password" id="password"
+                    class="span4" />
+
+                <label for="validate">Confirm Password</label>
+                <input type="password" name="validate" id="validate"
+                    class="span4" />
+
+                <br />
+
+                <button type="submit" class="btn btn-primary">Register</button>
+
+            </form>
+        </div>
+
+        {% if errors %}
+        <div class="span5">
+            <div class="alert alert-error">
+                Please try again. There were some errors with your registration:
+                <ul>
+                    {% for error in errors %}
+                    <li>{{error}}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+{% endblock %}

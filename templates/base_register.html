@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Registration{% endblock %}
+{% block nav_register %}active{% endblock %}
+{% block content %}
+    <h2>Registration</h2>
+
+    <div class="row">
+        <div class="span4">
+            {% block form %} {% endblock %}
+        </div>
+
+        {% if errors %}
+        <div class="span5">
+            <div class="alert alert-error">
+                Please try again. There were some errors with your registration:
+                <ul>
+                    {% for error in errors %}
+                    <li>{{error}}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Upload test{% endblock %}
+{% block nav_user %}active{% endblock %}
+{% block content %}
+    <div>
+        {{blob_info.content_type}}
+        <br />
+        {{blob_info.creation}}
+        <br />
+        {{blob_info.filename}}
+        <br />
+        {{blob_info.size}}
+        <br />
+        {{photo_title}}
+    </div>
+{% endblock %}

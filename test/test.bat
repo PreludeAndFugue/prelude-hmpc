@@ -1,0 +1,1 @@
+py -2 "C:\Program Files (x86)\Google\google_appengine\appcfg.py" --filename=bulkuploader.yaml --url=http://prelude-hmpc.appspot.com/_ah/remote_api create_bulkloader_config

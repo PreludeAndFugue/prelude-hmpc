@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>{% block title %}{% endblock %}</title>
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link href="/static/css/hmpc.css" rel="stylesheet" type="text/css" />
+    {% block css %}{% endblock %}
+</head>
+<body>
+    <div class="navbar">
+        <div class="navbar-inner">
+            <div class="container">
+                <a class="brand" href="#">HMPC</a>
+
+                <ul class="nav">
+                    <li id="nav-home" class="{% block nav_home %}{% endblock %}">
+                        <a href="/">Home</a>
+                    </li>
+
+                    {% if user and user.admin %}
+
+                    <li id="nav-competitions"
+                        class="dropdown{% block nav_comps %}{% endblock %}">
+                        <a href="/competitions" class="dropdown-toggle"
+                                data-target="#" data-toggle="dropdown">
+                            Competitions
+                            <b class="caret"></b>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li id="nav-current-comp">
+                                <a href="/competition/current">Current Competition</a>
+                            </li>
+                            <li id="nav-competitions1">
+                                <a href="/competitions">View Competitions</a>
+                            </li>
+                            <li id="nav-comp-admin">
+                                <a href="/competition/admin">Competition Admin</a>
+                            </li>
+                        </ul>
+                    </li>
+
+                    {% else %}
+
+                    <li id="nav-competitions" class="{{self.nav_comps()}}">
+                        <a href="/competitions">Competitions</a>
+                    </li>
+
+                    {% endif %}
+
+                    {% if user %}
+                    <li id="nav-user" class="{% block nav_user %}{% endblock %}">
+                        <a href="/user">User [{{user.username}}]</a>
+                    </li>
+                    {% endif %}
+
+                    <li id="nav-contact"
+                        class="{% block nav_contact %}{% endblock %}">
+                        <a href="/contact">Contact</a>
+                    </li>
+                    <li class="divider-vertical"></li>
+
+                    {% if user %}
+                    <li id="nav-logout">
+                        <a href="/logout">Logout</a>
+                    </li>
+                    {% else %}
+                    <li id="nav-login" class="{% block nav_login %}{% endblock %}">
+                        <a href="/login">Login</a>
+                    </li>
+                    <li id="nav-register"
+                        class="{% block nav_register %}{% endblock %}">
+                        <a href="/register">Register</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="page-header">
+            <h1>{{page_title}} <small>{{page_subtitle}}</small></h1>
+        </div>
+
+        {% block content %}{% endblock %}
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js">
+    </script>
+    <script src="/static/js/bootstrap.min.js"></script>
+    {% block js %}{% endblock %}
+    <script>{% block script %}{% endblock %}</script>
+</body>
+</html>

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}HMPC{% endblock %}
+{% block nav_home %}active{% endblock %}
+{% block content %}
+    <h2>Recent competitions</h2>
+    <p>
+        List - sort descending - most recent first.
+    </p>
+
+    <h2>Top scoring photographs</h2>
+    <p>
+        The top scoring photographs for all competitons
+    </p>
+
+    <h2>Top scoring competitors</h2>
+    <p>
+        Query to find the top 5 user scores in the database. Don't repeat users
+        in this list - if one user has more than one score in the top five then
+        get the sixth top score.
+    </p>
+{% endblock %}

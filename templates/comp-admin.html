@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Competition Admin{% endblock %}
+{% block nav_comps %} active{% endblock %}
+{% block content %}
+
+    <a href="/competition/new" class="btn btn-primary">
+        New competition
+    </a>
+    <br />
+    <br />
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Year</th>
+                <th>Month</th>
+                <th>Status</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for comp in comps %}
+            <tr>
+                <td>{{comp.title}}</td>
+                <td>{{comp.year}}</td>
+                <td>{{months[comp.month]}}</td>
+                <td>{{comp.get_status()}}</td>
+                <td class="span1"><a href="/competition/modify/{{comp.year}}/{{comp.month}}" class="btn btn-primary btn-mini">Modify</a></td>
+            </tr>
+            {% endfor %}
+            {% if not comps %}
+            <tr>
+                <td colspan="5">
+                    No competitions
+                </td>
+            </tr>
+            {% endif %}
+        </tbody>
+    </table>
+
+{% endblock %}

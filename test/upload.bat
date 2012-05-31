@@ -1,0 +1,1 @@
+py -2 "C:\Program Files (x86)\Google\google_appengine\appcfg.py" upload_data --config_file="C:\Users\Gary\Documents\computing\googleappengine\prelude-hmpc\test\bulkuploader.yaml" --filename=users.csv --kind=User --url=http://localhost:8083/_ah/remote_api --num_thread=1

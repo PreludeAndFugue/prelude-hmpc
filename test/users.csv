@@ -1,0 +1,3 @@
+"admin", "email", "password", "username", "verified"
+"true", "foo@foo.com", "foo", "foo", "true"
+"false", "bar@bar.com", "bar", "bar", "true"

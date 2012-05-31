@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Contact{% endblock %}
+{% block nav_contact %}active{% endblock %}
+{% block content %}
+    <p>Send an email to the administrators.</p>
+
+    <form method="post">
+
+        <label for="name">Name</label>
+        <input type="text" name="name" id="name"
+            value="{{user.username}}" />
+
+        <label for="email">Email Address</label>
+        <input type="type" name="email" id="email"
+            value="{{user.email}}" />
+
+        <label for="message">Message</label>
+        <textarea class="span5" rows="6" name="message" id="message"></textarea>
+
+        <br />
+
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+
+    {% if message_sent %}
+    <div class="alert {{alert_type}}">
+        {{message}}
+    </div>
+    {% endif %}
+{% endblock %}

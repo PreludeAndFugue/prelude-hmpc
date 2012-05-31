@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}New Competition{% endblock %}
+{% block nav_comps %} active{% endblock %}
+{% block content %}
+<div class="row">
+    <div class="span6">
+        <form method="post">
+            <label for="comp-title">Title</label>
+            <input type="text" name="comp-title" id="comp-title" class="span4" />
+
+            <p>The competition will begin and end on the first and last days of this
+                month.
+            </p>
+            <label for="comp-month">Month</label>
+            <select name="comp-month">
+                {% for i in months %}
+                    <option value="{{i}}">{{months[i]}}</option>
+                {% endfor %}
+            </select>
+
+            <label for="comp-year">Year</label>
+            <select name="comp-year">
+                <option value="2012" selected="selected">2012</option>
+                <option value="2013">2013</option>
+            </select>
+            <br />
+            <input type="submit" class="btn btn-primary" value="Create" />
+        </form>
+    </div>
+
+    {% if errors %}
+    <div class="span5">
+        <div class="alert alert-error">
+            There were errors when you tried to create a new competition.
+            <ul>
+                {% for error in errors %}
+                <li>{{error}}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}

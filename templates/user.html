@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}User: {{user.username}}{% endblock %}
+{% block css%}
+<link href="/static/css/lightbox.css" rel="stylesheet" type="text/css" />
+{% endblock %}
+{% block nav_user %}active{% endblock %}
+{% block content %}
+
+    {% if comp_live and not comp_photo %}
+    <form method="post" action="{{upload_url}}" class="well"
+        enctype="multipart/form-data" accept="image/jpeg">
+        <p>
+            There is a competition in progress and you haven't submitted a
+            photograph for this competition. Note that only
+            <span class="label">jpg</span> files can be
+            submitted.
+        </p>
+        <div class="clearfix">
+            <label for="photo-submit">
+                Select a photograph to sumbit to
+                <span class="label">{{comp.title}}</span>.
+            </label>
+            <input class="span6" id="photo-submit" name="photo-submit"
+                type="file" />
+            <label for="photo-title">
+                Photograph title (optional)
+            </label>
+            <input class="span6" type="text" name="photo-title" id="photo-title" />
+        </div>
+        <input type="submit" class="btn btn-primary" value="Submit" />
+        <input type="hidden" value="{{comp.key().id()}}" name="comp-id" />
+    </form>
+    {% endif %}
+
+    {% if comp_live and comp_photo %}
+    <div class="alert alert-info">
+        You have submitted a photograph for the currently open competition.
+    </div>
+    {% endif %}
+
+    {% if not_jpg %}
+    <div class="alert alert-error">
+        You didn't select a photograph to submit. Try again.
+    </div>
+    {% endif %}
+
+    {% if submit_success %}
+    <div class="alert alert-success">
+        You have submitted a photograph for the current competition.
+    </div>
+    {% endif %}
+
+    {% if not comp_live %}
+    <div class="alert alert-info">
+        There is currently no open competition.
+    </div>
+    {% endif %}
+
+    <p>Best score: ...</p>
+    <p>Worst score: ...</p>
+
+    <h3>
+        Photographs
+        <small>Six most recent</small>
+    </h3>
+
+    <ul class="thumbnails">
+    {% for photo, title, photo_url, thumbnail, date in photos %}
+        <li class="span4">
+            <a href="{{photo_url}}" class="thumbnail" rel="lightbox[user]"
+                title="{{title}}">
+                <img src="{{thumbnail}}" alt="{{title}}" />
+            </a>
+            <dl class="dl-horizontal">
+                <dt>Title</dt>
+                    <dd>{{title}}</dd>
+                <dt>Uploaded</dt>
+                    <dd>{{date}}</dd>
+                <dt>Competition</dt>
+                    <dd>{{photo.competition.title}}</dd>
+                <dt>Score</dt>
+                    <dd>{{photo.total_score}}</dd>
+                <dt>Position</dt>
+                    <dd>{{photo.position}}</dd>
+            </dl>
+        </li>
+    {% endfor %}
+    </ul>
+
+{% endblock %}
+
+{% block js %}
+<script src="/static/js/lightbox.js"></script>
+{% endblock %}

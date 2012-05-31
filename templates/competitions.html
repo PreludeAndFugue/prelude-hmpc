@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Competitions{% endblock %}
+{% block nav_comps %} active{% endblock %}
+{% block content %}
+
+    {% for m_int, month, year, title, status, user_photo in comps %}
+    <section>
+        <h2>{{month}} {{year}}
+            <small>{{title}}</small>
+        </h2>
+        <p><b>Status:</b> {{status}}</p>
+
+        {% if user_photo %}
+        <p><span class="label label-info">You submitted a photograph.</span></p>
+        {% elif user_photo == false %}
+        <p><span class="label label-inverse">You didn't submit a photograph.</span></p>
+        {% endif %}
+
+        <a href="/competition/{{year}}/{{m_int}}"
+            class="btn btn-primary">View</a>
+    </section>
+    {% endfor %}
+
+{% endblock %}

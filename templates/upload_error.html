@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Upload test{% endblock %}
+{% block nav_user %}active{% endblock %}
+{% block content %}
+    <div class="alert alert-error">
+        {{error}}
+    </div>
+
+    <a href="/user" class="btn btn-primary">Return to user page</a>
+{% endblock %}

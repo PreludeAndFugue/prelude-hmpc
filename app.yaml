@@ -1,0 +1,63 @@
+application: prelude-hmpc
+version: 1
+runtime: python27
+api_version: 1
+threadsafe: yes
+
+builtins:
+- remote_api: on
+
+handlers:
+- url: /favicon\.ico
+  static_files: favicon.ico
+  upload: favicon\.ico
+
+- url: /static/
+  static_dir: static
+
+- url: /login
+  script: user.app
+  secure: always
+
+- url: /register
+  script: user.app
+  secure: always
+
+- url: /logout
+  script: user.app
+  secure: never
+
+- url: /user
+  script: user.app
+  secure: never
+
+- url: /verify/.+
+  script: user.app
+  secure: never
+
+- url: /contact
+  script: user.app
+  secure: never
+
+- url: /upload
+  script: user.app
+  secure: never
+
+- url: /competitions
+  script: competition.app
+  secure: never
+
+- url: /competition/.*
+  script: competition.app
+  secure: never
+
+- url: .*
+  script: main.app
+  secure: never
+
+libraries:
+- name: webapp2
+  version: "2.5.1"
+
+- name: jinja2
+  version: latest
