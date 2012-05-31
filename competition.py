@@ -105,7 +105,7 @@ class CompHandler(BaseHandler):
         usercomp.submitted_scores = True
         usercomp.put()
 
-        self.redirect('/competition/current')
+        self.redirect('/competition/%d/%d' % (year, month))
 
     def view_open(self, user, comp, data):
         photos = []
