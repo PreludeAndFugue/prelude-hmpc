@@ -82,7 +82,7 @@ class Photo(db.Model):
     blob = blobstore.BlobReferenceProperty(required=True)
     upload_date = db.DateTimeProperty(auto_now_add=True)
     position = db.IntegerProperty(default=None)
-    total_score = db.IntegerProperty(default=None)
+    total_score = db.IntegerProperty(default=0)
 
     @classmethod
     def user_photos(cls, user, limit=6):

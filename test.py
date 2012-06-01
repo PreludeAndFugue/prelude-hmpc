@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 
 from datetime import date
+from itertools import product
 from glob import glob
 from google.appengine.api import files
 from google.appengine.ext.blobstore import delete as delete_blob
 import os
+from random import randint
 import webapp2
 from webapp2_extras.security import generate_password_hash
 
@@ -25,8 +27,9 @@ class Test(BaseHandler):
 
         if not delete:
             users = self._create_users()
-            comp = self._create_competition()
-            self._upload_photos(users, comp)
+            comps = self._create_competition()
+            photos = self._upload_photos(users, comps)
+            self._create_scores(users, comps, photos)
         else:
             self._delete_all()
         self.redirect('/')
@@ -34,7 +37,7 @@ class Test(BaseHandler):
     def _create_users(self):
         data = (
             # username, email, password, verified, admin
-            ('foo1', 'foo@foo.com', 'foo1', True, True),
+            ('foo', 'foo@foo.com', 'foo', True, True),
             ('bar', 'bar@bar.com', 'bar', True, False),
             ('baz', 'baz@baz.com', 'baz', True, False)
         )
@@ -48,27 +51,70 @@ class Test(BaseHandler):
         return users
 
     def _create_competition(self):
-        comp = Competition(title='May photographs', year=2012, month=5,
+        comp1 = Competition(title='May photographs', year=2012, month=5,
                 start=date(2012, 5, 1), end=date(2012, 5, 31))
-        comp.put()
-        return comp
+        comp1.status = 2
+        comp1.put()
+        comp2 = Competition(title='June photographs', year=2012, month=6,
+                start=date(2012, 6, 1), end=date(2012, 6, 30))
+        comp2.status = 1
+        comp2.put()
+        return (comp1, comp2)
 
-    def _upload_photos(self, users, comp):
+    def _upload_photos(self, users, comps):
         d = os.getcwd()
         d = os.path.join(d, 'test', '*.jpg')
         photos = glob(d)
+        titles = ('Mars', 'Finnish Flag', 'Hospital in the distance', '', '', '')
+        comp1 = comps[0]
 
-        for user, photo_path in zip(users, photos):
+        # collect Photo instances here
+        p = []
+        for (user, comp), photo_path, title in zip(product(users, comps), photos, titles):
             file_name = files.blobstore.create(mime_type='application/jpeg')
             with files.open(file_name, 'a') as f:
                 f.write(open(photo_path, 'rb').read())
             files.finalize(file_name)
             blob_key = files.blobstore.get_blob_key(file_name)
 
-            photo = Photo(user=user, competition=comp, blob=blob_key)
+            photo = Photo(user=user, competition=comp, blob=blob_key, title=title)
             photo.put()
+            p.append(photo)
             user_comp = UserComp(user=user, comp=comp)
+            if comp == comp1:
+                user_comp.submitted_scores = True
             user_comp.put()
+        return p
+
+    def _create_scores(self, users, comps, photos):
+        # the first of the two competitions is complete
+        comp = comps[0]
+        scores = []
+        for photo, user in product(photos, users):
+            if photo.competition != comp or photo.user == user:
+                continue
+            score = Scores(photo=photo, user_from=user, score=randint(1, 10))
+            score.put()
+            scores.append(score)
+
+        # calculate total scores
+        results = []
+        for photo in Photo.competition_photos(comp):
+            total_score = Scores.photo_score(photo)
+            results.append((total_score, photo))
+        results.sort(reverse=True)
+
+        # calculate positions
+        position = 1
+        prev_score = 1000000
+        for i, (score, photo) in enumerate(results, start=1):
+            if score != prev_score:
+                position = i
+            #full_results.append((position, score, photo))
+            photo.position = position
+            photo.total_score = score
+            photo.put()
+            prev_score = score
 
     def _delete_all(self):
         for base in (Competition, UserComp, Scores):
@@ -77,7 +123,7 @@ class Test(BaseHandler):
         for photo in Photo.all():
             delete_blob(photo.blob.key())
             photo.delete()
-        for user in User.gql('WHERE username != :1', 'foo'):
+        for user in User.gql('WHERE username != :1', 'test'):
             user.delete()
 
 
