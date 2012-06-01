@@ -24,6 +24,10 @@ class User(db.Model):
         '''Compare to users for equality.'''
         return self.username == other.username
 
+    def __str__(self):
+        return 'User(%s, %s, verified=%s, admin=%s)' % (self.username, self.email,
+                self.verified, self.admin)
+
 class Competition(db.Model):
     title = db.StringProperty(required=True)
     year = db.IntegerProperty(required=True)

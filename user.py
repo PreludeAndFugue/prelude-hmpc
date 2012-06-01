@@ -66,6 +66,7 @@ class Login(BaseUser):
         if not user or not self.validate_user(user, password):
             errors.append('Invalid username or password.')
             self.render('login.html', errors=errors, username=username)
+            logging.warning('Login: invalid username or password. %s', user)
             return
 
         # unverified user
@@ -75,6 +76,7 @@ class Login(BaseUser):
                 'Please check your mail (and your spam folder). If you have '
                 'not received the email, please contact admin.')
             self.render('login.html', errors=errors, username=username, contact=True)
+            logging.warning('Login: unverified user attempted login. %s', user)
             return
 
         # user exists - set cookie and redirect
@@ -196,6 +198,7 @@ class VerifyUser(BaseUser):
         test_user = User.user_from_name(username)
 
         if not test_user:
+            logging.warning('VerifyUser: user not found in db.')
             self.render('verify_fail.html', **data)
             return
 
@@ -203,6 +206,7 @@ class VerifyUser(BaseUser):
             test_user.verified = True
             test_user.verify_code = None
             test_user.put()
+            logging.info('VerifyUser: user succesfully verified.')
             self.render('verify.html', **data)
         else:
             self.render('verify_fail.html', **data)
