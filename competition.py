@@ -143,7 +143,6 @@ class CompHandler(BaseHandler):
         })
         self.render('competition-scoring.html', **data)
 
-
     def view_complete(self, user, comp, data):
         photos = []
         for p in Photo.competition_result(comp):
@@ -156,6 +155,14 @@ class CompHandler(BaseHandler):
         })
 
         self.render('competition-complete.html', **data)
+
+    def parse_scores(self, scores):
+        '''take the raw POST data MultiDict and convert to dict of photo ids (keys)
+        and scores (values).'''
+        results = {}
+        for photo_id, score in scores.iteritems():
+            results[int(photo_id)] = int(score)
+        return results
 
     def get_comp(self, year, month):
         if year == 0 and month == 0:
