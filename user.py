@@ -125,6 +125,7 @@ class Register(BaseUser):
             user = User(username=username, password=hash_pass, email=email,
                 verify_code=verify_code)
             user.put()
+            logging.info('Register: successfully created user: %s', user)
             # send email to admin about new user
             body = 'Username: %s\nEmail: %s' % (user.username, user.email)
             mail.send_mail_to_admins('gdrummondk@gmail.com', 'hmpc: new user', body)
@@ -158,31 +159,40 @@ class Register(BaseUser):
         # username errors
         if not username:
             errors.append('You forgot to enter a username.')
+            logging.warning('Register: forgot username.')
         elif not self.valid_name(username):
             errors.append('A Valid user name can contain only the characters '
                 'a-z, A-Z, 0-9, _ (underscore) and - (dash) and must be at '
                 'least 3 characters long.')
+            logging.warning('Register: invalid username: %s.', username)
 
         user = User.user_from_name(username)
         if user:
             # user name already exists
             errors.append('That user name already exists, please choose '
                 'another one.')
+            logging.warning('Register: username already in use. %s', user)
 
         # email errors
         if not email:
             errors.append('You forgot to enter an email address.')
+            logging.warning('Register: forgot email.')
         elif not self.valid_email(email):
             errors.append("Check your email address - it doesn't appear to "
                 "be correct.")
+            logging.warning('Register: invalid email: %s', email)
 
         # password errors
         if not password or not validate:
             errors.append('You forgot to enter your password twice.')
+            logging.warning('Register: forgot to enter password twice.')
         elif password != validate:
             errors.append("Your password confirmation doesn't match your password.")
+            logging.warning('Register: validate != password.')
         if not self.valid_pass(password):
-            errors.append('Not a valid password - it must contain at least 3 characters.')
+            errors.append('Not a valid password - it must contain at least '
+                '3 characters.')
+            logging.warning('Register: invalid password.')
 
         return errors
 
