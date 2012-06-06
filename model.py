@@ -3,6 +3,8 @@ from google.appengine.ext import db
 from google.appengine.ext import blobstore
 from google.appengine.api.images import get_serving_url
 
+import logging
+
 # the maximum length of the longest dimension of on uploaded photo
 MAX_SIZE = 800
 
@@ -17,7 +19,8 @@ class User(db.Model):
     @classmethod
     def user_from_name(cls, name):
         '''Return the user from the name attribute.'''
-        query = cls.gql('WHERE username = :name', name=name)
+        logging.warning('Getting user object from username: %s' % repr(name))
+        query = cls.gql('WHERE username = :1', name)
         return query.get()
 
     def __eq__(self, other):

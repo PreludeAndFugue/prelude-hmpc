@@ -60,6 +60,8 @@ class Login(BaseUser):
             self.render('login.html', errors=errors, username=username)
             return
 
+        logging.warning('This is the username: %s' % repr(username))
+
         user = User.user_from_name(username)
 
         # invalid username or password
