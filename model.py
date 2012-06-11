@@ -51,6 +51,11 @@ class Competition(db.Model):
         '''Return the status of the competition as a meaningful str.'''
         return {0: 'Open', 1: 'Scoring', 2: 'Completed'}[self.status]
 
+    def users(self):
+        '''Return a list of users in competition.'''
+        query = UserComp.gql('WHERE comp = :1', self)
+        return query.run()
+
     def __eq__(self, other):
         '''Compare competitions for equality.'''
         return self.year == other.year and self.month == other.month

@@ -340,6 +340,8 @@ class CompMod(BaseHandler):
             'month': MONTHS[comp.month],
             'status': comp.get_status(),
             'user': user,
+            'users': [(uc.user.username, 'Yes' if uc.submitted_scores else 'No')
+                      for uc in comp.users()],
             'comp_id': comp.key().id(),
             'status_values': (
                 (0, 'Open'),

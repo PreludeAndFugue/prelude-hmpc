@@ -47,5 +47,25 @@
     </div>
 {% endif %}
 
+{% if users %}
+    <h3>Competitors</h3>
+    <table class="table">
+        <thead>
+            <tr>
+                <th class="span2">User</th>
+                <th>Submitted scores</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user, submitted in users %}
+            <tr>
+                <td>{{user}}</td>
+                <td>{{submitted}}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endif %}
+
 
 {% endblock %}
