@@ -288,9 +288,11 @@ class CompMod(BaseHandler):
         new_status = int(self.request.get('comp-status'))
         comp_id = int(self.request.get('comp-id'))
 
-        #logging.info(repr(comp_id))
-
         comp = Competition.get_by_id(comp_id)
+
+        if not new_title:
+            self.report_error(comp, 'Error - blank title.')
+            return
 
         #logging.info(comp)
         logging.info('updating competition: status %d, new status: %d',
@@ -301,53 +303,33 @@ class CompMod(BaseHandler):
                 # completing a competition and calculating scores
                 completed = self.calculate_scores(comp)
                 if completed:
-                    comp.title = new_title
-                    comp.status = new_status
-                    comp.put()
-                    self.redirect('/competition/admin')
+                    self.update_competition(comp, new_title, new_status)
                 else:
                     # failed to calculate scores
-                    user = self.get_user()
                     error = ('Cannot complete competition - '
                         'not all competitors have submitted scores.')
-                    data = self._data(comp, user, error=error)
-                    self.render('comp-mod.html', **data)
+                    self.report_error(comp, error)
             elif comp.status == COMPLETED:
-                comp.title = new_title
-                comp.put()
-                self.redirect('/competition/admin')
+                self.update_competition(comp, new_title, new_status)
             else: # comp.status == OPEN
                 # cannot complete an open competition
-                user = self.get_user()
                 error = ('Cannot complete an open competition - '
                     'users have not yet submitted scores.')
-                data = self._data(comp, user, error=error)
-                self.render('comp-mod.html', **data)
+                self.report_error(comp, error)
         elif new_status == SCORING:
             if comp.status == SCORING:
-                comp.title = new_title
-                comp.put()
-                self.redirect('/competition/admin')
+                self.update_competition(comp, new_title, new_status)
             elif comp.status == COMPLETED:
-                user = self.get_user()
                 error = 'Competition has been completed - cannot change status.'
-                data = self._data(comp, user, error=error)
-                self.render('comp-mod.html', **data)
+                self.report_error(comp, error)
             else: # comp.status == OPEN
-                comp.title = new_title
-                comp.status = new_status
-                comp.put()
-                self.redirect('/competition/admin')
+                self.update_competition(comp, new_title, new_status)
         else: # new_status == OPEN
             if comp.status in (SCORING, COMPLETED):
-                user = self.get_user()
                 error = 'Cannot re-open this competition.'
-                data = self._data(comp, user, error=error)
-                self.render('comp-mod.html', **data)
+                self.report_error(comp, error)
             else: # comp.status == OPEN
-                comp.title = new_title
-                comp.put()
-                self.redirect('/competition/admin')
+                self.update_competition(comp, new_title, new_status)
 
     def _data(self, comp, user, **kwds):
         '''Create the data dictionary for the renderer.'''
@@ -397,6 +379,18 @@ class CompMod(BaseHandler):
 
         return True
 
+    def update_competition(self, comp, title, status):
+        '''Update the competition details and redirect to admin page.'''
+        comp.title = title
+        comp.status = status
+        comp.put()
+        self.redirect('/competition/admin')
+
+    def report_error(self, comp, error):
+        '''Competition could not be modified - report error to user.'''
+        user = self.get_user()
+        data = self._data(comp, user, error=error)
+        self.render('comp-mod.html', **data)
 
 
 app = webapp2.WSGIApplication([('/competitions', Comps),
