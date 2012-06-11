@@ -33,15 +33,21 @@
         </thead>
         <tbody>
             {% for photo, title, username, url, thumb, position, total_score in photos %}
-            <tr>
-                <td class="centred"><span class="centred badge
-                    {% if position == '1st' %}
-                    badge-first
+                {% if user.username == username %}
+                <tr class="highlight-user">
+                {% else %}
+                <tr>
+                {% endif %}
+                <td class="centred">
+                {% if position == '1st' %}
+                    <span class="centred badge badge-first">
                 {% elif position == '2nd' %}
-                    badge-second
+                    <span class="centred badge badge-second">
                 {% elif position == '3rd' %}
-                    badge-third
-                {% endif %}">
+                    <span class="centred badge badge-third">
+                {% else %}
+                    <span class="centred badge">
+                {% endif %}
                     {{position}}</td>
                 <td><span class="pull-right">{{total_score}}</span></td>
                 <td>{{username}}</td>
