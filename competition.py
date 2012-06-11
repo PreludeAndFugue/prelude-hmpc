@@ -10,6 +10,10 @@ import logging
 from handler import BaseHandler
 from model import Competition, User, Photo, Scores, UserComp
 
+OPEN = 0
+SCORING = 1
+COMPLETED = 2
+
 MONTHS = {
     1: 'January',
     2: 'February',
@@ -34,6 +38,7 @@ def ordinal(n):
 
 class Comps(BaseHandler):
     def get(self):
+        '''Show the competitions page.'''
         user = self.get_user()
         comps = []
         for c in Competition.all().order('-start').run():
@@ -54,6 +59,7 @@ class Comps(BaseHandler):
 
 class CompHandler(BaseHandler):
     def get(self, year=0, month=0):
+        '''Show the competition page.'''
         user = self.get_user()
         comp = self.get_comp(year, month)
 
@@ -86,6 +92,7 @@ class CompHandler(BaseHandler):
             self.view_complete(user, comp, data)
 
     def post(self, year=0, month=0):
+        '''A user is submitting scores.'''
         user = self.get_user()
         year = int(year)
         month = int(month)
@@ -113,6 +120,7 @@ class CompHandler(BaseHandler):
         self.redirect('/competition/%d/%d' % (year, month))
 
     def view_open(self, user, comp, data):
+        '''Create the competition page when its status is Open.'''
         photos = []
         for p in Photo.competition_photos(comp):
             title, url, thumb, date = p.data(128)
@@ -124,6 +132,7 @@ class CompHandler(BaseHandler):
         self.render('competition-open.html', **data)
 
     def view_scoring(self, user, comp, user_comp, data):
+        '''Create the competition page when its status is Scoring.'''
         to_score = user_comp and not user_comp.submitted_scores
 
         photos = []
@@ -144,6 +153,7 @@ class CompHandler(BaseHandler):
         self.render('competition-scoring.html', **data)
 
     def view_complete(self, user, comp, data):
+        '''Create the competition page when its status is Completed.'''
         photos = []
         for p in Photo.competition_result(comp):
             title, url, thumb, date = p.data(128)
@@ -157,7 +167,7 @@ class CompHandler(BaseHandler):
         self.render('competition-complete.html', **data)
 
     def parse_scores(self, scores):
-        '''take the raw POST data MultiDict and convert to dict of photo ids (keys)
+        '''Take the raw POST data MultiDict and convert to dict of photo ids (keys)
         and scores (values).'''
         results = {}
         for photo_id, score in scores.iteritems():
@@ -165,6 +175,7 @@ class CompHandler(BaseHandler):
         return results
 
     def get_comp(self, year, month):
+        '''Return the competition object from the year and the month.'''
         if year == 0 and month == 0:
              # get the current competition
             comp = Competition.all().order('-start').get()
@@ -175,12 +186,15 @@ class CompHandler(BaseHandler):
         return comp
 
     def get_usercomp(self, user, comp):
+        '''Return UserComp object for user and competition.'''
         if user is not None and comp is not None:
             return UserComp.get_usercomp(user, comp)
         # otherwise return None
 
 class CompAdmin(BaseHandler):
+    '''Competition Admin handler.'''
     def get(self):
+        '''Show the competition admin page.'''
         user = self.get_user()
         if not user or not user.admin:
             self.redirect('/')
@@ -197,7 +211,9 @@ class CompAdmin(BaseHandler):
         self.render('comp-admin.html', **data)
 
 class NewComp(BaseHandler):
+    '''New competition handler.'''
     def get(self):
+        '''Show the new competition page.'''
         user = self.get_user()
         if not user or not user.admin:
             self.redirect('/')
@@ -210,6 +226,7 @@ class NewComp(BaseHandler):
         self.render('comp-new.html', **data)
 
     def post(self):
+        '''Create a new competition.'''
         user = self.get_user()
         if not user or not user.admin:
             self.redirect('/')
@@ -247,7 +264,9 @@ class NewComp(BaseHandler):
         self.redirect('/competition/admin')
 
 class CompMod(BaseHandler):
+    '''Competition modification handler.'''
     def get(self, year, month):
+        '''Show the competition modification page for a particular competition.'''
         user = self.get_user()
         if not user or not user.admin:
             self.redirect('/')
@@ -264,6 +283,7 @@ class CompMod(BaseHandler):
         self.render('comp-mod.html', **data)
 
     def post(self, year, month):
+        '''Modify a competition.'''
         new_title = self.request.get('comp-title')
         new_status = int(self.request.get('comp-status'))
         comp_id = int(self.request.get('comp-id'))
@@ -274,12 +294,12 @@ class CompMod(BaseHandler):
 
         #logging.info(comp)
 
-        if new_status != 2:
+        if new_status != COMPLETED:
             comp.title = new_title
             comp.status = new_status
             comp.put()
             self.redirect('/competition/admin')
-        elif comp.status == 2 and new_status != 2:
+        elif comp.status == COMPLETED and new_status != COMPLETED:
             user = self.get_user()
             error = 'Competition has been completed - cannot change status.'
             data = self._data(comp, user, error=error)
@@ -301,6 +321,7 @@ class CompMod(BaseHandler):
                 self.render('comp-mod.html', **data)
 
     def _data(self, comp, user, **kwds):
+        '''Create the data dictionary for the renderer.'''
         data = {
             'page_title': 'Modify Competition',
             'title': comp.title,
@@ -321,6 +342,7 @@ class CompMod(BaseHandler):
         return data
 
     def calculate_scores(self, comp):
+        '''Calculate the scores for a completed competition.'''
         all_scores = UserComp.all_scores_submitted(comp)
         if not all_scores:
             return False
