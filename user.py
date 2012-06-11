@@ -15,6 +15,7 @@ import logging
 
 from handler import BaseHandler
 from model import Competition, User, Photo, UserComp
+from helper import OPEN, SCORING, COMPLETED, ordinal
 
 class BaseUser(BaseHandler):
     def valid_name(self, name):
@@ -256,7 +257,7 @@ class UserPage(BaseHandler):
             'upload_url': upload_url,
             'photos': photos,
             'comp': comp,
-            'comp_live': comp.status == 0 if comp else False,
+            'comp_live': comp.status == OPEN if comp else False,
             'comp_photo': comp_photo
         }
         self.render('user.html', **data)

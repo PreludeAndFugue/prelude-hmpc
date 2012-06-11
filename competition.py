@@ -9,32 +9,7 @@ import logging
 
 from handler import BaseHandler
 from model import Competition, User, Photo, Scores, UserComp
-
-OPEN = 0
-SCORING = 1
-COMPLETED = 2
-
-MONTHS = {
-    1: 'January',
-    2: 'February',
-    3: 'March',
-    4: 'April',
-    5: 'May',
-    6: 'June',
-    7: 'July',
-    8: 'August',
-    9: 'September',
-    10: 'October',
-    11: 'November',
-    12: 'December'
-}
-
-def ordinal(n):
-    '''Return ordinal number string from input integer.'''
-    if 10 <= n % 100 < 20:
-        return str(n) + 'th'
-    else:
-       return  str(n) + {1 : 'st', 2 : 'nd', 3 : 'rd'}.get(n % 10, "th")
+from helper import OPEN, SCORING, COMPLETED, MONTHS, ordinal
 
 class Comps(BaseHandler):
     def get(self):
@@ -117,7 +92,12 @@ class CompHandler(BaseHandler):
         usercomp.submitted_scores = True
         usercomp.put()
 
-        self.redirect('/competition/%d/%d' % (year, month))
+        if self.request.path.endswith('/current'):
+            url = '/competition/current'
+        else:
+            url = '/competition/%d/%d' % (year, month)
+
+        self.redirect(url)
 
     def view_open(self, user, comp, data):
         '''Create the competition page when its status is Open.'''
