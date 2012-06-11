@@ -293,32 +293,61 @@ class CompMod(BaseHandler):
         comp = Competition.get_by_id(comp_id)
 
         #logging.info(comp)
+        logging.info('updating competition: status %d, new status: %d',
+            comp.status, new_status)
 
-        if new_status != COMPLETED:
-            comp.title = new_title
-            comp.status = new_status
-            comp.put()
-            self.redirect('/competition/admin')
-        elif comp.status == COMPLETED and new_status != COMPLETED:
-            user = self.get_user()
-            error = 'Competition has been completed - cannot change status.'
-            data = self._data(comp, user, error=error)
-            self.render('comp-mod.html', **data)
-        else:
-            # completing a competition and calculating scores
-            completed = self.calculate_scores(comp)
-            if completed:
+        if new_status == COMPLETED:
+            if comp.status == SCORING:
+                # completing a competition and calculating scores
+                completed = self.calculate_scores(comp)
+                if completed:
+                    comp.title = new_title
+                    comp.status = new_status
+                    comp.put()
+                    self.redirect('/competition/admin')
+                else:
+                    # failed to calculate scores
+                    user = self.get_user()
+                    error = ('Cannot complete competition - '
+                        'not all competitors have submitted scores.')
+                    data = self._data(comp, user, error=error)
+                    self.render('comp-mod.html', **data)
+            elif comp.status == COMPLETED:
+                comp.title = new_title
+                comp.put()
+                self.redirect('/competition/admin')
+            else: # comp.status == OPEN
+                # cannot complete an open competition
+                user = self.get_user()
+                error = ('Cannot complete an open competition - '
+                    'users have not yet submitted scores.')
+                data = self._data(comp, user, error=error)
+                self.render('comp-mod.html', **data)
+        elif new_status == SCORING:
+            if comp.status == SCORING:
+                comp.title = new_title
+                comp.put()
+                self.redirect('/competition/admin')
+            elif comp.status == COMPLETED:
+                user = self.get_user()
+                error = 'Competition has been completed - cannot change status.'
+                data = self._data(comp, user, error=error)
+                self.render('comp-mod.html', **data)
+            else: # comp.status == OPEN
                 comp.title = new_title
                 comp.status = new_status
                 comp.put()
                 self.redirect('/competition/admin')
-            else:
-                # failed to calculate scores
+        else: # new_status == OPEN
+            if comp.status in (SCORING, COMPLETED):
                 user = self.get_user()
-                error = ('Cannot complete competition - '
-                    'not all competitors have submitted scores.')
+                error = 'Cannot re-open this competition.'
                 data = self._data(comp, user, error=error)
                 self.render('comp-mod.html', **data)
+            else: # comp.status == OPEN
+                comp.title = new_title
+                comp.put()
+                self.redirect('/competition/admin')
 
     def _data(self, comp, user, **kwds):
         '''Create the data dictionary for the renderer.'''
