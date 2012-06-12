@@ -46,7 +46,7 @@ class CompHandler(BaseHandler):
         data = {
             'user': user,
             'comp': comp,
-            'year': year,
+            'year': year if year else comp.year,
             'month': month_str,
             'page_title': 'Competition: %s %d' % (month_str, comp.year),
             'page_subtitle': comp.get_status(),
