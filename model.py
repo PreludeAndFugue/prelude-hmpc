@@ -23,6 +23,12 @@ class User(db.Model):
         query = cls.gql('WHERE username = :1', name)
         return query.get()
 
+    @classmethod
+    def user_from_email(cls, email):
+        '''Return the user from the email attribute.'''
+        query = cls.gql('WHERE email = :1', email)
+        return query.get()
+
     def __eq__(self, other):
         '''Compare to users for equality.'''
         return self.username == other.username

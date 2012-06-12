@@ -46,30 +46,30 @@ class Login(BaseUser):
         self.render('login.html', page_title="Login")
 
     def post(self):
-        username = self.request.get('username', '')
+        email = self.request.get('email', '')
         password = self.request.get('password', '')
 
         # collect the errors
         errors = []
 
         # catch errors in the form
-        if not username:
-            errors.append('You forgot to enter a username.')
+        if not email:
+            errors.append('You forgot to enter an email address.')
         if not password:
             errors.append('You forgot to enter a password.')
         if errors:
-            self.render('login.html', errors=errors, username=username)
+            self.render('login.html', errors=errors, email=email)
             return
 
-        logging.warning('This is the username: %s' % repr(username))
+        logging.warning('This is the email address: %s' % repr(email))
 
-        user = User.user_from_name(username)
+        user = User.user_from_email(email)
 
-        # invalid username or password
+        # invalid email address or password
         if not user or not self.validate_user(user, password):
-            errors.append('Invalid username or password.')
-            self.render('login.html', errors=errors, username=username)
-            logging.warning('Login: invalid username or password. %s', user)
+            errors.append('Invalid email address or password.')
+            self.render('login.html', errors=errors, email=email)
+            logging.warning('Login: invalid email address or password. %s', user)
             return
 
         # unverified user
@@ -78,7 +78,7 @@ class Login(BaseUser):
                 'You should have received an email with a verification link. '
                 'Please check your mail (and your spam folder). If you have '
                 'not received the email, please contact admin.')
-            self.render('login.html', errors=errors, username=username, contact=True)
+            self.render('login.html', errors=errors, email=email, contact=True)
             logging.warning('Login: unverified user attempted login. %s', user)
             return
 
