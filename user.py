@@ -52,13 +52,20 @@ class Login(BaseUser):
         # collect the errors
         errors = []
 
+        # data for the page if it has to be re-rendered because of invalid login.
+        data = {
+            'errors': errors,
+            'email': email,
+            'page_title': 'Login'
+        }
+
         # catch errors in the form
         if not email:
             errors.append('You forgot to enter an email address.')
         if not password:
             errors.append('You forgot to enter a password.')
         if errors:
-            self.render('login.html', errors=errors, email=email)
+            self.render('login.html', **data)
             return
 
         logging.warning('This is the email address: %s' % repr(email))
@@ -68,7 +75,7 @@ class Login(BaseUser):
         # invalid email address or password
         if not user or not self.validate_user(user, password):
             errors.append('Invalid email address or password.')
-            self.render('login.html', errors=errors, email=email)
+            self.render('login.html', **data)
             logging.warning('Login: invalid email address or password. %s', user)
             return
 
@@ -78,7 +85,8 @@ class Login(BaseUser):
                 'You should have received an email with a verification link. '
                 'Please check your mail (and your spam folder). If you have '
                 'not received the email, please contact admin.')
-            self.render('login.html', errors=errors, email=email, contact=True)
+            data['contact'] = True
+            self.render('login.html', **data)
             logging.warning('Login: unverified user attempted login. %s', user)
             return
 
