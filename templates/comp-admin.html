@@ -12,7 +12,7 @@
         <thead>
             <tr>
                 <th>Title</th>
-                <th>Year</th>
+                <th><span class="pull-right">Year</span></th>
                 <th>Month</th>
                 <th>Status</th>
                 <th>Scores</th>
@@ -23,7 +23,7 @@
             {% for comp in comps %}
             <tr>
                 <td>{{comp.title}}</td>
-                <td>{{comp.year}}</td>
+                <td><span class="pull-right">{{comp.year}}</span></td>
                 <td>{{months[comp.month]}}</td>
                 <td>{{comp.get_status()}}</td>
                 <td class="span1">
