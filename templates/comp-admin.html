@@ -27,7 +27,7 @@
                 <td>{{months[comp.month]}}</td>
                 <td>{{comp.get_status()}}</td>
                 <td class="span1">
-                    <form action="/competition/scores/{{comp.year}}/{{comp.month}}"
+                    <form action="/competition/scores/{{comp.year}}/{{comp.month}}/scores_{{comp.year}}_{{comp.month}}.csv"
                         method="get" class="small-form">
                     {% if comp.status == 2 %}
                         <button class="btn btn-mini">Download</button>

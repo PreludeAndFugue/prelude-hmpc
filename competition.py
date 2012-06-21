@@ -382,7 +382,7 @@ class CompScores(BaseHandler):
             self.redirect('/')
             return
 
-        self.response.content_type = 'text/plain'
+        self.response.content_type = 'text/csv'
 
         year = int(year)
         month = int(month)
@@ -398,6 +398,6 @@ app = webapp2.WSGIApplication([('/competitions', Comps),
                                ('/competition/new', NewComp),
                                ('/competition/modify/(\d{4})/(\d\d?)', CompMod),
                                ('/competition/current', CompHandler),
-                               ('/competition/scores/(\d{4})/(\d\d?)', CompScores)
+                               ('/competition/scores/(\d{4})/(\d\d?)/scores_\d{4}_\d\d?.csv', CompScores)
                               ],
                               debug=True)
