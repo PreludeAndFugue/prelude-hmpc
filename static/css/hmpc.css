@@ -2,6 +2,10 @@ section {
     margin-bottom: 30px;
 }
 
+.small-form {
+    margin: 0;
+}
+
 .centred {
     text-align: center;
 }

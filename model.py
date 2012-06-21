@@ -3,7 +3,9 @@ from google.appengine.ext import db
 from google.appengine.ext import blobstore
 from google.appengine.api.images import get_serving_url
 
+import csv
 import logging
+import StringIO
 
 # the maximum length of the longest dimension of on uploaded photo
 MAX_SIZE = 800
@@ -128,6 +130,11 @@ class Photo(db.Model):
         query = cls.gql('WHERE competition = :c AND user = :u', c=competition, u=user)
         return query.get()
 
+    def scores(self):
+        '''Return a collection of all the scores for this photo as Scores objects.'''
+        query = Scores.gql('WHERE photo = :photo', photo=self)
+        return query.run()
+
     def data(self, size=288):
         '''Return information about photo and urls for image and thumb.'''
         title = self.title if self.title else 'Untitled'
@@ -167,3 +174,23 @@ def user_scores(user):
         photo_score = sum(Scores.photo_scores(photo))
         scores.append((photo, photo_score))
     return scores
+
+def csv_scores(comp):
+    '''Create a csv file for all the scores for a competition.'''
+    photos = list(Photo.competition_photos(comp))
+    photos.sort(key=lambda p: p.user.username)
+
+    buf = StringIO.StringIO()
+    fieldnames = ['Recipient'] + [p.user.username for p in photos]
+    data = csv.DictWriter(buf, fieldnames=fieldnames)
+
+    data.writerow(dict((n, n) for n in fieldnames))
+
+    for photo in photos:
+        row = {}
+        row['Recipient'] = photo.user.username
+        for score in photo.scores():
+            row[score.user_from.username] = score.score
+        data.writerow(row)
+
+    return buf.getvalue()

@@ -8,7 +8,7 @@ import os
 import logging
 
 from handler import BaseHandler
-from model import Competition, User, Photo, Scores, UserComp
+from model import Competition, User, Photo, Scores, UserComp, csv_scores
 from helper import OPEN, SCORING, COMPLETED, MONTHS, ordinal
 
 class Comps(BaseHandler):
@@ -374,11 +374,30 @@ class CompMod(BaseHandler):
         data = self._data(comp, user, error=error)
         self.render('comp-mod.html', **data)
 
+class CompScores(BaseHandler):
+    def get(self, year, month):
+        # should check for logged in user cookie
+        user = self.get_user()
+        if not user or not user.admin:
+            self.redirect('/')
+            return
+
+        self.response.content_type = 'text/plain'
+
+        year = int(year)
+        month = int(month)
+        comp = Competition.get_by_date(month, year)
+
+        logging.info(comp)
+
+        self.write(csv_scores(comp))
 
 app = webapp2.WSGIApplication([('/competitions', Comps),
                                ('/competition/(\d{4})/(\d\d?)', CompHandler),
                                ('/competition/admin', CompAdmin),
                                ('/competition/new', NewComp),
                                ('/competition/modify/(\d{4})/(\d\d?)', CompMod),
-                               ('/competition/current', CompHandler)],
+                               ('/competition/current', CompHandler),
+                               ('/competition/scores/(\d{4})/(\d\d?)', CompScores)
+                              ],
                               debug=True)
