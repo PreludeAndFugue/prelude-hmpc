@@ -21,8 +21,15 @@ class Comps(BaseHandler):
             user_photo = None
             if user:
                 user_photo = Photo.competition_user(c, user) is not None
-            comps.append((month, month_word, c.year, c.title, c.get_status(),
-                user_photo))
+            comps.append((
+                #month,
+                c.key().id(),
+                month_word,
+                c.year,
+                c.title,
+                c.get_status(),
+                user_photo
+            ))
         data = {
             'page_title': 'Competitions',
             'user': user,
@@ -33,10 +40,12 @@ class Comps(BaseHandler):
 
 
 class CompHandler(BaseHandler):
-    def get(self, year=0, month=0):
+    def get(self, comp_id=0):
         '''Show the competition page.'''
         user = self.get_user()
-        comp = self.get_comp(year, month)
+        comp_id = int(comp_id)
+        comp = Competition.get_by_id(comp_id)
+        #comp = self.get_comp(year, month)
 
         if comp is None:
             self.redirect('/competitions')
@@ -46,7 +55,7 @@ class CompHandler(BaseHandler):
         data = {
             'user': user,
             'comp': comp,
-            'year': year if year else comp.year,
+            'year': comp.year,
             'month': month_str,
             'page_title': 'Competition: %s %d' % (month_str, comp.year),
             'page_subtitle': comp.get_status(),
@@ -186,7 +195,7 @@ class CompAdmin(BaseHandler):
         data = {
             'page_title': 'Competition Admin',
             'user': user,
-            'comps': list(comps),
+            'comps': [(c.key().id(), c) for c in comps],
             'months': MONTHS
         }
         self.render('comp-admin.html', **data)
@@ -214,6 +223,7 @@ class NewComp(BaseHandler):
             self.redirect('/')
 
         title = self.request.get('comp-title')
+        description = self.request.get('comp-description')
         month = int(self.request.get('comp-month'))
         year = int(self.request.get('comp-year'))
 
@@ -222,10 +232,12 @@ class NewComp(BaseHandler):
         if not title:
             errors.append('You forgot to give this competition a title.')
 
-        comp = Competition.get_by_date(month, year)
+        comp = Competition.get_by_title_date(title, month, year)
         if comp:
-            errors.append('A competition already exists for %s, %d'
-                    % (MONTHS[month], year))
+            errors.append(
+                'A competition already exists with this title (%s), month (%s), '
+                'and year (%d)' % (title, MONTHS[month], year)
+            )
 
         if errors:
             data = {
@@ -240,24 +252,29 @@ class NewComp(BaseHandler):
         # no errors so create new competiton
         start = date(year, month, 1)
         end = date(year, month, monthrange(year, month)[1])
-        new_comp = Competition(title=title, month=month, year=year,
-                            start=start, end=end)
+        new_comp = Competition(
+            title=title,
+            description=description,
+            month=month,
+            year=year,
+            start=start,
+            end=end
+        )
         new_comp.put()
         self.redirect('/competition/admin')
 
 
 class CompMod(BaseHandler):
     '''Competition modification handler.'''
-    def get(self, year, month):
+    def get(self, comp_id):
         'Show the competition modification page for a particular competition.'
         user = self.get_user()
         if not user or not user.admin:
             self.redirect('/')
             return
 
-        year = int(year)
-        month = int(month)
-        comp = Competition.get_by_date(month, year)
+        comp_id = int(comp_id)
+        comp = Competition.get_by_id(comp_id)
         if not comp:
             self.redirect('/competition/admin')
             return
@@ -265,11 +282,13 @@ class CompMod(BaseHandler):
         data = self._data(comp, user)
         self.render('comp-mod.html', **data)
 
-    def post(self, year, month):
+    def post(self, comp_id):
         '''Modify a competition.'''
         new_title = self.request.get('comp-title')
+        new_description = self.request.get('comp-description')
         new_status = int(self.request.get('comp-status'))
-        comp_id = int(self.request.get('comp-id'))
+        #comp_id = int(self.request.get('comp-id'))
+        comp_id = int(comp_id)
 
         comp = Competition.get_by_id(comp_id)
 
@@ -278,22 +297,35 @@ class CompMod(BaseHandler):
             return
 
         #logging.info(comp)
-        logging.info('updating competition: status %d, new status: %d',
-            comp.status, new_status)
+        logging.info(
+            'updating competition: status %d, new status: %d',
+            comp.status,
+            new_status
+        )
 
         if new_status == COMPLETED:
             if comp.status == SCORING:
                 # completing a competition and calculating scores
                 completed = self.calculate_scores(comp)
                 if completed:
-                    self.update_competition(comp, new_title, new_status)
+                    self.update_competition(
+                        comp,
+                        new_title,
+                        new_description,
+                        new_status
+                    )
                 else:
                     # failed to calculate scores
                     error = ('Cannot complete competition - '
                         'not all competitors have submitted scores.')
                     self.report_error(comp, error)
             elif comp.status == COMPLETED:
-                self.update_competition(comp, new_title, new_status)
+                self.update_competition(
+                    comp,
+                    new_title,
+                    new_description,
+                    new_status
+                )
             else:  # comp.status == OPEN
                 # cannot complete an open competition
                 error = ('Cannot complete an open competition - '
@@ -301,30 +333,49 @@ class CompMod(BaseHandler):
                 self.report_error(comp, error)
         elif new_status == SCORING:
             if comp.status == SCORING:
-                self.update_competition(comp, new_title, new_status)
+                self.update_competition(
+                    comp,
+                    new_title,
+                    new_description,
+                    new_status
+                )
             elif comp.status == COMPLETED:
                 error = 'Competition has been completed - cannot change status.'
                 self.report_error(comp, error)
             else:  # comp.status == OPEN
-                self.update_competition(comp, new_title, new_status)
+                self.update_competition(
+                    comp,
+                    new_title,
+                    new_description,
+                    new_status
+                )
         else:  # new_status == OPEN
             if comp.status in (SCORING, COMPLETED):
                 error = 'Cannot re-open this competition.'
                 self.report_error(comp, error)
             else:  # comp.status == OPEN
-                self.update_competition(comp, new_title, new_status)
+                self.update_competition(
+                    comp,
+                    new_title,
+                    new_description,
+                    new_status
+                )
 
     def _data(self, comp, user, **kwds):
         '''Create the data dictionary for the renderer.'''
+        users = [
+            (uc.user.username, 'Yes' if uc.submitted_scores else 'No')
+            for uc in comp.users()
+        ]
         data = {
             'page_title': 'Modify Competition',
             'title': comp.title,
+            'description': comp.description,
             'year': comp.year,
             'month': MONTHS[comp.month],
             'status': comp.get_status(),
             'user': user,
-            'users': [(uc.user.username, 'Yes' if uc.submitted_scores else 'No')
-                      for uc in comp.users()],
+            'users': users,
             'comp_id': comp.key().id(),
             'status_values': (
                 (0, 'Open'),
@@ -364,9 +415,10 @@ class CompMod(BaseHandler):
 
         return True
 
-    def update_competition(self, comp, title, status):
+    def update_competition(self, comp, title, description, status):
         '''Update the competition details and redirect to admin page.'''
         comp.title = title
+        comp.description = description
         comp.status = status
         comp.put()
         self.redirect('/competition/admin')
@@ -379,7 +431,7 @@ class CompMod(BaseHandler):
 
 
 class CompScores(BaseHandler):
-    def get(self, year, month):
+    def get(self, comp_id):
         # should check for logged in user cookie
         user = self.get_user()
         if not user or not user.admin:
@@ -388,23 +440,22 @@ class CompScores(BaseHandler):
 
         self.response.content_type = 'text/csv'
 
-        year = int(year)
-        month = int(month)
-        comp = Competition.get_by_date(month, year)
+        #year = int(year)
+        #month = int(month)
+        comp_id = int(comp_id)
+        comp = Competition.get_by_id(comp_id)
 
         logging.info(comp)
 
         self.write(csv_scores(comp))
 
-app = webapp2.WSGIApplication(
-    [
-        ('/competitions', Comps),
-        ('/competition/(\d{4})/(\d\d?)', CompHandler),
-        ('/competition/admin', CompAdmin),
-        ('/competition/new', NewComp),
-        ('/competition/modify/(\d{4})/(\d\d?)', CompMod),
-        ('/competition/current', CompHandler),
-        ('/competition/scores/(\d{4})/(\d\d?)/scores_\d{4}_\d\d?.csv', CompScores)
-    ],
-    debug=True
-)
+routes = [
+    (r'/competitions', Comps),
+    (r'/competition/(\d+)', CompHandler),
+    (r'/competition/admin', CompAdmin),
+    (r'/competition/new', NewComp),
+    (r'/competition/modify/(\d+)', CompMod),
+    #(r'/competition/current', CompHandler),
+    (r'/competition/scores/(\d+)/scores_\d+.csv', CompScores)
+]
+app = webapp2.WSGIApplication(routes=routes, debug=True)

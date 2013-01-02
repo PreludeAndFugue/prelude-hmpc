@@ -28,6 +28,9 @@
         <input type="text" name="comp-title" id="comp-title" class="span4"
             value="{{title}}" />
 
+        <label for="comp-description">New Description</label>
+        <textarea rows="3" class="span6" name="comp-description" id="comp-description">{{description}}</textarea>
+
         <label for="comp-status">Status</label>
         <select name="comp-status">
             {% for status_id, status_value in status_values %}

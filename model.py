@@ -43,6 +43,7 @@ class User(db.Model):
 
 class Competition(db.Model):
     title = db.StringProperty(required=True)
+    description = db.TextProperty()
     year = db.IntegerProperty(required=True)
     month = db.IntegerProperty(required=True)
     start = db.DateProperty(required=True)
@@ -50,6 +51,13 @@ class Competition(db.Model):
     end = db.DateProperty(required=True)
     finished = db.BooleanProperty(default=False)
     status = db.IntegerProperty(default=0)
+
+    @classmethod
+    def get_by_title_date(cls, title, month, year):
+        '''Return competition based on title, month and year.'''
+        sql = 'WHERE title = :1 AND month = :2 AND year = :3'
+        query = cls.gql(sql, title, month, year)
+        return query.get()
 
     @classmethod
     def get_by_date(cls, month, year):

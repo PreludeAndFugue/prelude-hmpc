@@ -3,7 +3,7 @@
 {% block nav_comps %} active{% endblock %}
 {% block content %}
 
-    {% for m_int, month, year, title, status, user_photo in comps %}
+    {% for comp_id, month, year, title, status, user_photo in comps %}
     <section>
         <h2>{{month}} {{year}}
             <small>{{title}}</small>
@@ -16,7 +16,7 @@
         <p><span class="label label-important">No photograph submitted.</span></p>
         {% endif %}
 
-        <a href="/competition/{{year}}/{{m_int}}"
+        <a href="/competition/{{comp_id}}"
             class="btn btn-primary">View</a>
     </section>
     {% endfor %}
