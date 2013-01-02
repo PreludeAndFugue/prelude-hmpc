@@ -9,12 +9,14 @@ template_dir = os.path.join(os.path.dirname(__file__), 'templates')
 env = jinja2.Environment(loader=jinja2.FileSystemLoader(template_dir),
                                autoescape=True)
 
+
 class BaseHandler(webapp2.RequestHandler):
 
     def initialize(self, request, response):
         super(BaseHandler, self).initialize(request, response)
         # initialise with secret key
-        self.cookie_serializer = SecureCookieSerializer('atubetcd483cehbte09otu4')
+        secret_key = 'atubetcd483cehbte09otu4'
+        self.cookie_serializer = SecureCookieSerializer(secret_key)
 
     def write(self, *args, **kwgs):
         self.response.out.write(*args, **kwgs)
@@ -33,7 +35,8 @@ class BaseHandler(webapp2.RequestHandler):
             user_id, username = user_cookie.split('|')
             user_id = int(user_id)
             return user_id, username
-        return None, ''
+        else:
+            return None, ''
 
     def get_user(self):
         user_id, username = self.get_cookie()

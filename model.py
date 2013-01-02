@@ -10,12 +10,13 @@ import StringIO
 # the maximum length of the longest dimension of on uploaded photo
 MAX_SIZE = 800
 
+
 class User(db.Model):
     username = db.StringProperty(required=True)
     password = db.StringProperty(required=True)
     email = db.StringProperty(required=True)
     verified = db.BooleanProperty(default=False)
-    verify_code=db.StringProperty()
+    verify_code = db.StringProperty()
     admin = db.BooleanProperty(default=False)
 
     @classmethod
@@ -36,8 +37,9 @@ class User(db.Model):
         return self.username == other.username
 
     def __str__(self):
-        return 'User(%s, %s, verified=%s, admin=%s)' % (self.username, self.email,
-                self.verified, self.admin)
+        params = (self.username, self.email, self.verified, self.admin)
+        return 'User(%s, %s, verified=%s, admin=%s)' % params
+
 
 class Competition(db.Model):
     title = db.StringProperty(required=True)
@@ -68,12 +70,13 @@ class Competition(db.Model):
         '''Compare competitions for equality.'''
         return self.year == other.year and self.month == other.month
 
+
 class UserComp(db.Model):
     '''Keep track of the users who have submitted photos to competitions.
     When a user submits a photo to a competition a record is added to this
-    class. This class is used to tell if a user can submit scores to a competition -
-    only when they have submitted photo to competition. And if they have submitted
-    scores during the scoring phase of the competition.'''
+    class. This class is used to tell if a user can submit scores to a
+    competition - only when they have submitted photo to competition. And if
+    they have submitted scores during the scoring phase of the competition.'''
     user = db.ReferenceProperty(reference_class=User, required=True)
     comp = db.ReferenceProperty(reference_class=Competition, required=True)
     submitted_scores = db.BooleanProperty(default=False)
@@ -91,9 +94,10 @@ class UserComp(db.Model):
         query.filter('comp = ', comp)
         return all(r.submitted_scores for r in query.run())
 
+
 class Photo(db.Model):
     user = db.ReferenceProperty(reference_class=User, required=True)
-    competition = db.ReferenceProperty(reference_class=Competition) #, required=True)
+    competition = db.ReferenceProperty(reference_class=Competition)  # required=True)
     title = db.StringProperty()
     blob = blobstore.BlobReferenceProperty(required=True)
     upload_date = db.DateTimeProperty(auto_now_add=True)
@@ -103,7 +107,8 @@ class Photo(db.Model):
     @classmethod
     def user_photos(cls, user, limit=6):
         '''Return all photos of a user.'''
-        query = cls.gql('WHERE user = :user ORDER BY upload_date DESC', user=user)
+        sql = 'WHERE user = :user ORDER BY upload_date DESC'
+        query = cls.gql(sql, user=user)
         if limit is not None:
             return query.run(limit=limit)
         else:
@@ -127,11 +132,13 @@ class Photo(db.Model):
     @classmethod
     def competition_user(cls, competition, user):
         '''Return the photo entered by user into competition.'''
-        query = cls.gql('WHERE competition = :c AND user = :u', c=competition, u=user)
+        sql = 'WHERE competition = :c AND user = :u'
+        query = cls.gql(sql, c=competition, u=user)
         return query.get()
 
     def scores(self):
-        '''Return a collection of all the scores for this photo as Scores objects.'''
+        '''Return a collection of all the scores for this photo as Scores
+        objects.'''
         query = Scores.gql('WHERE photo = :photo', photo=self)
         return query.run()
 
@@ -142,6 +149,7 @@ class Photo(db.Model):
         thumb = get_serving_url(self.blob, size=size, crop=True)
         date = self.upload_date.strftime('%d %B, %Y')
         return title, url, thumb, date
+
 
 class Scores(db.Model):
     photo = db.ReferenceProperty(reference_class=Photo, required=True)
@@ -156,8 +164,9 @@ class Scores(db.Model):
 
     @classmethod
     def scores_from_user(cls, user, comp):
-        '''Return all scores submitted by a user for a particular competition.'''
-        query = cls.gql('WHERE user_from = :1 AND photo.competition = :2', user, comp)
+        'Return all scores submitted by a user for a particular competition.'
+        sql = 'WHERE user_from = :1 AND photo.competition = :2'
+        query = cls.gql(sql, user, comp)
         return query.run()
 
     @classmethod
@@ -165,6 +174,7 @@ class Scores(db.Model):
         '''Return the score submitted by a user for a particular photo.'''
         query = cls.gql('WHERE photo = :1 AND user_from = :2', photo, user)
         return query.get()
+
 
 # some functions that don't really fit in any particular model
 
@@ -174,6 +184,7 @@ def user_scores(user):
         photo_score = sum(Scores.photo_scores(photo))
         scores.append((photo, photo_score))
     return scores
+
 
 def csv_scores(comp):
     '''Create a csv file for all the scores for a competition.'''

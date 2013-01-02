@@ -1,21 +1,22 @@
 #!/usr/bin/env python
 
 from google.appengine.api import mail
-from google.appengine.api.images import get_serving_url
 from google.appengine.ext import blobstore
 from google.appengine.ext.webapp import blobstore_handlers
-import jinja2
-import os
 import re
 import webapp2
-from webapp2_extras.security import (generate_password_hash, check_password_hash,
-    generate_random_string)
+from webapp2_extras.security import (
+    generate_password_hash,
+    check_password_hash,
+    generate_random_string
+)
 
 import logging
 
 from handler import BaseHandler
 from model import Competition, User, Photo, UserComp
-from helper import OPEN, SCORING, COMPLETED, ordinal
+from helper import OPEN
+
 
 class BaseUser(BaseHandler):
     def valid_name(self, name):
@@ -41,6 +42,7 @@ class BaseUser(BaseHandler):
         value = self.cookie_serializer.serialize('userid', template)
         self.response.set_cookie('userid', value)
 
+
 class Login(BaseUser):
     def get(self):
         self.render('login.html', page_title="Login")
@@ -52,7 +54,7 @@ class Login(BaseUser):
         # collect the errors
         errors = []
 
-        # data for the page if it has to be re-rendered because of invalid login.
+        # data for the page if it has to be re-rendered because of invalid login
         data = {
             'errors': errors,
             'email': email,
@@ -76,7 +78,10 @@ class Login(BaseUser):
         if not user or not self.validate_user(user, password):
             errors.append('Invalid email address or password.')
             self.render('login.html', **data)
-            logging.warning('Login: invalid email address or password. %s', user)
+
+            log_msg = 'Login: invalid email address or password. %s'
+            logging.warning(log_msg, user)
+
             return
 
         # unverified user
@@ -94,10 +99,12 @@ class Login(BaseUser):
         self.set_cookie(user)
         self.redirect('/user')
 
+
 class Logout(BaseHandler):
     def get(self):
         self.response.delete_cookie('userid')
         self.redirect('/')
+
 
 class Register(BaseUser):
     def get(self):
@@ -139,7 +146,11 @@ class Register(BaseUser):
             logging.info('Register: successfully created user: %s', user)
             # send email to admin about new user
             body = 'Username: %s\nEmail: %s' % (user.username, user.email)
-            mail.send_mail_to_admins('gdrummondk@gmail.com', 'hmpc: new user', body)
+            mail.send_mail_to_admins(
+                'gdrummondk@gmail.com',
+                'hmpc: new user',
+                body
+            )
             # send user verification email to user's email address
             self.send_verification_email(username, email, verify_code)
             # set the cookie
@@ -153,14 +164,13 @@ class Register(BaseUser):
 
         logging.info('generated verify code: %s' % verify)
 
-        body = '''This is an automated email form HMPC.
-
-        Please click the following link (or paste it into the browser address bar)
-        to verify your user account on HMPC.
-
-        http://prelude-hmpc.appspot.com/verify/%s
-        ''' % verify
-        mail.send_mail('gdrummondk@gmail.com', to, subject, body)
+        body = (
+            'This is an automated email form HMPC.\n\n'
+            'Please click the following link (or paste it into the browser '
+            'address bar) to verify your user account on HMPC.\n\n'
+            'http://prelude-hmpc.appspot.com/verify/%s\n'
+        )
+        mail.send_mail('gdrummondk@gmail.com', to, subject, body % verify)
 
     def input_errors(self, username, password, validate, email):
         '''Return a list of errors with user registration data.'''
@@ -198,14 +208,17 @@ class Register(BaseUser):
             errors.append('You forgot to enter your password twice.')
             logging.warning('Register: forgot to enter password twice.')
         elif password != validate:
-            errors.append("Your password confirmation doesn't match your password.")
+            msg = "Your password confirmation doesn't match your password."
+            errors.append(msg)
             logging.warning('Register: validate != password.')
         if not self.valid_pass(password):
-            errors.append('Not a valid password - it must contain at least '
+            errors.append(
+                'Not a valid password - it must contain at least '
                 '3 characters.')
             logging.warning('Register: invalid password.')
 
         return errors
+
 
 class VerifyUser(BaseUser):
     def get(self, verify_code_hash):
@@ -231,6 +244,7 @@ class VerifyUser(BaseUser):
             self.render('verify.html', **data)
         else:
             self.render('verify_fail.html', **data)
+
 
 class UserPage(BaseHandler):
     def get(self):
@@ -274,6 +288,7 @@ class UserPage(BaseHandler):
         # submitting a photograph - handled by Upload class
         pass
 
+
 class Upload(BaseHandler, blobstore_handlers.BlobstoreUploadHandler):
     def get(self):
         self.redirect('/user')
@@ -305,7 +320,10 @@ class Upload(BaseHandler, blobstore_handlers.BlobstoreUploadHandler):
             data = {
                 'user': user,
                 'page_title': 'Upload error',
-                'error': 'You tried to upload a file which was not a jpeg image.'
+                'error': (
+                    'You tried to upload a file which was '
+                    'not a jpeg image.'
+                )
             }
             self.render('upload_error.html', **data)
             return
@@ -315,8 +333,12 @@ class Upload(BaseHandler, blobstore_handlers.BlobstoreUploadHandler):
         comp = Competition.get_by_id(comp_id)
 
         # add photo details to database
-        photo = Photo(user=user, title=photo_title, blob=blob_info,
-            competition=comp)
+        photo = Photo(
+            user=user,
+            title=photo_title,
+            blob=blob_info,
+            competition=comp
+        )
         photo.put()
 
         # add UserComp record
@@ -361,11 +383,15 @@ class Contact(BaseHandler):
             data.update(extra_data)
         self.render('contact.html', **data)
 
-app = webapp2.WSGIApplication([('/login', Login),
-                               ('/logout', Logout),
-                               ('/register', Register),
-                               ('/user', UserPage),
-                               ('/contact', Contact),
-                               ('/upload', Upload),
-                               ('/verify/(.+)', VerifyUser)],
-                              debug=True)
+app = webapp2.WSGIApplication(
+    [
+        ('/login', Login),
+        ('/logout', Logout),
+        ('/register', Register),
+        ('/user', UserPage),
+        ('/contact', Contact),
+        ('/upload', Upload),
+        ('/verify/(.+)', VerifyUser)
+    ],
+    debug=True
+)

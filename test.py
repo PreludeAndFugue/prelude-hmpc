@@ -13,6 +13,7 @@ from webapp2_extras.security import generate_password_hash
 from handler import BaseHandler
 from model import Competition, User, Photo, UserComp, Scores
 
+
 class Test(BaseHandler):
     def get(self):
         user = self.get_user()
@@ -70,14 +71,20 @@ class Test(BaseHandler):
 
         # collect Photo instances here
         p = []
-        for (user, comp), photo_path, title in zip(product(users, comps), photos, titles):
+        all_data = zip(product(users, comps), photos, titles)
+        for (user, comp), photo_path, title in all_data:
             file_name = files.blobstore.create(mime_type='application/jpeg')
             with files.open(file_name, 'a') as f:
                 f.write(open(photo_path, 'rb').read())
             files.finalize(file_name)
             blob_key = files.blobstore.get_blob_key(file_name)
 
-            photo = Photo(user=user, competition=comp, blob=blob_key, title=title)
+            photo = Photo(
+                user=user,
+                competition=comp,
+                blob=blob_key,
+                title=title
+            )
             photo.put()
             p.append(photo)
             user_comp = UserComp(user=user, comp=comp)
@@ -127,5 +134,4 @@ class Test(BaseHandler):
             user.delete()
 
 
-app = webapp2.WSGIApplication([('/_admin', Test)],
-                              debug=True)
+app = webapp2.WSGIApplication([('/_admin', Test)], debug=True)

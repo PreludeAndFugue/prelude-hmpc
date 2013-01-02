@@ -20,9 +20,10 @@ MONTHS = {
     12: 'December'
 }
 
+
 def ordinal(n):
     '''Return ordinal number string from input integer.'''
     if 10 <= n % 100 < 20:
         return str(n) + 'th'
     else:
-       return  str(n) + {1 : 'st', 2 : 'nd', 3 : 'rd'}.get(n % 10, "th")
+        return str(n) + {1: 'st', 2: 'nd', 3: 'rd'}.get(n % 10, "th")

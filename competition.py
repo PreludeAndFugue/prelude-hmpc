@@ -2,14 +2,13 @@
 
 from calendar import monthrange
 from datetime import date
-import jinja2
 import webapp2
-import os
 import logging
 
 from handler import BaseHandler
-from model import Competition, User, Photo, Scores, UserComp, csv_scores
-from helper import OPEN, SCORING, COMPLETED, MONTHS, ordinal
+from model import Competition, Photo, Scores, UserComp, csv_scores
+from helper import SCORING, COMPLETED, MONTHS, ordinal
+
 
 class Comps(BaseHandler):
     def get(self):
@@ -31,6 +30,7 @@ class Comps(BaseHandler):
             'months': MONTHS
         }
         self.render('competitions.html', **data)
+
 
 class CompHandler(BaseHandler):
     def get(self, year=0, month=0):
@@ -103,7 +103,7 @@ class CompHandler(BaseHandler):
         '''Create the competition page when its status is Open.'''
         photos = []
         for p in Photo.competition_photos(comp):
-            title, url, thumb, date = p.data(128)
+            title, url, thumb, _ = p.data(128)
             photos.append((p, title, url, thumb))
 
         data.update({
@@ -117,7 +117,7 @@ class CompHandler(BaseHandler):
 
         photos = []
         for p in Photo.competition_photos(comp):
-            title, url, thumb, date = p.data(128)
+            title, url, thumb, _ = p.data(128)
             user_photo = p.user == user
             if not to_score:
                 s = Scores.score_from_user(p, user)
@@ -136,7 +136,7 @@ class CompHandler(BaseHandler):
         '''Create the competition page when its status is Completed.'''
         photos = []
         for p in Photo.competition_result(comp):
-            title, url, thumb, date = p.data(128)
+            title, url, thumb, _ = p.data(128)
             photos.append((p, title, p.user.username, url, thumb,
                 ordinal(p.position), p.total_score))
 
@@ -147,8 +147,8 @@ class CompHandler(BaseHandler):
         self.render('competition-complete.html', **data)
 
     def parse_scores(self, scores):
-        '''Take the raw POST data MultiDict and convert to dict of photo ids (keys)
-        and scores (values).'''
+        '''Take the raw POST data MultiDict and convert to dict of photo ids
+        (keys) and scores (values).'''
         results = {}
         for photo_id, score in scores.iteritems():
             results[int(photo_id)] = int(score)
@@ -171,6 +171,7 @@ class CompHandler(BaseHandler):
             return UserComp.get_usercomp(user, comp)
         # otherwise return None
 
+
 class CompAdmin(BaseHandler):
     '''Competition Admin handler.'''
     def get(self):
@@ -189,6 +190,7 @@ class CompAdmin(BaseHandler):
             'months': MONTHS
         }
         self.render('comp-admin.html', **data)
+
 
 class NewComp(BaseHandler):
     '''New competition handler.'''
@@ -243,10 +245,11 @@ class NewComp(BaseHandler):
         new_comp.put()
         self.redirect('/competition/admin')
 
+
 class CompMod(BaseHandler):
     '''Competition modification handler.'''
     def get(self, year, month):
-        '''Show the competition modification page for a particular competition.'''
+        'Show the competition modification page for a particular competition.'
         user = self.get_user()
         if not user or not user.admin:
             self.redirect('/')
@@ -291,7 +294,7 @@ class CompMod(BaseHandler):
                     self.report_error(comp, error)
             elif comp.status == COMPLETED:
                 self.update_competition(comp, new_title, new_status)
-            else: # comp.status == OPEN
+            else:  # comp.status == OPEN
                 # cannot complete an open competition
                 error = ('Cannot complete an open competition - '
                     'users have not yet submitted scores.')
@@ -302,13 +305,13 @@ class CompMod(BaseHandler):
             elif comp.status == COMPLETED:
                 error = 'Competition has been completed - cannot change status.'
                 self.report_error(comp, error)
-            else: # comp.status == OPEN
+            else:  # comp.status == OPEN
                 self.update_competition(comp, new_title, new_status)
-        else: # new_status == OPEN
+        else:  # new_status == OPEN
             if comp.status in (SCORING, COMPLETED):
                 error = 'Cannot re-open this competition.'
                 self.report_error(comp, error)
-            else: # comp.status == OPEN
+            else:  # comp.status == OPEN
                 self.update_competition(comp, new_title, new_status)
 
     def _data(self, comp, user, **kwds):
@@ -374,6 +377,7 @@ class CompMod(BaseHandler):
         data = self._data(comp, user, error=error)
         self.render('comp-mod.html', **data)
 
+
 class CompScores(BaseHandler):
     def get(self, year, month):
         # should check for logged in user cookie
@@ -392,12 +396,15 @@ class CompScores(BaseHandler):
 
         self.write(csv_scores(comp))
 
-app = webapp2.WSGIApplication([('/competitions', Comps),
-                               ('/competition/(\d{4})/(\d\d?)', CompHandler),
-                               ('/competition/admin', CompAdmin),
-                               ('/competition/new', NewComp),
-                               ('/competition/modify/(\d{4})/(\d\d?)', CompMod),
-                               ('/competition/current', CompHandler),
-                               ('/competition/scores/(\d{4})/(\d\d?)/scores_\d{4}_\d\d?.csv', CompScores)
-                              ],
-                              debug=True)
+app = webapp2.WSGIApplication(
+    [
+        ('/competitions', Comps),
+        ('/competition/(\d{4})/(\d\d?)', CompHandler),
+        ('/competition/admin', CompAdmin),
+        ('/competition/new', NewComp),
+        ('/competition/modify/(\d{4})/(\d\d?)', CompMod),
+        ('/competition/current', CompHandler),
+        ('/competition/scores/(\d{4})/(\d\d?)/scores_\d{4}_\d\d?.csv', CompScores)
+    ],
+    debug=True
+)
