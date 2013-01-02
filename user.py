@@ -199,9 +199,22 @@ class Register(BaseUser):
             errors.append('You forgot to enter an email address.')
             logging.warning('Register: forgot email.')
         elif not self.valid_email(email):
-            errors.append("Check your email address - it doesn't appear to "
-                "be correct.")
+            errors.append(
+                'Check your email address - it may not '
+                'be correct.')
             logging.warning('Register: invalid email: %s', email)
+        else:
+            # maybe the email address is being used by another user - can't
+            # have more than one user with the same email address because the
+            # email address is used as login id
+            user = User.user_from_email(email)
+            if user:
+                # email address is attached to other user
+                errors.append(
+                    'This email address is being used by another user'
+                )
+                msg = 'Register: email address already in use: %s'
+                logging.warning(msg, email)
 
         # password errors
         if not password or not validate:
