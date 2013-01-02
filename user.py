@@ -266,20 +266,22 @@ class UserPage(BaseHandler):
             self.render('user_no.html', page_title='User')
             return
 
-        upload_url = blobstore.create_upload_url('/upload')
+        open_comps = Competition.get_by_status(OPEN)
+        open_comps_no_photos = []
+        for oc in open_comps:
+            usercomp = UserComp.get_usercomp(user, oc)
+            if not usercomp:
+                open_comps_no_photos.append(oc)
 
-        # the most recent competition
-        comp = Competition.all().order('-start').get()
+        upload_url = None
+        if open_comps_no_photos:
+            upload_url = blobstore.create_upload_url('/upload')
 
-        #logging.info(comp)
+        #logging.info(open_comps)
+        logging.info(open_comps_no_photos)
 
-        comp_photo = None
-        # the users photos
         photos = []
         for p in Photo.user_photos(user):
-            # is this the photo for the most recent competition
-            if p.competition and p.competition == comp:
-                comp_photo = p
             title, url, thumb, date = p.data()
             photos.append((p, title, url, thumb, date))
 
@@ -291,9 +293,7 @@ class UserPage(BaseHandler):
             'page_subtitle': user.username,
             'upload_url': upload_url,
             'photos': photos,
-            'comp': comp,
-            'comp_live': comp.status == OPEN if comp else False,
-            'comp_photo': comp_photo
+            'open_comps': open_comps_no_photos,
         }
         self.render('user.html', **data)
 
@@ -322,7 +322,7 @@ class Upload(BaseHandler, blobstore_handlers.BlobstoreUploadHandler):
 
         blob_info = upload_files[0]
 
-        logging.info('blob info %s' % dir(blob_info))
+        #logging.info('blob info %s' % dir(blob_info))
         logging.info(blob_info.kind())
         logging.info(blob_info.properties())
         logging.info(blob_info.size)

@@ -65,6 +65,12 @@ class Competition(db.Model):
         query = cls.gql('WHERE month = :1 AND year = :2', month, year)
         return query.get()
 
+    @classmethod
+    def get_by_status(cls, status):
+        '''Return all competitions based on their status.'''
+        query = cls.gql('WHERE status = :1', status)
+        return query.run()
+
     def get_status(self):
         '''Return the status of the competition as a meaningful str.'''
         return {0: 'Open', 1: 'Scoring', 2: 'Completed'}[self.status]

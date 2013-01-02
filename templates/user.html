@@ -6,36 +6,36 @@
 {% block nav_user %}active{% endblock %}
 {% block content %}
 
-    {% if comp_live and not comp_photo %}
+    {% if open_comps %}
     <form method="post" action="{{upload_url}}" class="well"
         enctype="multipart/form-data" accept="image/jpeg">
         <p>
-            There is a competition in progress and you haven't submitted a
-            photograph for this competition. Note that only
+            There are competitions in progress and you haven't submitted a
+            photograph for at least one of them. Note that only
             <span class="label">jpg</span> files can be
             submitted.
         </p>
         <div class="clearfix">
-            <label for="photo-submit">
-                Select a photograph to submit to
-                <span class="label">{{comp.title}}</span>.
+            <label for="comp-id">
+                Select a competition
             </label>
-            <input class="span6" id="photo-submit" name="photo-submit"
-                type="file" />
+            <select id="comp-id" name="comp-id">
+                {% for c in open_comps %}
+                <option value="{{c.key().id()}}">{{c.title}}</option>
+                {% endfor %}
+            </select>
             <label for="photo-title">
                 Photograph title (optional)
             </label>
             <input class="span6" type="text" name="photo-title" id="photo-title" />
+            <label for="photo-submit">
+                Browse for file
+            </label>
+            <input class="span6" id="photo-submit" name="photo-submit"
+                type="file" />
         </div>
         <input type="submit" class="btn btn-primary" value="Submit" />
-        <input type="hidden" value="{{comp.key().id()}}" name="comp-id" />
     </form>
-    {% endif %}
-
-    {% if comp_live and comp_photo %}
-    <div class="alert alert-info">
-        You have submitted a photograph for the currently open competition.
-    </div>
     {% endif %}
 
     {% if not_jpg %}
@@ -50,18 +50,14 @@
     </div>
     {% endif %}
 
-    {% if not comp_live %}
+    {% if not open_comps %}
     <div class="alert alert-info">
         There is currently no open competition.
     </div>
     {% endif %}
 
-    <p>Best score: ...</p>
-    <p>Worst score: ...</p>
-
     <h3>
         Photographs
-        <small>Six most recent</small>
     </h3>
 
     <ul class="thumbnails">
