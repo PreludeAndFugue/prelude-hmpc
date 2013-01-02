@@ -396,15 +396,13 @@ class Contact(BaseHandler):
             data.update(extra_data)
         self.render('contact.html', **data)
 
-app = webapp2.WSGIApplication(
-    [
-        ('/login', Login),
-        ('/logout', Logout),
-        ('/register', Register),
-        ('/user', UserPage),
-        ('/contact', Contact),
-        ('/upload', Upload),
-        ('/verify/(.+)', VerifyUser)
-    ],
-    debug=True
-)
+routes = [
+    ('/login', Login),
+    ('/logout', Logout),
+    ('/register', Register),
+    ('/user', UserPage),
+    ('/contact', Contact),
+    ('/upload', Upload),
+    ('/verify/(.+)', VerifyUser)
+]
+app = webapp2.WSGIApplication(routes=routes, debug=True)
