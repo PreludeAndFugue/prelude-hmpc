@@ -45,19 +45,36 @@ class Test(BaseHandler):
         users = []
         for name, email, password, verified, admin in data:
             hash_pass = generate_password_hash(password)
-            user = User(username=name, email=email, password=hash_pass,
-                verified=verified, admin=admin)
+            user = User(
+                username=name,
+                email=email,
+                password=hash_pass,
+                verified=verified,
+                admin=admin
+            )
             user.put()
             users.append(user)
         return users
 
     def _create_competition(self):
-        comp1 = Competition(title='May photographs', year=2012, month=5,
-                start=date(2012, 5, 1), end=date(2012, 5, 31))
+        comp1 = Competition(
+            title='May photographs',
+            description='',
+            year=2012,
+            month=5,
+            start=date(2012, 5, 1),
+            end=date(2012, 5, 31),
+        )
         comp1.status = 2
         comp1.put()
-        comp2 = Competition(title='June photographs', year=2012, month=6,
-                start=date(2012, 6, 1), end=date(2012, 6, 30))
+        comp2 = Competition(
+            title='June photographs',
+            description='',
+            year=2012,
+            month=6,
+            start=date(2012, 6, 1),
+            end=date(2012, 6, 30),
+        )
         comp2.status = 1
         comp2.put()
         return (comp1, comp2)

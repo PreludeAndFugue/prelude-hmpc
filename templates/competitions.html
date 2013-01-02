@@ -3,11 +3,14 @@
 {% block nav_comps %} active{% endblock %}
 {% block content %}
 
-    {% for comp_id, month, year, title, status, user_photo in comps %}
+    {% for comp_id, month, year, title, description, status, user_photo in comps %}
     <section>
         <h2>{{month}} {{year}}
             <small>{{title}}</small>
         </h2>
+        <p>
+            {{description}}
+        </p>
         <p><b>Status:</b> {{status}}</p>
 
         {% if user_photo %}

@@ -7,7 +7,7 @@ import logging
 
 from handler import BaseHandler
 from model import Competition, Photo, Scores, UserComp, csv_scores
-from helper import SCORING, COMPLETED, MONTHS, ordinal
+from helper import OPEN, SCORING, COMPLETED, MONTHS, ordinal
 
 
 class Comps(BaseHandler):
@@ -27,6 +27,7 @@ class Comps(BaseHandler):
                 month_word,
                 c.year,
                 c.title,
+                c.description,
                 c.get_status(),
                 user_photo
             ))
@@ -61,35 +62,28 @@ class CompHandler(BaseHandler):
             'page_subtitle': comp.get_status(),
         }
 
-        if comp.status == 0:
-            # open
+        if comp.status == OPEN:
             self.view_open(user, comp, data)
-        elif comp.status == 1:
-            # scoring
+        elif comp.status == SCORING:
             user_comp = self.get_usercomp(user, comp)
             if not user or not user_comp:
                 self.view_open(user, comp, data)
             else:
                 self.view_scoring(user, comp, user_comp, data)
-        else:
-            # completed
+        else:  # completed
             self.view_complete(user, comp, data)
 
-    def post(self, year=0, month=0):
+    def post(self, comp_id=0):
         '''A user is submitting scores.'''
         user = self.get_user()
-        year = int(year)
-        month = int(month)
-        comp = self.get_comp(year, month)
+        comp_id = int(comp_id)
+        comp = Competition.get_by_id(comp_id)
         results = self.parse_scores(self.request.POST)
 
         if not user or not comp:
             # stop some unauthorised post submissions.
             self.redirect('/competitions')
             return
-
-        #self.write(results)
-        #self.write(self.request.POST)
 
         for photo_id, score in results.iteritems():
             photo = Photo.get_by_id(photo_id)
@@ -104,7 +98,7 @@ class CompHandler(BaseHandler):
         if self.request.path.endswith('/current'):
             url = '/competition/current'
         else:
-            url = '/competition/%d/%d' % (year, month)
+            url = '/competition/%d' % (comp_id)
 
         self.redirect(url)
 
@@ -123,6 +117,8 @@ class CompHandler(BaseHandler):
     def view_scoring(self, user, comp, user_comp, data):
         '''Create the competition page when its status is Scoring.'''
         to_score = user_comp and not user_comp.submitted_scores
+
+        logging.info('to_score: %s' % to_score)
 
         photos = []
         for p in Photo.competition_photos(comp):
@@ -440,8 +436,6 @@ class CompScores(BaseHandler):
 
         self.response.content_type = 'text/csv'
 
-        #year = int(year)
-        #month = int(month)
         comp_id = int(comp_id)
         comp = Competition.get_by_id(comp_id)
 
@@ -455,7 +449,6 @@ routes = [
     (r'/competition/admin', CompAdmin),
     (r'/competition/new', NewComp),
     (r'/competition/modify/(\d+)', CompMod),
-    #(r'/competition/current', CompHandler),
     (r'/competition/scores/(\d+)/scores_\d+.csv', CompScores)
 ]
 app = webapp2.WSGIApplication(routes=routes, debug=True)
