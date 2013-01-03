@@ -2,24 +2,31 @@
 {% block title %}Photo{% endblock %}
 
 {% block content %}
-    <div>
+    <div id="photo">
         <img src="{{url}}" alt="{{title}}" class="img-polaroid" />
     </div>
 
-    <div class="row" id="comments">
-        <h3>Comments</h3>
+    <div id="comments">
+        <h3>
+            Comments
+            {% if not comp_closed %}
+            <small>No comments until the competition is finished.</small>
+            {% endif %}
+        </h3>
         {% for c in comments %}
+        <div class="row">
             <blockquote class="span9">
                 <p><pre>{{c.text}}</pre></p>
                 <small>{{c.user.username}}, {{c.format_date()}}</small>
             </blockquote>
+        </div>
         {% endfor %}
         {% if not comments %}
             <p>No comments yet</p>
         {% endif %}
     </div>
 
-    {% if user %}
+    {% if user and comp_closed %}
     <div id="new-comment">
         <form method="post">
             <fieldset>

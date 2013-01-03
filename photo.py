@@ -25,15 +25,18 @@ class PhotoView(BaseHandler):
             self.render('error.html', **data)
             return
 
+        #logging.info(dir(Comment.photo_comments(photo)))
+
         data = {
             'page_title': 'Photo',
             'page_subtitle': photo.title,
             'user': user,
             'userid': user.key().id() if user else 0,
             'photoid': photo.key().id(),
+            'comp_closed': photo.position is not None,
             'url': photo.url(),
             'title': photo.title,
-            'comments': Comment.photo_comments(photo)
+            'comments': list(Comment.photo_comments(photo))
         }
         self.render('photo.html', **data)
 
@@ -43,6 +46,7 @@ class PhotoView(BaseHandler):
         user_id = int(user_id)
         comment = self.request.get('comment-text')
         comment = escape(comment)
+
         logging.info(user_id)
         logging.info(photo_id)
         logging.info(comment)

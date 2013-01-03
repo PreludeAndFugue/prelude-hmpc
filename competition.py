@@ -142,8 +142,16 @@ class CompHandler(BaseHandler):
         photos = []
         for p in Photo.competition_result(comp):
             title, url, thumb, _, _, _, _ = p.data(128)
-            photos.append((p, title, p.user.username, url, thumb,
-                ordinal(p.position), p.total_score))
+            photos.append((
+                p,
+                title,
+                p.user.username,
+                url,
+                thumb,
+                ordinal(p.position),
+                p.total_score,
+                p.key().id()
+            ))
 
         data.update({
             'photos': photos

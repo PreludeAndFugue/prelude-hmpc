@@ -10,6 +10,13 @@ section {
     text-align: center;
 }
 
+.comment-button {
+    display: block;
+    margin: 5px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
 .photo-score {
     text-align: center;
     margin: 10px;

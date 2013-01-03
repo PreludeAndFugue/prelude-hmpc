@@ -12,12 +12,13 @@
     <br />
 
     <ul class="thumbnails">
-    {% for photo, title, username, url, thumb, position, total_score in photos %}
+    {% for photo, title, username, url, thumb, position, total_score, id in photos %}
         <li class="span2">
             <a href="{{url}}" class="thumbnail" rel="lightbox[comp]"
                 title="{{title}} submitted by {{username}}, position: {{position}}">
                 <img id="thumb" src="{{thumb}}" alt="{{title}}" />
             </a>
+            <a href="/photo/{{id}}" class="btn comment-button">Comments</a>
         </li>
     {% endfor %}
     </ul>
@@ -32,7 +33,7 @@
             </tr>
         </thead>
         <tbody>
-            {% for photo, title, username, url, thumb, position, total_score in photos %}
+            {% for photo, title, username, url, thumb, position, total_score, id in photos %}
                 {% if user.username == username %}
                     <tr class="highlight-user">
                 {% else %}

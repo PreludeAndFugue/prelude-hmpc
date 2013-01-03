@@ -119,14 +119,11 @@ class Photo(db.Model):
     total_score = db.IntegerProperty(default=0)
 
     @classmethod
-    def user_photos(cls, user, limit=6):
+    def user_photos(cls, user, limit=None):
         '''Return all photos of a user.'''
         sql = 'WHERE user = :user ORDER BY upload_date DESC'
         query = cls.gql(sql, user=user)
-        if limit is not None:
-            return query.run(limit=limit)
-        else:
-            return query.run()
+        return query.run(limit=limit)
 
     @classmethod
     def competition_photos(cls, competition):
