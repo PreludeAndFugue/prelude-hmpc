@@ -156,13 +156,16 @@ class Photo(db.Model):
         query = Scores.gql('WHERE photo = :photo', photo=self)
         return query.run()
 
-    def data(self, size=288):
+    def data(self, size=211):
         '''Return information about photo and urls for image and thumb.'''
         title = self.title if self.title else 'Untitled'
         url = get_serving_url(self.blob, size=MAX_SIZE)
         thumb = get_serving_url(self.blob, size=size, crop=True)
         date = self.upload_date.strftime('%d %B, %Y')
-        return title, url, thumb, date
+        position = self.position if self.position is not None else ''
+        score = self.total_score if position != '' else ''
+        comp_title = self.competition.title
+        return title, url, thumb, date, position, score, comp_title
 
 
 class Scores(db.Model):

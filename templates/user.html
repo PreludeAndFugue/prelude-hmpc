@@ -56,29 +56,24 @@
     </div>
     {% endif %}
 
-    <h3>
-        Photographs
-    </h3>
-
     <ul class="thumbnails">
-    {% for photo, title, photo_url, thumbnail, date in photos %}
-        <li class="span4">
+    {% for title, photo_url, thumbnail, date, position, score, comp_title in photos %}
+        <li class="span3">
             <a href="{{photo_url}}" class="thumbnail" rel="lightbox[user]"
                 title="{{title}}">
                 <img src="{{thumbnail}}" alt="{{title}}" />
             </a>
-            <dl class="dl-horizontal">
-                <dt>Title</dt>
-                    <dd>{{title}}</dd>
-                <dt>Uploaded</dt>
-                    <dd>{{date}}</dd>
-                <dt>Competition</dt>
-                    <dd>{{photo.competition.title}}</dd>
-                <dt>Score</dt>
-                    <dd>{{photo.total_score}}</dd>
-                <dt>Position</dt>
-                    <dd>{{photo.position}}</dd>
-            </dl>
+            <p>
+                <em>{{title}}</em>
+                <br />
+                {{comp_title}}
+                <br />
+                {{date}}
+                <br />
+                {{score}}
+                <br />
+                {{position}}
+            </p>
         </li>
     {% endfor %}
     </ul>

@@ -15,7 +15,7 @@ import logging
 
 from handler import BaseHandler
 from model import Competition, User, Photo, UserComp
-from helper import OPEN
+from helper import OPEN, ordinal
 
 
 class BaseUser(BaseHandler):
@@ -282,8 +282,18 @@ class UserPage(BaseHandler):
 
         photos = []
         for p in Photo.user_photos(user):
-            title, url, thumb, date = p.data()
-            photos.append((p, title, url, thumb, date))
+            title, url, thumb, date, position, score, comp_title = p.data()
+            position = '%s place' % ordinal(position) if position else position
+            score = '%d points' % score if score else score
+            photos.append((
+                title,
+                url,
+                thumb,
+                date,
+                position,
+                score,
+                comp_title
+            ))
 
         #logging.info(comp_photo)
 

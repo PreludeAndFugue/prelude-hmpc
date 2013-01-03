@@ -106,7 +106,7 @@ class CompHandler(BaseHandler):
         '''Create the competition page when its status is Open.'''
         photos = []
         for p in Photo.competition_photos(comp):
-            title, url, thumb, _ = p.data(128)
+            title, url, thumb, _, _, _, _ = p.data(128)
             photos.append((p, title, url, thumb))
 
         data.update({
@@ -122,7 +122,7 @@ class CompHandler(BaseHandler):
 
         photos = []
         for p in Photo.competition_photos(comp):
-            title, url, thumb, _ = p.data(128)
+            title, url, thumb, _, _, _, _ = p.data(128)
             user_photo = p.user == user
             if not to_score:
                 s = Scores.score_from_user(p, user)
@@ -141,7 +141,7 @@ class CompHandler(BaseHandler):
         '''Create the competition page when its status is Completed.'''
         photos = []
         for p in Photo.competition_result(comp):
-            title, url, thumb, _ = p.data(128)
+            title, url, thumb, _, _, _, _ = p.data(128)
             photos.append((p, title, p.user.username, url, thumb,
                 ordinal(p.position), p.total_score))
 
