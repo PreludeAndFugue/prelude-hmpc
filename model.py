@@ -181,7 +181,7 @@ class Comment(db.Model):
     def photo_comments(cls, photo):
         query = cls.all()
         query.filter('photo = ', photo)
-        query.order('-submit_date')
+        query.order('submit_date')
         return query.run()
 
     @classmethod
