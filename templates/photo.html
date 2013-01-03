@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Photo{% endblock %}
+
+{% block content %}
+    <div>
+        <img src="{{url}}" alt="{{title}}" class="img-polaroid" />
+    </div>
+
+    <div class="row" id="comments">
+        <h3>Comments</h3>
+        {% for c in comments %}
+            <blockquote class="span9">
+                <p><pre>{{c.text}}</pre></p>
+                <small>{{c.user.username}}, {{c.format_date()}}</small>
+            </blockquote>
+        {% endfor %}
+        {% if not comments %}
+            <p>No comments yet</p>
+        {% endif %}
+    </div>
+
+    {% if user %}
+    <div id="new-comment">
+        <form method="post">
+            <fieldset>
+            <legend>Submit a comment</legend>
+            <input type="hidden" id="user" name="user" value="{{userid}}" />
+            <textarea id="comment-text" name="comment-text" rows="3" class="span6"></textarea>
+            <br />
+            <button type="submit" class="btn btn-primary">
+                Submit
+            </button>
+            </fieldset>
+        </form>
+    </div>
+    {% endif %}
+
+{% endblock %}

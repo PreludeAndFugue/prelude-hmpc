@@ -167,6 +167,37 @@ class Photo(db.Model):
         comp_title = self.competition.title
         return title, url, thumb, date, position, score, comp_title
 
+    def thumb(self, size=211):
+        return get_serving_url(self.blob, size=size, crop=True)
+
+    def url(self, size=MAX_SIZE):
+        return get_serving_url(self.blob, size=MAX_SIZE)
+
+
+class Comment(db.Model):
+    photo = db.ReferenceProperty(reference_class=Photo, required=True)
+    user = db.ReferenceProperty(reference_class=User, required=True)
+    submit_date = db.DateTimeProperty(auto_now_add=True)
+    text = db.TextProperty()
+
+    @classmethod
+    def photo_comments(cls, photo):
+        query = cls.all()
+        query.filter('photo = ', photo)
+        query.order('-submit_date')
+        return query.run()
+
+    @classmethod
+    def user_comments(cls, user):
+        query = cls.all()
+        query.filter('user = ', user)
+        query.order('-submit_date')
+        return query.run()
+
+    def format_date(self):
+        '''Format the stored submit date for pretty printing.'''
+        return self.submit_date.strftime('%H:%M, %d-%b-%Y')
+
 
 class Scores(db.Model):
     photo = db.ReferenceProperty(reference_class=Photo, required=True)
