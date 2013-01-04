@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-from google.appengine.api import mail
 from google.appengine.ext import blobstore
 from google.appengine.ext.webapp import blobstore_handlers
 import webapp2
@@ -124,44 +123,8 @@ class Upload(BaseHandler, blobstore_handlers.BlobstoreUploadHandler):
         self.redirect('/user')
 
 
-class Contact(BaseHandler):
-    def get(self):
-        self.display()
-
-    def post(self):
-        name = self.request.get('name', '')
-        email = self.request.get('email', '')
-        message = self.request.get('message', '')
-
-        if not name or not email or not message:
-            data = {
-                'message_sent': True,
-                'alert_type': 'alert-error',
-                'message': 'No message sent - complete all fields.'
-            }
-        else:
-            body = 'name: %s\nemail: %s\n\n%s' % (name, email, message)
-            mail.send_mail_to_admins('gdrummondk@gmail.com', 'hmpc', body)
-            data = {
-                'message_sent': True,
-                'alert_type': 'alert-success',
-                'message': 'You have sent a message to the administrators.'
-            }
-
-        self.display(data)
-
-    def display(self, extra_data=None):
-        data = {
-            'page_title': 'Contact',
-            'user': self.get_user()
-        }
-        if extra_data:
-            data.update(extra_data)
-        self.render('contact.html', **data)
-
 routes = [
     ('/user', UserPage),
-    ('/contact', Contact),
     ('/upload', Upload),
 ]
 app = webapp2.WSGIApplication(routes=routes, debug=True)
