@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+'''Creating test data.'''
+
 from datetime import date
 from itertools import product
 from glob import glob
@@ -11,7 +13,7 @@ import webapp2
 from webapp2_extras.security import generate_password_hash
 
 from handler import BaseHandler
-from model import Competition, User, Photo, UserComp, Scores
+from model import Competition, User, Photo, UserComp, Scores, Comment
 
 
 class Test(BaseHandler):
@@ -141,7 +143,7 @@ class Test(BaseHandler):
             prev_score = score
 
     def _delete_all(self):
-        for base in (Competition, UserComp, Scores):
+        for base in (Competition, UserComp, Scores, Comment):
             for item in base.all():
                 item.delete()
         for photo in Photo.all():
