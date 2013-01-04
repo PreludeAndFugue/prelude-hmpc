@@ -36,7 +36,9 @@
                         <option>10</option>
                     </select>
                 {% elif not to_score and not user_photo %}
-                    <b>Score:</b> {{score}}
+                    <p><b>Score:</b> {{score}}</p>
+                {% else %}
+                    <p>My photo</p>
                 {% endif %}
             </div>
         </li>

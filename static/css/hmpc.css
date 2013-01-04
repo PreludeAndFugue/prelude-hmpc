@@ -20,6 +20,10 @@ section {
 .photo-score {
     text-align: center;
     margin: 10px;
+    /*line-height: 30px;*/
+}
+.photo-score p {
+    line-height: 30px;
 }
 
 .badge-first {
