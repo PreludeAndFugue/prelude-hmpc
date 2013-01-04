@@ -16,26 +16,26 @@ handlers:
   static_dir: static
 
 - url: /login
-  script: user.app
+  script: user_admin.app
   secure: always
 
 - url: /register
-  script: user.app
+  script: user_admin.app
   secure: always
 
 - url: /logout
-  script: user.app
-  secure: never
-
-- url: /user
-  script: user.app
+  script: user_admin.app
   secure: never
 
 - url: /verify/.+
-  script: user.app
+  script: user_admin.app
   secure: never
 
 - url: /contact
+  script: user_admin.app
+  secure: never
+
+- url: /user
   script: user.app
   secure: never
 
