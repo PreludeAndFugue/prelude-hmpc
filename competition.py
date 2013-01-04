@@ -60,6 +60,7 @@ class CompHandler(BaseHandler):
             'month': month_str,
             'page_title': 'Competition: %s %d' % (month_str, comp.year),
             'page_subtitle': comp.get_status(),
+            'description': comp.description,
         }
 
         if comp.status == OPEN:
