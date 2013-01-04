@@ -38,6 +38,7 @@ class UserPage(BaseHandler):
             position = '%s place' % ordinal(position) if position else position
             score = '%d points' % score if score else score
             photos.append((
+                p.key().id(),
                 title,
                 url,
                 thumb,

@@ -57,10 +57,9 @@
     {% endif %}
 
     <ul class="thumbnails">
-    {% for title, photo_url, thumbnail, date, position, score, comp_title in photos %}
+    {% for id, title, photo_url, thumbnail, date, position, score, comp_title in photos %}
         <li class="span3">
-            <a href="{{photo_url}}" class="thumbnail" rel="lightbox[user]"
-                title="{{title}}">
+            <a href="/photo/{{id}}" class="thumbnail" title="{{title}}">
                 <img src="{{thumbnail}}" alt="{{title}}" />
             </a>
             <p>
@@ -78,8 +77,4 @@
     {% endfor %}
     </ul>
 
-{% endblock %}
-
-{% block js %}
-<script src="/static/js/lightbox.js"></script>
 {% endblock %}
