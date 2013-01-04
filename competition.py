@@ -95,12 +95,7 @@ class CompHandler(BaseHandler):
         usercomp.submitted_scores = True
         usercomp.put()
 
-        if self.request.path.endswith('/current'):
-            url = '/competition/current'
-        else:
-            url = '/competition/%d' % (comp_id)
-
-        self.redirect(url)
+        self.redirect('/competition/%d' % (comp_id))
 
     def view_open(self, user, comp, data):
         '''Create the competition page when its status is Open.'''
@@ -141,15 +136,15 @@ class CompHandler(BaseHandler):
         '''Create the competition page when its status is Completed.'''
         photos = []
         for p in Photo.competition_result(comp):
-            title, url, thumb, _, _, _, _ = p.data(128)
+            title, url, thumb, _, position, score, _ = p.data(128)
             photos.append((
                 p,
                 title,
                 p.user.username,
                 url,
                 thumb,
-                ordinal(p.position),
-                p.total_score,
+                ordinal(position),
+                score,
                 p.key().id()
             ))
 
