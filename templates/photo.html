@@ -16,7 +16,7 @@
         {% for c in comments %}
         <div class="row">
             <blockquote class="span9">
-                <p><pre>{{c.text}}</pre></p>
+                <p><pre>{{c.text|e}}</pre></p>
                 <small>{{c.user.username}}, {{c.format_date()}}</small>
             </blockquote>
         </div>

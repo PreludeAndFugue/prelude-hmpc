@@ -51,6 +51,7 @@ class Competition(db.Model):
     end = db.DateProperty(required=True)
     finished = db.BooleanProperty(default=False)
     status = db.IntegerProperty(default=0)
+    challenge = db.BooleanProperty(default=False)
 
     @classmethod
     def get_by_title_date(cls, title, month, year):

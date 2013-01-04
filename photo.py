@@ -2,7 +2,8 @@
 
 import webapp2
 import logging
-from markupsafe import escape
+from google.appengine.api import mail
+#from markupsafe import escape
 
 from handler import BaseHandler
 from model import Photo, Comment, User
@@ -45,7 +46,7 @@ class PhotoView(BaseHandler):
         user_id = self.request.get('user')
         user_id = int(user_id)
         comment = self.request.get('comment-text')
-        comment = escape(comment)
+        #comment = escape(comment)
 
         logging.info(user_id)
         logging.info(photo_id)
@@ -59,6 +60,23 @@ class PhotoView(BaseHandler):
             text=comment
         )
         new_comment.put()
+
+        # send an email to the photographer, letting them know of the new
+        # comment
+        to = '{} <{}>'.format(photo.user.username, photo.user.email)
+        subject = 'HMPC: New photograph comment'
+        body = (
+            'You have received a new comment on one of your photographs.'
+            '\n\n'
+            'From: {}\n\n'
+            '{}'  # comment
+            '\n\n'
+            "The following link will take you to your photograph's page.\n"
+            'http://prelude-hmpc.appspot.com/photo/{}'
+        )
+        body = body.format(user.username, comment, photo_id)
+        logging.info(body)
+        mail.send_mail('gdrummondk@gmail.com', to, subject, body)
 
         self.redirect(self.request.path)
 
