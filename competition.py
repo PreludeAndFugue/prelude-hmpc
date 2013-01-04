@@ -46,7 +46,6 @@ class CompHandler(BaseHandler):
         user = self.get_user()
         comp_id = int(comp_id)
         comp = Competition.get_by_id(comp_id)
-        #comp = self.get_comp(year, month)
 
         if comp is None:
             self.redirect('/competitions')
@@ -167,17 +166,6 @@ class CompHandler(BaseHandler):
         for photo_id, score in scores.iteritems():
             results[int(photo_id)] = int(score)
         return results
-
-    def get_comp(self, year, month):
-        '''Return the competition object from the year and the month.'''
-        if year == 0 and month == 0:
-             # get the current competition
-            comp = Competition.all().order('-start').get()
-        else:
-            month = int(month)
-            year = int(year)
-            comp = Competition.get_by_date(month, year)
-        return comp
 
     def get_usercomp(self, user, comp):
         '''Return UserComp object for user and competition.'''
