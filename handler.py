@@ -1,7 +1,9 @@
 import jinja2
 import os
+import logging
 import webapp2
 from webapp2_extras.securecookie import SecureCookieSerializer
+from google.appengine.api import memcache
 
 from model import User
 
@@ -40,5 +42,20 @@ class BaseHandler(webapp2.RequestHandler):
 
     def get_user(self):
         user_id, username = self.get_cookie()
-        if user_id:
-            return User.get_by_id(user_id)
+        logging.info('get_user -> {}, {}'.format(user_id, username))
+        if not user_id:
+            # no logged in user cookie
+            return None
+
+        key = 'user_{}'.format(user_id)
+        user = memcache.get(key)
+
+        logging.info('get_user memcached user: {}'.format(user))
+
+        if not user:
+            user = User.get_by_id(user_id)
+            memcache.set(key, user)
+
+            logging.info('get_user: memcache access database')
+
+        return user
