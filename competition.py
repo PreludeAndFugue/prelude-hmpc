@@ -420,7 +420,7 @@ class CompScores(BaseHandler):
         self.response.content_type = 'text/csv'
 
         comp_id = int(comp_id)
-        comp = Competition.get_by_id(comp_id)
+        comp = self.get_competition(comp_id)
 
         logging.info(comp)
 
