@@ -318,7 +318,6 @@ class CompMod(BaseHandler):
                 successful_update = True
             elif comp.status == COMPLETED:
                 error = 'Competition has been completed - cannot change status.'
-                self.report_error(comp, error)
             else:  # comp.status == OPEN
                 successful_update = True
         else:  # new_status == OPEN

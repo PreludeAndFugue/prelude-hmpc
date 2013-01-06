@@ -7,7 +7,7 @@ import webapp2
 import logging
 
 from handler import BaseHandler
-from model import Competition, Photo, UserComp
+from model import Photo, UserComp
 from helper import OPEN, ordinal
 
 
@@ -18,7 +18,9 @@ class UserPage(BaseHandler):
             self.render('user_no.html', page_title='User')
             return
 
-        open_comps = Competition.get_by_status(OPEN)
+        #open_comps = Competition.get_by_status(OPEN)
+        comps = self.get_competitions()
+        open_comps = [c for c in comps if c.status == OPEN]
         open_comps_no_photos = []
         for oc in open_comps:
             usercomp = UserComp.get_usercomp(user, oc)
@@ -71,7 +73,7 @@ class Upload(BaseHandler, blobstore_handlers.BlobstoreUploadHandler):
 
     def post(self):
         user = self.get_user()
-        user_id, username = self.get_cookie()
+        #user_id, username = self.get_cookie()
         upload_files = self.get_uploads('photo-submit')
 
         if not upload_files:
@@ -106,7 +108,8 @@ class Upload(BaseHandler, blobstore_handlers.BlobstoreUploadHandler):
 
         photo_title = self.request.get('photo-title')
         comp_id = int(self.request.get('comp-id'))
-        comp = Competition.get_by_id(comp_id)
+        comp = self.get_competition(comp_id)
+        #comp = Competition.get_by_id(comp_id)
 
         # add photo details to database
         photo = Photo(
