@@ -15,7 +15,8 @@ class PhotoView(BaseHandler):
         user = self.get_user()
 
         photo_id = int(photo_id)
-        photo = Photo.get_by_id(photo_id)
+        #photo = Photo.get_by_id(photo_id)
+        photo = self.get_photo(photo_id)
 
         if not photo:
             data = {

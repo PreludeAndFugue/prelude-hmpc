@@ -144,7 +144,10 @@ class Photo(db.Model):
     @classmethod
     def competition_photos(cls, competition):
         '''Return all photos entered into a competition.'''
-        query = cls.gql('WHERE competition = :c', c=competition)
+        #query = cls.gql('WHERE competition = :c', c=competition)
+        query = cls.all()
+        query.filter('competition = ', competition)
+        query.order('-total_score')
         return query.run()
 
     @classmethod

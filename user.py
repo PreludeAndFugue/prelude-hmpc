@@ -35,7 +35,8 @@ class UserPage(BaseHandler):
         logging.info(open_comps_no_photos)
 
         photos = []
-        for p in Photo.user_photos(user):
+        #for p in Photo.user_photos(user):
+        for p in self.get_user_photos(user.key().id()):
             title, url, thumb, date, position, score, comp_title = p.data()
             position = '%s place' % ordinal(position) if position else position
             score = '%d points' % score if score else score
@@ -119,6 +120,11 @@ class Upload(BaseHandler, blobstore_handlers.BlobstoreUploadHandler):
             competition=comp
         )
         photo.put()
+
+        # users photos cache is now stale - delete
+        self.delete_cache_user_photos(user.key().id())
+        # comp photos cache is now stale - delete
+        self.delete_cache_competition_photos(comp_id)
 
         # add UserComp record
         usercomp = UserComp(user=user, comp=comp)

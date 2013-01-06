@@ -5,7 +5,7 @@ import webapp2
 from webapp2_extras.securecookie import SecureCookieSerializer
 from google.appengine.api import memcache
 
-from model import User, Competition
+from model import User, Competition, Photo
 
 template_dir = os.path.join(os.path.dirname(__file__), 'templates')
 env = jinja2.Environment(loader=jinja2.FileSystemLoader(template_dir),
@@ -47,17 +47,19 @@ class BaseHandler(webapp2.RequestHandler):
             # no logged in user cookie
             return None
 
+        return self.get_user_from_id(user_id)
+
+    def get_user_from_id(self, user_id):
+        '''Bypass accessing cookie since already know the user_id.'''
         key = 'user_{}'.format(user_id)
         user = memcache.get(key)
 
-        logging.info('get_user memcached user: {}'.format(user))
+        logging.info('get_user_from_id memcached user: {}'.format(user))
 
         if not user:
             user = User.get_by_id(user_id)
             memcache.set(key, user)
-
-            logging.info('get_user: memcache access database')
-
+            logging.info('get_user_from_id: memcache db access')
         return user
 
     def get_competitions(self):
@@ -89,3 +91,43 @@ class BaseHandler(webapp2.RequestHandler):
     def set_competition(self, comp):
         key = 'comp_{}'.format(comp.key().id())
         memcache.set(key, comp)
+
+    def get_photo(self, photo_id):
+        key = 'photo_{}'.format(photo_id)
+        photo = memcache.get(key)
+        logging.info('memcached get_photo')
+        if not photo:
+            photo = Photo.get_by_id(photo_id)
+            memcache.set(key, photo)
+            logging.info('memcached get_photo db access')
+        return photo
+
+    def get_user_photos(self, user_id):
+        key = 'photos_user_{}'.format(user_id)
+        photos = memcache.get(key)
+        logging.info('memcached get_user_photos')
+        if not photos:
+            user = self.get_user_from_id(user_id)
+            photos = list(Photo.user_photos(user))
+            memcache.set(key, photos)
+            logging.info('memcached get_user_photos db access')
+        return photos
+
+    def delete_cache_user_photos(self, user_id):
+        key = 'photos_user_{}'.format(user_id)
+        memcache.delete(key)
+
+    def get_competition_photos(self, comp_id, comp=None):
+        key = 'photos_comp_{}'.format(comp_id)
+        photos = memcache.get(key)
+        logging.info('memcached get_comp_photos')
+        if not photos:
+            comp = comp if comp else self.get_competition(comp_id)
+            photos = list(Photo.competition_photos(comp))
+            memcache.set(key, photos)
+            logging.info('memcached get_comp_photos db access')
+        return photos
+
+    def delete_cache_competition_photos(self, comp_id):
+        key = 'photos_comp_{}'.format(comp_id)
+        memcache.delete(key)

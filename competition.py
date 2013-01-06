@@ -63,30 +63,32 @@ class CompHandler(BaseHandler):
         }
 
         if comp.status == OPEN:
-            self.view_open(user, comp, data)
+            self.view_open(user, comp_id, comp, data)
         elif comp.status == SCORING:
             user_comp = self.get_usercomp(user, comp)
             if not user or not user_comp:
                 self.view_open(user, comp, data)
             else:
-                self.view_scoring(user, comp, user_comp, data)
+                self.view_scoring(user, comp_id, comp, user_comp, data)
         else:  # completed
-            self.view_complete(user, comp, data)
+            self.view_complete(user, comp_id, comp, data)
 
     def post(self, comp_id=0):
         '''A user is submitting scores.'''
         user = self.get_user()
         comp_id = int(comp_id)
         comp = self.get_competition(comp_id)
-        results = self.parse_scores(self.request.POST)
 
         if not user or not comp:
             # stop some unauthorised post submissions.
             self.redirect('/competitions')
             return
 
+        results = self.parse_scores(self.request.POST)
+
         for photo_id, score in results.iteritems():
-            photo = Photo.get_by_id(photo_id)
+            #photo = Photo.get_by_id(photo_id)
+            photo = self.get_photo(photo_id)
             new_score = Scores(photo=photo, user_from=user, score=score)
             new_score.put()
 
@@ -97,10 +99,11 @@ class CompHandler(BaseHandler):
 
         self.redirect('/competition/%d' % (comp_id))
 
-    def view_open(self, user, comp, data):
+    def view_open(self, user, comp_id, comp, data):
         '''Create the competition page when its status is Open.'''
         photos = []
-        for p in Photo.competition_photos(comp):
+        #for p in Photo.competition_photos(comp):
+        for p in self.get_competition_photos(comp_id, comp=comp):
             title, url, thumb, _, _, _, _ = p.data(128)
             photos.append((p, title, url, thumb))
 
@@ -109,14 +112,15 @@ class CompHandler(BaseHandler):
         })
         self.render('competition-open.html', **data)
 
-    def view_scoring(self, user, comp, user_comp, data):
+    def view_scoring(self, user, comp_id, comp, user_comp, data):
         '''Create the competition page when its status is Scoring.'''
         to_score = user_comp and not user_comp.submitted_scores
 
         logging.info('to_score: %s' % to_score)
 
         photos = []
-        for p in Photo.competition_photos(comp):
+        #for p in Photo.competition_photos(comp):
+        for p in self.get_competition_photos(comp_id, comp=comp):
             title, url, thumb, _, _, _, _ = p.data(128)
             user_photo = p.user == user
             if not to_score:
@@ -132,10 +136,11 @@ class CompHandler(BaseHandler):
         })
         self.render('competition-scoring.html', **data)
 
-    def view_complete(self, user, comp, data):
+    def view_complete(self, user, comp_id, comp, data):
         '''Create the competition page when its status is Completed.'''
         photos = []
-        for p in Photo.competition_result(comp):
+        #for p in Photo.competition_result(comp):
+        for p in self.get_competition_photos(comp_id, comp=comp):
             title, url, thumb, _, position, score, _ = p.data(128)
             photos.append((
                 p,
