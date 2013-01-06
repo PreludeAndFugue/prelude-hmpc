@@ -15,7 +15,7 @@ class Comps(BaseHandler):
         '''Show the competitions page.'''
         user = self.get_user()
         comps = []
-        for c in Competition.all().order('-start').run():
+        for c in self.get_competitions():
             month = c.month
             month_word = MONTHS[month]
             user_photo = None
@@ -45,7 +45,7 @@ class CompHandler(BaseHandler):
         '''Show the competition page.'''
         user = self.get_user()
         comp_id = int(comp_id)
-        comp = Competition.get_by_id(comp_id)
+        comp = self.get_competition(comp_id)
 
         if comp is None:
             self.redirect('/competitions')
@@ -77,7 +77,7 @@ class CompHandler(BaseHandler):
         '''A user is submitting scores.'''
         user = self.get_user()
         comp_id = int(comp_id)
-        comp = Competition.get_by_id(comp_id)
+        comp = self.get_competition(comp_id)
         results = self.parse_scores(self.request.POST)
 
         if not user or not comp:
@@ -177,8 +177,7 @@ class CompAdmin(BaseHandler):
         if not user or not user.admin:
             self.redirect('/')
 
-        query = Competition.all().order('-start')
-        comps = query.run()
+        comps = self.get_competitions()
 
         data = {
             'page_title': 'Competition Admin',
@@ -249,6 +248,8 @@ class NewComp(BaseHandler):
             end=end
         )
         new_comp.put()
+        # created a new competition, so need to delete 'all_comps' from cache
+        self.delete_cache_competitions()
         self.redirect('/competition/admin')
 
 
@@ -262,7 +263,7 @@ class CompMod(BaseHandler):
             return
 
         comp_id = int(comp_id)
-        comp = Competition.get_by_id(comp_id)
+        comp = self.get_competition(comp_id)
         if not comp:
             self.redirect('/competition/admin')
             return
@@ -278,7 +279,7 @@ class CompMod(BaseHandler):
         #comp_id = int(self.request.get('comp-id'))
         comp_id = int(comp_id)
 
-        comp = Competition.get_by_id(comp_id)
+        comp = self.get_competition(comp_id)
 
         if not new_title:
             self.report_error(comp, 'Error - blank title.')
@@ -291,63 +292,54 @@ class CompMod(BaseHandler):
             new_status
         )
 
+        successful_update = False
         if new_status == COMPLETED:
             if comp.status == SCORING:
                 # completing a competition and calculating scores
                 completed = self.calculate_scores(comp)
                 if completed:
-                    self.update_competition(
-                        comp,
-                        new_title,
-                        new_description,
-                        new_status
-                    )
+                    successful_update = True
                 else:
                     # failed to calculate scores
-                    error = ('Cannot complete competition - '
-                        'not all competitors have submitted scores.')
-                    self.report_error(comp, error)
+                    error = (
+                        'Cannot complete competition - '
+                        'not all competitors have submitted scores.'
+                    )
             elif comp.status == COMPLETED:
-                self.update_competition(
-                    comp,
-                    new_title,
-                    new_description,
-                    new_status
-                )
+                successful_update = True
             else:  # comp.status == OPEN
                 # cannot complete an open competition
-                error = ('Cannot complete an open competition - '
-                    'users have not yet submitted scores.')
-                self.report_error(comp, error)
+                error = (
+                    'Cannot complete an open competition - '
+                    'users have not yet submitted scores.'
+                )
         elif new_status == SCORING:
             if comp.status == SCORING:
-                self.update_competition(
-                    comp,
-                    new_title,
-                    new_description,
-                    new_status
-                )
+                successful_update = True
             elif comp.status == COMPLETED:
                 error = 'Competition has been completed - cannot change status.'
                 self.report_error(comp, error)
             else:  # comp.status == OPEN
-                self.update_competition(
-                    comp,
-                    new_title,
-                    new_description,
-                    new_status
-                )
+                successful_update = True
         else:  # new_status == OPEN
             if comp.status in (SCORING, COMPLETED):
                 error = 'Cannot re-open this competition.'
-                self.report_error(comp, error)
             else:  # comp.status == OPEN
-                self.update_competition(
-                    comp,
-                    new_title,
-                    new_description,
-                    new_status
-                )
+                successful_update = True
+
+        if successful_update:
+            self.update_competition(
+                comp,
+                new_title,
+                new_description,
+                new_status
+            )
+            # delete stale cache
+            self.delete_cache_competitions()
+            # update cache item for this competition
+            self.set_competition(comp)
+        else:
+            self.report_error(comp, error)
 
     def _data(self, comp, user, **kwds):
         '''Create the data dictionary for the renderer.'''

@@ -5,7 +5,7 @@ import webapp2
 from webapp2_extras.securecookie import SecureCookieSerializer
 from google.appengine.api import memcache
 
-from model import User
+from model import User, Competition
 
 template_dir = os.path.join(os.path.dirname(__file__), 'templates')
 env = jinja2.Environment(loader=jinja2.FileSystemLoader(template_dir),
@@ -59,3 +59,33 @@ class BaseHandler(webapp2.RequestHandler):
             logging.info('get_user: memcache access database')
 
         return user
+
+    def get_competitions(self):
+        key = 'all_comps'
+        all_comps = memcache.get(key)
+
+        logging.info('memcached get_competitions')
+
+        if not all_comps:
+            all_comps = list(Competition.all().order('-start').run())
+            memcache.set(key, all_comps)
+            logging.info('memcached get_competitions database access')
+
+        return all_comps
+
+    def delete_cache_competitions(self):
+        memcache.delete('all_comps')
+
+    def get_competition(self, comp_id):
+        key = 'comp_{}'.format(comp_id)
+        comp = memcache.get(key)
+        logging.info('memcached get_competition')
+        if not comp:
+            comp = Competition.get_by_id(comp_id)
+            memcache.set(key, comp)
+            logging.info('memcached get_competition database access')
+        return comp
+
+    def set_competition(self, comp):
+        key = 'comp_{}'.format(comp.key().id())
+        memcache.set(key, comp)

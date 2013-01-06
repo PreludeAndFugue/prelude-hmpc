@@ -83,7 +83,22 @@ class Competition(db.Model):
 
     def __eq__(self, other):
         '''Compare competitions for equality.'''
-        return self.year == other.year and self.month == other.month
+        return (
+            self.title == other.title
+            and self.year == other.year
+            and self.month == other.month
+        )
+
+    def __str__(self):
+        return 'Competition({}, {}-{}, status={})'.format(
+            self.title,
+            self.month,
+            self.year,
+            self.status
+        )
+
+    def __repr__(self):
+        return self.__str__()
 
 
 class UserComp(db.Model):
