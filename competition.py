@@ -13,7 +13,7 @@ from helper import OPEN, SCORING, COMPLETED, MONTHS, ordinal
 class Comps(BaseHandler):
     def get(self):
         '''Show the competitions page.'''
-        user = self.get_user()
+        user_id, user = self.get_user()
         comps = []
         for c in self.get_competitions():
             month = c.month
@@ -43,7 +43,7 @@ class Comps(BaseHandler):
 class CompHandler(BaseHandler):
     def get(self, comp_id=0):
         '''Show the competition page.'''
-        user = self.get_user()
+        user_id, user = self.get_user()
         comp_id = int(comp_id)
         comp = self.get_competition(comp_id)
 
@@ -67,7 +67,7 @@ class CompHandler(BaseHandler):
         elif comp.status == SCORING:
             user_comp = self.get_usercomp(user, comp)
             if not user or not user_comp:
-                self.view_open(user, comp, data)
+                self.view_open(user, comp_id, comp, data)
             else:
                 self.view_scoring(user, comp_id, comp, user_comp, data)
         else:  # completed
@@ -75,7 +75,7 @@ class CompHandler(BaseHandler):
 
     def post(self, comp_id=0):
         '''A user is submitting scores.'''
-        user = self.get_user()
+        user_id, user = self.get_user()
         comp_id = int(comp_id)
         comp = self.get_competition(comp_id)
 
@@ -178,7 +178,7 @@ class CompAdmin(BaseHandler):
     '''Competition Admin handler.'''
     def get(self):
         '''Show the competition admin page.'''
-        user = self.get_user()
+        user_id, user = self.get_user()
         if not user or not user.admin:
             self.redirect('/')
 
@@ -197,7 +197,7 @@ class NewComp(BaseHandler):
     '''New competition handler.'''
     def get(self):
         '''Show the new competition page.'''
-        user = self.get_user()
+        user_id, user = self.get_user()
         if not user or not user.admin:
             self.redirect('/')
 
@@ -210,7 +210,7 @@ class NewComp(BaseHandler):
 
     def post(self):
         '''Create a new competition.'''
-        user = self.get_user()
+        user_id, user = self.get_user()
         if not user or not user.admin:
             self.redirect('/')
 
@@ -262,7 +262,7 @@ class CompMod(BaseHandler):
     '''Competition modification handler.'''
     def get(self, comp_id):
         'Show the competition modification page for a particular competition.'
-        user = self.get_user()
+        user_id, user = self.get_user()
         if not user or not user.admin:
             self.redirect('/')
             return
@@ -278,6 +278,11 @@ class CompMod(BaseHandler):
 
     def post(self, comp_id):
         '''Modify a competition.'''
+        user_id, user = self.get_user()
+        if not user or not user.admin:
+            self.redirect('/')
+            return
+
         new_title = self.request.get('comp-title')
         new_description = self.request.get('comp-description')
         new_status = int(self.request.get('comp-status'))
@@ -417,7 +422,7 @@ class CompMod(BaseHandler):
 class CompScores(BaseHandler):
     def get(self, comp_id):
         # should check for logged in user cookie
-        user = self.get_user()
+        user_id, user = self.get_user()
         if not user or not user.admin:
             self.redirect('/')
             return

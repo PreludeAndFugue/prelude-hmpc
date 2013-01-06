@@ -30,6 +30,11 @@ class BaseHandler(webapp2.RequestHandler):
     def render(self, template, **params):
         self.write(self.render_str(template, **params))
 
+    def render_and_cache(self, key, template, **params):
+        page = self.render_str(template, **params)
+        memcache.set(key, page)
+        self.write(page)
+
     def get_cookie(self):
         user_cookie = self.request.cookies.get('userid')
         if user_cookie:
@@ -45,7 +50,7 @@ class BaseHandler(webapp2.RequestHandler):
         logging.info('get_user -> {}, {}'.format(user_id, username))
         if not user_id:
             # no logged in user cookie
-            return None
+            return None, ''
 
         return self.get_user_from_id(user_id)
 
@@ -60,7 +65,7 @@ class BaseHandler(webapp2.RequestHandler):
             user = User.get_by_id(user_id)
             memcache.set(key, user)
             logging.info('get_user_from_id: memcache db access')
-        return user
+        return user_id, user
 
     def get_competitions(self):
         key = 'all_comps'
@@ -107,7 +112,7 @@ class BaseHandler(webapp2.RequestHandler):
         photos = memcache.get(key)
         logging.info('memcached get_user_photos')
         if not photos:
-            user = self.get_user_from_id(user_id)
+            user_id, user = self.get_user_from_id(user_id)
             photos = list(Photo.user_photos(user))
             memcache.set(key, photos)
             logging.info('memcached get_user_photos db access')

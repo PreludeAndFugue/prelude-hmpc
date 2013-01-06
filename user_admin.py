@@ -167,7 +167,7 @@ class Logout(BaseHandler):
 
 class Register(BaseUser):
     def get(self):
-        user = self.get_user()
+        user_id, user = self.get_user()
         data = {
             'page_title': 'Registration',
             'user': user
@@ -294,7 +294,7 @@ class Register(BaseUser):
 
 class VerifyUser(BaseUser):
     def get(self, verify_code_hash):
-        user = self.get_user()
+        user_id, user = self.get_user()
         data = {
             'user': user,
             'page_title': 'User Verification'
@@ -345,9 +345,10 @@ class Contact(BaseHandler):
         self.display(data)
 
     def display(self, extra_data=None):
+        user_id, user = self.get_user()
         data = {
             'page_title': 'Contact',
-            'user': self.get_user()
+            'user': user
         }
         if extra_data:
             data.update(extra_data)

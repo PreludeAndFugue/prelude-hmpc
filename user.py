@@ -13,7 +13,7 @@ from helper import OPEN, ordinal
 
 class UserPage(BaseHandler):
     def get(self):
-        user = self.get_user()
+        user_id, user = self.get_user()
         if not user:
             self.render('user_no.html', page_title='User')
             return
@@ -36,10 +36,10 @@ class UserPage(BaseHandler):
 
         photos = []
         #for p in Photo.user_photos(user):
-        for p in self.get_user_photos(user.key().id()):
+        for p in self.get_user_photos(user_id):
             title, url, thumb, date, position, score, comp_title = p.data()
-            position = '%s place' % ordinal(position) if position else position
-            score = '%d points' % score if score else score
+            position = '%s place' % ordinal(position) if position else ''
+            score = '%d points' % score if score else ''
             photos.append((
                 p.key().id(),
                 title,
@@ -73,7 +73,7 @@ class Upload(BaseHandler, blobstore_handlers.BlobstoreUploadHandler):
         self.redirect('/user')
 
     def post(self):
-        user = self.get_user()
+        user_id, user = self.get_user()
         #user_id, username = self.get_cookie()
         upload_files = self.get_uploads('photo-submit')
 
@@ -122,7 +122,7 @@ class Upload(BaseHandler, blobstore_handlers.BlobstoreUploadHandler):
         photo.put()
 
         # users photos cache is now stale - delete
-        self.delete_cache_user_photos(user.key().id())
+        self.delete_cache_user_photos(user_id)
         # comp photos cache is now stale - delete
         self.delete_cache_competition_photos(comp_id)
 

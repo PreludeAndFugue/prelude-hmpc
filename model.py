@@ -131,7 +131,7 @@ class Photo(db.Model):
     title = db.StringProperty()
     blob = blobstore.BlobReferenceProperty(required=True)
     upload_date = db.DateTimeProperty(auto_now_add=True)
-    position = db.IntegerProperty(default=None)
+    position = db.IntegerProperty(default=0)
     total_score = db.IntegerProperty(default=0)
 
     @classmethod
