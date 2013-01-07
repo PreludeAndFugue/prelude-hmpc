@@ -169,7 +169,7 @@ class Photo(db.Model):
         return get_serving_url(self.blob, size=size, crop=True)
 
     def url(self, size=MAX_SIZE):
-        return get_serving_url(self.blob, size=MAX_SIZE)
+        return get_serving_url(self.blob, size=size)
 
 
 class Comment(db.Model):
