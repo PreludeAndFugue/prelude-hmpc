@@ -9,7 +9,7 @@ from model import Photo
 
 class Home(BaseHandler):
     def get(self):
-        user = self.get_user()
+        user_id, user = self.get_user()
         data = {
             'page_title': 'Monthly Photographs 2013',
             'photos': self.random_images(4),
