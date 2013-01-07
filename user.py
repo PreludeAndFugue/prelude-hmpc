@@ -7,18 +7,26 @@ import webapp2
 import logging
 
 from handler import BaseHandler
-from model import Competition, Photo, UserComp
+from model import Photo, UserComp
 from helper import OPEN, ordinal
 
 
 class UserPage(BaseHandler):
     def get(self):
-        user = self.get_user()
+        user_id, user = self.get_user()
         if not user:
             self.render('user_no.html', page_title='User')
             return
 
-        open_comps = Competition.get_by_status(OPEN)
+        page, key = self.get_page_user(user_id)
+        if page:
+            self.write(page)
+            logging.info('UserPage -> write cached page')
+            return
+
+        #open_comps = Competition.get_by_status(OPEN)
+        comps = self.get_competitions()
+        open_comps = [c for c in comps if c.status == OPEN]
         open_comps_no_photos = []
         for oc in open_comps:
             usercomp = UserComp.get_usercomp(user, oc)
@@ -33,10 +41,11 @@ class UserPage(BaseHandler):
         logging.info(open_comps_no_photos)
 
         photos = []
-        for p in Photo.user_photos(user):
+        #for p in Photo.user_photos(user):
+        for p in self.get_user_photos(user_id):
             title, url, thumb, date, position, score, comp_title = p.data()
-            position = '%s place' % ordinal(position) if position else position
-            score = '%d points' % score if score else score
+            position = '%s place' % ordinal(position) if position else ''
+            score = '%d points' % score if score else ''
             photos.append((
                 p.key().id(),
                 title,
@@ -58,7 +67,8 @@ class UserPage(BaseHandler):
             'photos': photos,
             'open_comps': open_comps_no_photos,
         }
-        self.render('user.html', **data)
+        #self.render('user.html', **data)
+        self.render_and_cache(key, 'user.html', **data)
 
     def post(self):
         # submitting a photograph - handled by Upload class
@@ -70,8 +80,8 @@ class Upload(BaseHandler, blobstore_handlers.BlobstoreUploadHandler):
         self.redirect('/user')
 
     def post(self):
-        user = self.get_user()
-        user_id, username = self.get_cookie()
+        user_id, user = self.get_user()
+        #user_id, username = self.get_cookie()
         upload_files = self.get_uploads('photo-submit')
 
         if not upload_files:
@@ -106,7 +116,8 @@ class Upload(BaseHandler, blobstore_handlers.BlobstoreUploadHandler):
 
         photo_title = self.request.get('photo-title')
         comp_id = int(self.request.get('comp-id'))
-        comp = Competition.get_by_id(comp_id)
+        comp = self.get_competition(comp_id)
+        #comp = Competition.get_by_id(comp_id)
 
         # add photo details to database
         photo = Photo(
@@ -116,6 +127,13 @@ class Upload(BaseHandler, blobstore_handlers.BlobstoreUploadHandler):
             competition=comp
         )
         photo.put()
+
+        # users photos cache is now stale - delete
+        self.delete_cache_user_photos(user_id)
+        # comp photos cache is now stale - delete
+        self.delete_cache_competition_photos(comp_id)
+        # user page cache is now stale - delete
+        self.delete_cache_page_user(user_id)
 
         # add UserComp record
         usercomp = UserComp(user=user, comp=comp)

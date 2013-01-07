@@ -18,7 +18,7 @@ from model import Competition, User, Photo, UserComp, Scores, Comment
 
 class Test(BaseHandler):
     def get(self):
-        user = self.get_user()
+        user_id, user = self.get_user()
         if not user or not user.admin:
             self.redirect('/')
             return

@@ -83,7 +83,22 @@ class Competition(db.Model):
 
     def __eq__(self, other):
         '''Compare competitions for equality.'''
-        return self.year == other.year and self.month == other.month
+        return (
+            self.title == other.title
+            and self.year == other.year
+            and self.month == other.month
+        )
+
+    def __str__(self):
+        return 'Competition({}, {}-{}, status={})'.format(
+            self.title,
+            self.month,
+            self.year,
+            self.status
+        )
+
+    def __repr__(self):
+        return self.__str__()
 
 
 class UserComp(db.Model):
@@ -116,7 +131,7 @@ class Photo(db.Model):
     title = db.StringProperty()
     blob = blobstore.BlobReferenceProperty(required=True)
     upload_date = db.DateTimeProperty(auto_now_add=True)
-    position = db.IntegerProperty(default=None)
+    position = db.IntegerProperty(default=0)
     total_score = db.IntegerProperty(default=0)
 
     @classmethod
@@ -129,7 +144,10 @@ class Photo(db.Model):
     @classmethod
     def competition_photos(cls, competition):
         '''Return all photos entered into a competition.'''
-        query = cls.gql('WHERE competition = :c', c=competition)
+        #query = cls.gql('WHERE competition = :c', c=competition)
+        query = cls.all()
+        query.filter('competition = ', competition)
+        query.order('-total_score')
         return query.run()
 
     @classmethod

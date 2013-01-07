@@ -12,10 +12,11 @@ from model import Photo, Comment, User
 class PhotoView(BaseHandler):
     def get(self, photo_id=0):
         '''View a photograph'''
-        user = self.get_user()
+        user_id, user = self.get_user()
 
         photo_id = int(photo_id)
-        photo = Photo.get_by_id(photo_id)
+        #photo = Photo.get_by_id(photo_id)
+        photo = self.get_photo(photo_id)
 
         if not photo:
             data = {
@@ -32,8 +33,8 @@ class PhotoView(BaseHandler):
             'page_title': 'Photo',
             'page_subtitle': photo.title,
             'user': user,
-            'userid': user.key().id() if user else 0,
-            'photoid': photo.key().id(),
+            'userid': user_id,
+            'photoid': photo_id,
             'comp_closed': photo.position is not None,
             'url': photo.url(),
             'title': photo.title,
@@ -42,9 +43,12 @@ class PhotoView(BaseHandler):
         self.render('photo.html', **data)
 
     def post(self, photo_id=0):
+        user_id, user = self.get_user()
+        if not user:
+            self.redirect('/')
+            return
+
         photo_id = int(photo_id)
-        user_id = self.request.get('user')
-        user_id = int(user_id)
         comment = self.request.get('comment-text')
         #comment = escape(comment)
 
@@ -52,7 +56,6 @@ class PhotoView(BaseHandler):
         logging.info(photo_id)
         logging.info(comment)
 
-        user = User.get_by_id(user_id)
         photo = Photo.get_by_id(photo_id)
         new_comment = Comment(
             photo=photo,
