@@ -1,4 +1,6 @@
 test/photo*
+static/css/bootstrap*
+static/js/bootstrap*
 
 
 #################
