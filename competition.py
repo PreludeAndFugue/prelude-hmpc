@@ -14,6 +14,13 @@ class Comps(BaseHandler):
     def get(self):
         '''Show the competitions page.'''
         user_id, user = self.get_user()
+
+        page, key = self.get_page_competitions(user_id)
+        if page:
+            self.write(page)
+            logging.info('Comps: write cached page')
+            return
+
         comps = []
         for c in self.get_competitions():
             month = c.month
@@ -37,7 +44,8 @@ class Comps(BaseHandler):
             'comps': comps,
             'months': MONTHS
         }
-        self.render('competitions.html', **data)
+        #self.render('competitions.html', **data)
+        self.render_and_cache(key, 'competitions.html', **data)
 
 
 class CompHandler(BaseHandler):
@@ -255,6 +263,8 @@ class NewComp(BaseHandler):
         new_comp.put()
         # created a new competition, so need to delete 'all_comps' from cache
         self.delete_cache_competitions()
+        # delete cached competitions page
+        self.delete_cache_page_competitions()
         self.redirect('/competition/admin')
 
 
@@ -347,6 +357,8 @@ class CompMod(BaseHandler):
             self.delete_cache_competitions()
             # update cache item for this competition
             self.set_competition(comp)
+            # delete cache of all forms of the competitions page
+            self.delete_cache_page_competitions()
         else:
             self.report_error(comp, error)
 

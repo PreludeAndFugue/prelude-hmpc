@@ -136,3 +136,28 @@ class BaseHandler(webapp2.RequestHandler):
     def delete_cache_competition_photos(self, comp_id):
         key = 'photos_comp_{}'.format(comp_id)
         memcache.delete(key)
+
+    def get_page_user(self, user_id):
+        key = 'page_user_{}'.format(user_id)
+        user_page = memcache.get(key)
+        return user_page, key
+
+    def delete_cache_page_user(self, user_id):
+        key = 'page_user_{}'.format(user_id)
+        memcache.delete(key)
+
+    def get_page_competitions(self, user_id=None):
+        if user_id is None:
+            key = 'page_competitions'
+        else:
+            key = 'page_competitions_user_{}'.format(user_id)
+        competitions_page = memcache.get(key)
+        return competitions_page, key
+
+    def delete_cache_page_competitions(self):
+        # need to delete all the competitions pages that have been cached
+        memcache.delete('page_competitions')
+
+        for user_key in User.all(keys_only=True):
+            key = 'page_competitions_user_{}'.format(user_key.id())
+            memcache.delete(key)

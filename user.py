@@ -18,6 +18,12 @@ class UserPage(BaseHandler):
             self.render('user_no.html', page_title='User')
             return
 
+        page, key = self.get_page_user(user_id)
+        if page:
+            self.write(page)
+            logging.info('UserPage -> write cached page')
+            return
+
         #open_comps = Competition.get_by_status(OPEN)
         comps = self.get_competitions()
         open_comps = [c for c in comps if c.status == OPEN]
@@ -61,7 +67,8 @@ class UserPage(BaseHandler):
             'photos': photos,
             'open_comps': open_comps_no_photos,
         }
-        self.render('user.html', **data)
+        #self.render('user.html', **data)
+        self.render_and_cache(key, 'user.html', **data)
 
     def post(self):
         # submitting a photograph - handled by Upload class
@@ -125,6 +132,8 @@ class Upload(BaseHandler, blobstore_handlers.BlobstoreUploadHandler):
         self.delete_cache_user_photos(user_id)
         # comp photos cache is now stale - delete
         self.delete_cache_competition_photos(comp_id)
+        # user page cache is now stale - delete
+        self.delete_cache_page_user(user_id)
 
         # add UserComp record
         usercomp = UserComp(user=user, comp=comp)
