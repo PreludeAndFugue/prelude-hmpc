@@ -2,6 +2,12 @@ section {
     margin-bottom: 30px;
 }
 
+.img-carousel {
+    background-repeat: no-repeat;
+    background-position: center;
+    height: 500px;
+}
+
 .small-form {
     margin: 0;
 }
