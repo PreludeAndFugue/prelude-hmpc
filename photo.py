@@ -6,7 +6,7 @@ from google.appengine.api import mail
 #from markupsafe import escape
 
 from handler import BaseHandler
-from model import Photo, Comment, User
+from model import Photo, Comment
 
 
 class PhotoView(BaseHandler):
