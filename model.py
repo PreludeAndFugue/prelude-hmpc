@@ -72,6 +72,14 @@ class Competition(db.Model):
         query = cls.gql('WHERE status = :1', status)
         return query.run()
 
+    @classmethod
+    def in_progress(cls):
+        '''Return all competitions that are Open or Scoring.'''
+        query = Competition.all()
+        query.filter('finished = ', False)
+        query.order('-start')
+        return query.run()
+
     def get_status(self):
         '''Return the status of the competition as a meaningful str.'''
         return {0: 'Open', 1: 'Scoring', 2: 'Completed'}[self.status]

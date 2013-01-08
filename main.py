@@ -4,7 +4,8 @@ from random import shuffle
 import webapp2
 
 from handler import BaseHandler
-from model import Photo
+from helper import MONTHS, STATUS
+from model import Photo, Competition
 
 
 class Home(BaseHandler):
@@ -13,7 +14,8 @@ class Home(BaseHandler):
         data = {
             'page_title': 'Monthly Photographs 2013',
             'photos': self.random_images(4),
-            'user': user
+            'user': user,
+            'competitions': self.competitions_in_progress()
         }
         self.render('home.html', **data)
 
@@ -29,5 +31,18 @@ class Home(BaseHandler):
             user = photo.user.username
             photos.append((i, key.id(), photo.url(size=1600), title, user))
         return photos
+
+    def competitions_in_progress(self):
+        competition_data = []
+        for comp in Competition.in_progress():
+            competition_data.append((
+                comp.key().id(),
+                comp.title,
+                comp.description,
+                comp.year,
+                MONTHS[comp.month],
+                STATUS[comp.status]
+            ))
+        return competition_data
 
 app = webapp2.WSGIApplication([('/', Home)], debug=True)

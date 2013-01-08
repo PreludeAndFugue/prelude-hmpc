@@ -5,6 +5,12 @@ OPEN = 0
 SCORING = 1
 COMPLETED = 2
 
+STATUS = {
+    0: 'Open',
+    1: 'Scoring',
+    2: 'Completed'
+}
+
 MONTHS = {
     1: 'January',
     2: 'February',

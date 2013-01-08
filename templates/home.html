@@ -26,4 +26,19 @@
     <a class="carousel-control left" href="#myCarousel" data-slide="prev">&lsaquo;</a>
     <a class="carousel-control right" href="#myCarousel" data-slide="next">&rsaquo;</a>
     </div>
+
+    <div class="row">
+        <div class="span6">
+            <h3>Competitions in progress</h3>
+            {% for id, title, description, year, month, status in competitions %}
+            <h4><a href="competition/{{id}}">{{title}}</a> <small>{{month}} {{year}}</small></h4>
+            <p>Status: {{status}}</p>
+            <p>{{description}}</p>
+            {% endfor %}
+        </div>
+        <div class="span6">
+
+
+        </div>
+    </div>
 {% endblock %}
