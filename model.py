@@ -23,13 +23,15 @@ class User(db.Model):
     def user_from_name(cls, name):
         '''Return the user from the name attribute.'''
         logging.warning('Getting user object from username: %s' % repr(name))
-        query = cls.gql('WHERE username = :1', name)
+        query = cls.all()
+        query.filter('username = ', name)
         return query.get()
 
     @classmethod
     def user_from_email(cls, email):
         '''Return the user from the email attribute.'''
-        query = cls.gql('WHERE email = :1', email)
+        query = cls.all()
+        query.filter('email = ', email)
         return query.get()
 
     def __eq__(self, other):
@@ -56,20 +58,17 @@ class Competition(db.Model):
     @classmethod
     def get_by_title_date(cls, title, month, year):
         '''Return competition based on title, month and year.'''
-        sql = 'WHERE title = :1 AND month = :2 AND year = :3'
-        query = cls.gql(sql, title, month, year)
-        return query.get()
-
-    @classmethod
-    def get_by_date(cls, month, year):
-        '''Return competition based on its month and year.'''
-        query = cls.gql('WHERE month = :1 AND year = :2', month, year)
+        query = cls.all()
+        query.filter('title = ', title)
+        query.filter('month = ', month)
+        query.filter('year = ', year)
         return query.get()
 
     @classmethod
     def get_by_status(cls, status):
         '''Return all competitions based on their status.'''
-        query = cls.gql('WHERE status = :1', status)
+        query = cls.all()
+        query.filter('status = ', status)
         return query.run()
 
     @classmethod
@@ -86,7 +85,8 @@ class Competition(db.Model):
 
     def users(self):
         '''Return a list of users in competition.'''
-        query = UserComp.gql('WHERE comp = :1', self)
+        query = UserComp.all()
+        query.filter('comp = ', self)
         return query.run()
 
     def __eq__(self, other):
@@ -122,7 +122,9 @@ class UserComp(db.Model):
     @classmethod
     def get_usercomp(cls, user, comp):
         '''Return details about a user's participation in a competition.'''
-        query = cls.gql('WHERE user = :1 AND comp = :2', user, comp)
+        query = cls.all()
+        query.filter('user = ', user)
+        query.filter('comp = ', comp)
         return query.get()
 
     @classmethod
@@ -145,14 +147,14 @@ class Photo(db.Model):
     @classmethod
     def user_photos(cls, user, limit=None):
         '''Return all photos of a user.'''
-        sql = 'WHERE user = :user ORDER BY upload_date DESC'
-        query = cls.gql(sql, user=user)
+        query = cls.all()
+        query.filter('user = ', user)
+        query.order('upload_date')
         return query.run(limit=limit)
 
     @classmethod
     def competition_photos(cls, competition):
         '''Return all photos entered into a competition.'''
-        #query = cls.gql('WHERE competition = :c', c=competition)
         query = cls.all()
         query.filter('competition = ', competition)
         query.order('-total_score')
@@ -170,14 +172,16 @@ class Photo(db.Model):
     @classmethod
     def competition_user(cls, competition, user):
         '''Return the photo entered by user into competition.'''
-        sql = 'WHERE competition = :c AND user = :u'
-        query = cls.gql(sql, c=competition, u=user)
+        query = cls.all()
+        query.filter('competition = ', competition)
+        query.filter('user = ', user)
         return query.get()
 
     def scores(self):
         '''Return a collection of all the scores for this photo as Scores
         objects.'''
-        query = Scores.gql('WHERE photo = :photo', photo=self)
+        query = Scores.all()
+        query.filter('photo = ', self)
         return query.run()
 
     def data(self, size=211):
@@ -231,20 +235,24 @@ class Scores(db.Model):
     @classmethod
     def photo_score(cls, photo):
         '''Return the total score for a photo.'''
-        query = cls.gql('WHERE photo = :photo', photo=photo)
+        query = cls.all()
+        query.filter('photo = ', photo)
         return sum(s.score for s in query)
 
     @classmethod
     def scores_from_user(cls, user, comp):
         'Return all scores submitted by a user for a particular competition.'
-        sql = 'WHERE user_from = :1 AND photo.competition = :2'
-        query = cls.gql(sql, user, comp)
+        query = cls.all()
+        query.filter('user_from = ', user)
+        query.filter('photo.competition = ', comp)
         return query.run()
 
     @classmethod
     def score_from_user(cls, photo, user):
         '''Return the score submitted by a user for a particular photo.'''
-        query = cls.gql('WHERE photo = :1 AND user_from = :2', photo, user)
+        query = cls.all()
+        query.filter('photo = ', photo)
+        query.filter('user = ', user)
         return query.get()
 
 

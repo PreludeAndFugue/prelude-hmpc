@@ -4,7 +4,7 @@ from random import shuffle
 import webapp2
 
 from handler import BaseHandler
-from helper import MONTHS, STATUS
+from helper import MONTHS
 from model import Photo, Competition
 
 
@@ -41,7 +41,7 @@ class Home(BaseHandler):
                 comp.description,
                 comp.year,
                 MONTHS[comp.month],
-                STATUS[comp.status]
+                comp.get_status()
             ))
         return competition_data
 
