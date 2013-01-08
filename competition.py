@@ -198,7 +198,7 @@ class CompAdmin(BaseHandler):
             'comps': [(c.key().id(), c) for c in comps],
             'months': MONTHS
         }
-        self.render('comp-admin.html', **data)
+        self.render('competitions-admin.html', **data)
 
 
 class NewComp(BaseHandler):
@@ -214,7 +214,7 @@ class NewComp(BaseHandler):
             'user': user,
             'months': MONTHS
         }
-        self.render('comp-new.html', **data)
+        self.render('competition-new.html', **data)
 
     def post(self):
         '''Create a new competition.'''
@@ -246,7 +246,7 @@ class NewComp(BaseHandler):
                 'user': user,
                 'months': MONTHS
             }
-            self.render('comp-new.html', **data)
+            self.render('competition-new.html', **data)
             return
 
         # no errors so create new competiton
@@ -284,7 +284,7 @@ class CompMod(BaseHandler):
             return
 
         data = self._data(comp, user)
-        self.render('comp-mod.html', **data)
+        self.render('competition-modify.html', **data)
 
     def post(self, comp_id):
         '''Modify a competition.'''
@@ -428,7 +428,7 @@ class CompMod(BaseHandler):
         '''Competition could not be modified - report error to user.'''
         user = self.get_user()
         data = self._data(comp, user, error=error)
-        self.render('comp-mod.html', **data)
+        self.render('competition-modify.html', **data)
 
 
 class CompScores(BaseHandler):
