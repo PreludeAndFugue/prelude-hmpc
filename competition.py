@@ -10,7 +10,7 @@ from model import Competition, Photo, Scores, UserComp, csv_scores
 from helper import OPEN, SCORING, COMPLETED, MONTHS, ordinal
 
 
-class Comps(BaseHandler):
+class Competitions(BaseHandler):
     def get(self):
         '''Show the competitions page.'''
         user_id, user = self.get_user()
@@ -48,7 +48,7 @@ class Comps(BaseHandler):
         self.render_and_cache(key, 'competitions.html', **data)
 
 
-class CompHandler(BaseHandler):
+class CompetitionHandler(BaseHandler):
     def get(self, comp_id=0):
         '''Show the competition page.'''
         user_id, user = self.get_user()
@@ -182,7 +182,7 @@ class CompHandler(BaseHandler):
         # otherwise return None
 
 
-class CompAdmin(BaseHandler):
+class CompetitionAdmin(BaseHandler):
     '''Competition Admin handler.'''
     def get(self):
         '''Show the competition admin page.'''
@@ -201,7 +201,7 @@ class CompAdmin(BaseHandler):
         self.render('competitions-admin.html', **data)
 
 
-class NewComp(BaseHandler):
+class CompetitionNew(BaseHandler):
     '''New competition handler.'''
     def get(self):
         '''Show the new competition page.'''
@@ -268,7 +268,7 @@ class NewComp(BaseHandler):
         self.redirect('/competition/admin')
 
 
-class CompMod(BaseHandler):
+class CompetitionModify(BaseHandler):
     '''Competition modification handler.'''
     def get(self, comp_id):
         'Show the competition modification page for a particular competition.'
@@ -431,7 +431,7 @@ class CompMod(BaseHandler):
         self.render('competition-modify.html', **data)
 
 
-class CompScores(BaseHandler):
+class CompetitionScores(BaseHandler):
     def get(self, comp_id):
         # should check for logged in user cookie
         user_id, user = self.get_user()
@@ -449,11 +449,11 @@ class CompScores(BaseHandler):
         self.write(csv_scores(comp))
 
 routes = [
-    (r'/competitions', Comps),
-    (r'/competition/(\d+)', CompHandler),
-    (r'/competition/admin', CompAdmin),
-    (r'/competition/new', NewComp),
-    (r'/competition/modify/(\d+)', CompMod),
-    (r'/competition/scores/(\d+)/scores_\d+.csv', CompScores)
+    (r'/competitions', Competitions),
+    (r'/competition/(\d+)', CompetitionHandler),
+    (r'/competition/admin', CompetitionAdmin),
+    (r'/competition/new', CompetitionNew),
+    (r'/competition/modify/(\d+)', CompetitionModify),
+    (r'/competition/scores/(\d+)/scores_\d+.csv', CompetitionScores)
 ]
 app = webapp2.WSGIApplication(routes=routes, debug=True)
