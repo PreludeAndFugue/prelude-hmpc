@@ -240,19 +240,11 @@ class Scores(db.Model):
         return sum(s.score for s in query)
 
     @classmethod
-    def scores_from_user(cls, user, comp):
-        'Return all scores submitted by a user for a particular competition.'
-        query = cls.all()
-        query.filter('user_from = ', user)
-        query.filter('photo.competition = ', comp)
-        return query.run()
-
-    @classmethod
     def score_from_user(cls, photo, user):
         '''Return the score submitted by a user for a particular photo.'''
         query = cls.all()
         query.filter('photo = ', photo)
-        query.filter('user = ', user)
+        query.filter('user_from = ', user)
         return query.get()
 
 
