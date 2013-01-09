@@ -359,6 +359,8 @@ class CompetitionModify(BaseHandler):
             self.set_competition(comp)
             # delete cache of all forms of the competitions page
             self.delete_cache_page_competitions()
+            # delete cache of competition photos
+            self.delete_cache_competition_photos(comp_id)
         else:
             self.report_error(comp, error)
 
