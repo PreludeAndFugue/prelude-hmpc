@@ -423,6 +423,7 @@ class CompetitionModify(BaseHandler):
         comp.title = title
         comp.description = description
         comp.status = status
+        comp.finished = True if status == 2 else False
         comp.put()
         self.redirect('/competition/admin')
 
