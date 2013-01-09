@@ -2,6 +2,8 @@ test/photo*
 static/css/bootstrap*
 static/js/bootstrap*
 
+# submlime text project files
+*.sublime*
 
 #################
 ## Eclipse
