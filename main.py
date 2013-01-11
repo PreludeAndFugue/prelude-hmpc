@@ -29,7 +29,7 @@ class Home(BaseHandler):
             if not title:
                 title = 'Untitled'
             user = photo.user.username
-            photos.append((i, key.id(), photo.url(size=1600), title, user))
+            photos.append((i, key.id(), photo.url(size=800), title, user))
         return photos
 
     def competitions_in_progress(self):
