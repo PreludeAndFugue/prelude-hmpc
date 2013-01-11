@@ -362,7 +362,7 @@ class CompetitionModify(BaseHandler):
             # delete cache of competition photos
             self.delete_cache_competition_photos(comp_id)
         else:
-            self.report_error(comp, error)
+            self.report_error(comp, user, error)
 
     def _data(self, comp, user, **kwds):
         '''Create the data dictionary for the renderer.'''
@@ -427,9 +427,8 @@ class CompetitionModify(BaseHandler):
         comp.put()
         self.redirect('/competition/admin')
 
-    def report_error(self, comp, error):
+    def report_error(self, comp, user, error):
         '''Competition could not be modified - report error to user.'''
-        user = self.get_user()
         data = self._data(comp, user, error=error)
         self.render('competition-modify.html', **data)
 
