@@ -43,6 +43,7 @@ class PhotoView(BaseHandler):
         self.render('photo.html', **data)
 
     def post(self, photo_id=0):
+        '''Adding a new comment to a photo.'''
         user_id, user = self.get_user()
         if not user:
             self.redirect('/')
@@ -63,6 +64,9 @@ class PhotoView(BaseHandler):
             text=comment
         )
         new_comment.put()
+
+        # need to clear cache of recent comments
+        self.delete_cache_recent_comments()
 
         # send an email to the photographer, letting them know of the new
         # comment

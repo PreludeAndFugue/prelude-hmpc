@@ -15,7 +15,8 @@ class Home(BaseHandler):
             'page_title': 'Monthly Photographs 2013',
             'photos': self.random_images(4),
             'user': user,
-            'competitions': self.competitions_in_progress()
+            'competitions': self.competitions_in_progress(),
+            'comments': self.recent_comments()
         }
         self.render('home.html', **data)
 
@@ -44,5 +45,16 @@ class Home(BaseHandler):
                 comp.get_status()
             ))
         return competition_data
+
+    def recent_comments(self):
+        comments = []
+        for comment in self.get_recent_comments():
+            comments.append((
+                comment.text,
+                comment.user.username,
+                comment.photo.key().id(),
+                comment.format_date()
+            ))
+        return comments
 
 app = webapp2.WSGIApplication([('/', Home)], debug=True)

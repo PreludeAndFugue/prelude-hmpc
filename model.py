@@ -222,6 +222,12 @@ class Comment(db.Model):
         query.order('-submit_date')
         return query.run()
 
+    @classmethod
+    def recent_comments(cls, limit=5):
+        query = cls.all()
+        query.order('-submit_date')
+        return query.fetch(limit)
+
     def format_date(self):
         '''Format the stored submit date for pretty printing.'''
         return self.submit_date.strftime('%H:%M, %d-%b-%Y')
