@@ -319,6 +319,8 @@ class CompetitionModify(BaseHandler):
                 completed = self.calculate_scores(comp)
                 if completed:
                     successful_update = True
+                    # delete cache of recently completed competitions
+                    self.delete_cache_recent_results()
                 else:
                     # failed to calculate scores
                     error = (

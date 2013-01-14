@@ -37,6 +37,23 @@
             {% endfor %}
 
             <h3>Recent Results</h3>
+            {% for comp, photos in results %}
+                <h4>
+                    {{comp.title}}
+                    <small>
+                        <a href="/competition/{{comp.key().id()}}">Full results</a>
+                    </small>
+                </h4>
+                {% for ordinal, klass, score, user in photos %}
+                <div class="row">
+                    <div class="span1">
+                        <span class="badge {{klass}}">{{ordinal}}</span>
+                        <span class="pull-right">{{score}}</span>
+                    </div>
+                    <div class="span4">{{user}}</div>
+                </div>
+                {% endfor %}
+            {% endfor %}
         </div>
 
         <div class="span6">

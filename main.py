@@ -4,7 +4,7 @@ from random import shuffle
 import webapp2
 
 from handler import BaseHandler
-from helper import MONTHS
+from helper import MONTHS, ordinal
 from model import Photo, Competition
 
 
@@ -16,7 +16,8 @@ class Home(BaseHandler):
             'photos': self.random_images(4),
             'user': user,
             'competitions': self.competitions_in_progress(),
-            'comments': self.recent_comments()
+            'comments': self.recent_comments(),
+            'results': self.recent_results()
         }
         self.render('home.html', **data)
 
@@ -56,5 +57,21 @@ class Home(BaseHandler):
                 comment.format_date()
             ))
         return comments
+
+    def recent_results(self):
+        results = []
+        for comp, photos in self.get_recent_results():
+            new_photos = []
+            classes = ('badge-first', 'badge-second', 'badge-third')
+            for klass, photo in zip(classes, photos):
+                new_photos.append((
+                    ordinal(photo.position),
+                    klass,
+                    photo.total_score,
+                    photo.user.username
+                ))
+            results.append((comp, new_photos))
+        return results
+
 
 app = webapp2.WSGIApplication([('/', Home)], debug=True)

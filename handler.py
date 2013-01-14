@@ -5,7 +5,13 @@ import webapp2
 from webapp2_extras.securecookie import SecureCookieSerializer
 from google.appengine.api import memcache
 
-from model import User, Competition, Photo, Comment
+from model import (
+    User,
+    Competition,
+    Photo,
+    Comment,
+    recently_completed_competitions
+)
 
 template_dir = os.path.join(os.path.dirname(__file__), 'templates')
 env = jinja2.Environment(loader=jinja2.FileSystemLoader(template_dir),
@@ -176,3 +182,18 @@ class BaseHandler(webapp2.RequestHandler):
         key = 'comments_recent'
         memcache.delete(key)
         logging.info('memcache delete recent comments')
+
+    def get_recent_results(self):
+        key = 'results_recent'
+        results = memcache.get(key)
+        logging.info('memcache get_recent_results')
+        if not results:
+            results = recently_completed_competitions()
+            memcache.set(key, results)
+            logging.info('memcache get_recent_results db access')
+        return results
+
+    def delete_cache_recent_results(self):
+        key = 'results_recent'
+        memcache.delete(key)
+        logging.info('memcache delete recent results')

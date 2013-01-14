@@ -283,3 +283,15 @@ def csv_scores(comp):
         data.writerow(row)
 
     return buf.getvalue()
+
+
+def recently_completed_competitions():
+    results = []
+    comps = Competition.all()
+    comps.filter('finished = ', True)
+    comps.order('-start')
+    for comp in comps.fetch(2):
+        # only the top three results
+        photos = list(Photo.competition_photos(comp))[:3]
+        results.append((comp, photos))
+    return results
