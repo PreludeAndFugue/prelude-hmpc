@@ -144,6 +144,7 @@ class BaseHandler(webapp2.RequestHandler):
         memcache.delete(key)
 
     def get_page_user(self, user_id):
+        '''Cache a user's page.'''
         key = 'page_user_{}'.format(user_id)
         user_page = memcache.get(key)
         return user_page, key
@@ -153,6 +154,7 @@ class BaseHandler(webapp2.RequestHandler):
         memcache.delete(key)
 
     def get_page_competitions(self, user_id=None):
+        '''Cache the main competitions page.'''
         if user_id is None:
             key = 'page_competitions'
         else:
