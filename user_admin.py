@@ -300,6 +300,10 @@ class VerifyUser(BaseUser):
             'page_title': 'User Verification'
         }
 
+        if '/' not in verify_code_hash:
+            self.render('verify_fail.html', **data)
+            return
+
         username, verify_code = verify_code_hash.split('/')
         test_user = User.user_from_name(username)
 
