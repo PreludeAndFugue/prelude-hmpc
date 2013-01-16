@@ -1,31 +1,29 @@
 {% extends "base.html" %}
-{% block title %}Login{% endblock %}
-{% block nav_login %}active{% endblock %}
+{% block title %}Reset Password{% endblock %}
 {% block content %}
     <div class="row">
-        <div class="span4">
+        <div class="span6">
+            <p>
+                Enter your email address and press the Request button. You will
+                be sent an email which will contain a link to a page where you
+                can change your password.
+            </p>
             <form method="post">
-
                 <label for="email">Email Address</label>
                 <input type="text" name="email" id="email"
                     value="{{email}}" class="span4" />
 
-                <label for="password">Password</label>
-                <input type="password" name="password" id="password" class="span4" />
-
                 <br />
 
-                <button type="submit" class="btn btn-primary">Login</button>
-                <a class="btn pull-right" href="/reset">
-                    Forgotten password
-                </a>
+                <button type="submit" class="btn btn-primary">Make Request</button>
+
             </form>
         </div>
 
         {% if errors %}
         <div class="span5">
             <div class="alert alert-error">
-                There were some errors with your login:
+                There were some errors with your request:
                 <ul>
                     {% for error in errors %}
                     <li>{{error}}</li>
@@ -34,6 +32,18 @@
                 {% if contact %}
                     <a href="/contact" class="btn">Contact admin</a>
                 {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if messages %}
+        <div class="span5">
+            <div class="alert alert-info">
+                <ul>
+                    {% for msg in messages %}
+                    <li>{{msg}}</li>
+                    {% endfor %}
+                </ul>
             </div>
         </div>
         {% endif %}

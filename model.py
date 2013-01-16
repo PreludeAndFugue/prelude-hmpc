@@ -18,6 +18,8 @@ class User(db.Model):
     verified = db.BooleanProperty(default=False)
     verify_code = db.StringProperty()
     admin = db.BooleanProperty(default=False)
+    pass_reset_code = db.StringProperty()
+    pass_reset_expire = db.DateTimeProperty()
 
     @classmethod
     def user_from_name(cls, name):
@@ -32,6 +34,12 @@ class User(db.Model):
         '''Return the user from the email attribute.'''
         query = cls.all()
         query.filter('email = ', email)
+        return query.get()
+
+    @classmethod
+    def user_from_reset_code(cls, reset_code):
+        query = cls.all()
+        query.filter('pass_reset_code = ', reset_code)
         return query.get()
 
     def __eq__(self, other):
