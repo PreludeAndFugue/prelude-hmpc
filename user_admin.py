@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import datetime
 from google.appengine.api import mail
 import logging
 import re
@@ -39,63 +40,6 @@ class BaseUser(BaseHandler):
         self.response.set_cookie('userid', value)
 
 
-class Login(BaseUser):
-    def get(self):
-        self.render('login.html', page_title="Login")
-
-    def post(self):
-        email = self.request.get('email', '')
-        password = self.request.get('password', '')
-
-        # collect the errors
-        errors = []
-
-        # data for the page if it has to be re-rendered because of invalid login
-        data = {
-            'errors': errors,
-            'email': email,
-            'page_title': 'Login'
-        }
-
-        # catch errors in the form
-        if not email:
-            errors.append('You forgot to enter an email address.')
-        if not password:
-            errors.append('You forgot to enter a password.')
-        if errors:
-            self.render('login.html', **data)
-            return
-
-        logging.warning('This is the email address: %s' % repr(email))
-
-        user = User.user_from_email(email)
-
-        # invalid email address or password
-        if not user or not self.validate_user(user, password):
-            errors.append('Invalid email address or password.')
-            self.render('login.html', **data)
-
-            log_msg = 'Login: invalid email address or password. %s'
-            logging.warning(log_msg, user)
-
-            return
-
-        # unverified user
-        if not user.verified:
-            errors.append('Your account has not yet been verified. '
-                'You should have received an email with a verification link. '
-                'Please check your mail (and your spam folder). If you have '
-                'not received the email, please contact admin.')
-            data['contact'] = True
-            self.render('login.html', **data)
-            logging.warning('Login: unverified user attempted login. %s', user)
-            return
-
-        # user exists - set cookie and redirect
-        self.set_cookie(user)
-        self.redirect('/user')
-
-
 class Logout(BaseHandler):
     def get(self):
         self.response.delete_cookie('userid')
@@ -107,6 +51,7 @@ class Login(BaseUser):
         self.render('login.html', page_title="Login")
 
     def post(self):
+        '''When the user clicks the submit button.'''
         email = self.request.get('email', '')
         password = self.request.get('password', '')
 
@@ -318,6 +263,135 @@ class VerifyUser(BaseUser):
             self.render('verify_fail.html', **data)
 
 
+class Reset(BaseHandler):
+    def get(self):
+        data = {
+            'page_title': 'Reset Password'
+        }
+
+        self.render('reset.html', **data)
+
+    def post(self):
+        email = self.request.get('email')
+        logging.info('Reset password for email: %s', email)
+
+        errors = []
+        messages = []
+        data = {
+            'page_title': 'Reset Password',
+            'errors': errors,
+            'messages': messages
+        }
+
+        if not email:
+            errors.append(
+                'You forgot to enter an email address.'
+            )
+        else:
+            user = User.user_from_email(email)
+            if not user:
+                errors.append(
+                    'There is no account for this email address. Please check '
+                    'that you typed in the correct email address.'
+                )
+                data['email'] = email
+            else:
+                expire = datetime.datetime.now()
+                expire += datetime.timedelta(hours=1)
+                code = generate_random_string(length=30)
+                user.pass_reset_code = code
+                user.pass_reset_expire = expire
+                user.put()
+
+                subject = 'HMPC: request to change password'
+                logging.info('generated verify code: %s' % code)
+                body = (
+                    'This is an automated email form HMPC.\n\n'
+                    'Please click the following link (or paste it into the '
+                    'browser address bar) to change your password. This code '
+                    'is valid for only one hour.\n\n'
+                    'When you reset your password, you will be redirected to '
+                    'the login page to login.\n\n'
+                    'http://prelude-hmpc.appspot.com/password/%s\n'
+                )
+                mail.send_mail(
+                    'gdrummondk@gmail.com',
+                    email,
+                    subject,
+                    body % code
+                )
+
+                msg = (
+                    'An email has been sent to the following email address: %s.'
+                    ' Follow the instructions in the email to change your '
+                    'password.'
+                )
+                messages.append(msg % email)
+
+        self.render('reset.html', **data)
+
+
+class Password(BaseHandler):
+    def get(self, code):
+        errors = []
+        data = {
+            'page_title': 'Reset Password',
+            'errors': errors,
+        }
+        logging.info('code: %s', code)
+        user = User.user_from_reset_code(code)
+        if not user:
+            errors.append(
+                'This is not a valid password reset code. You can request '
+                'another password reset code or contact admin for help.'
+            )
+        else:
+            expired = user.pass_reset_expire < datetime.datetime.now()
+            if expired:
+                errors.append(
+                    'The password reset code has expired - you submitted this '
+                    'request more than an hour ago. Please make another '
+                    'request to change your password.'
+                )
+
+        if errors:
+            data['hide_form'] = True
+
+        self.render('password.html', **data)
+
+    def post(self, code):
+        errors = []
+        data = {
+            'page_title': 'Reset Password',
+            'errors': errors,
+        }
+
+        password = self.request.get('password')
+        password_verify = self.request.get('password-verify')
+        if not password or password != password_verify:
+            errors.append(
+                "Missing password or both passwords didn't match. Please try "
+                "again."
+            )
+        else:
+            user = User.user_from_reset_code(code)
+            if not user:
+                errors.append(
+                    'No account for this reset code! Please contact admin.'
+                )
+            else:
+                hash_pass = generate_password_hash(password)
+                user.password = hash_pass
+                user.pass_reset_code = None
+                user.pass_reset_expire = None
+                user.put()
+                self.redirect('/login')
+                return
+
+        # reach here when there is an error to report
+        self.render('password.html', **data)
+
+
 class Contact(BaseHandler):
     def get(self):
         self.display()
@@ -359,6 +433,8 @@ routes = [
     ('/logout', Logout),
     ('/register', Register),
     ('/contact', Contact),
-    ('/verify/(.+)', VerifyUser)
+    ('/verify/(.+)', VerifyUser),
+    ('/reset', Reset),
+    ('/password/(.+)', Password)
 ]
 app = webapp2.WSGIApplication(routes=routes, debug=True)

@@ -38,11 +38,19 @@ handlers:
   script: user_admin.app
   secure: always
 
+- url: /password/.+
+  script: user_admin.app
+  secure: always
+
 - url: /logout
   script: user_admin.app
   secure: never
 
 - url: /verify/.+
+  script: user_admin.app
+  secure: never
+
+- url: /reset
   script: user_admin.app
   secure: never
 
