@@ -22,11 +22,13 @@ class UserPage(BaseHandler):
         if page:
             self.write(page)
             logging.info('UserPage -> write cached page')
+            logging.info(key)
             return
 
         #open_comps = Competition.get_by_status(OPEN)
         comps = self.get_competitions()
         open_comps = [c for c in comps if c.status == OPEN]
+        #logging.info(open_comps)
         open_comps_no_photos = []
         for oc in open_comps:
             usercomp = UserComp.get_usercomp(user, oc)
@@ -38,7 +40,7 @@ class UserPage(BaseHandler):
             upload_url = blobstore.create_upload_url('/upload')
 
         #logging.info(open_comps)
-        logging.info(open_comps_no_photos)
+        #logging.info(open_comps_no_photos)
 
         photos = []
         #for p in Photo.user_photos(user):
@@ -67,8 +69,10 @@ class UserPage(BaseHandler):
             'photos': photos,
             'open_comps': open_comps_no_photos,
         }
-        #self.render('user.html', **data)
-        self.render_and_cache(key, 'user.html', **data)
+        self.render('user.html', **data)
+        # when a new competition is added need to find a way to clear the 
+        # cache of user pages since they will all be out of date
+        #self.render_and_cache(key, 'user.html', **data)
 
     def post(self):
         # submitting a photograph - handled by Upload class
