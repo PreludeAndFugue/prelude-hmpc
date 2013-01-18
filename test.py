@@ -29,10 +29,10 @@ class Test(BaseHandler):
         delete = self.request.get('delete')
 
         if not delete:
-            users = self._create_users()
+            user = self._create_users()
             comps = self._create_competition()
-            photos = self._upload_photos(users, comps)
-            self._create_scores(users, comps, photos)
+            photos = self._upload_photos(user, comps)
+            self._create_scores(user, comps, photos)
         else:
             self._delete_all()
         self.redirect('/')
@@ -68,6 +68,7 @@ class Test(BaseHandler):
             end=date(2012, 5, 31),
         )
         comp1.status = 2
+        comp1.finished = True
         comp1.put()
         comp2 = Competition(
             title='June photographs',
@@ -99,14 +100,14 @@ class Test(BaseHandler):
             blob_key = files.blobstore.get_blob_key(file_name)
 
             photo = Photo(
-                user=user,
-                competition=comp,
+                user_key=user.key,
+                comp_key=comp.key,
                 blob=blob_key,
                 title=title
             )
             photo.put()
             p.append(photo)
-            user_comp = UserComp(user=user, comp=comp)
+            user_comp = UserComp(user_key=user.key, comp_key=comp.key)
             if comp == comp1:
                 user_comp.submitted_scores = True
             user_comp.put()
@@ -117,9 +118,13 @@ class Test(BaseHandler):
         comp = comps[0]
         scores = []
         for photo, user in product(photos, users):
-            if photo.competition != comp or photo.user == user:
+            if photo.comp_key.get() != comp or photo.user_key.get() == user:
                 continue
-            score = Scores(photo=photo, user_from=user, score=randint(1, 10))
+            score = Scores(
+                photo_key=photo.key,
+                user_from_key=user.key,
+                score=randint(1, 10)
+            )
             score.put()
             scores.append(score)
 
@@ -144,13 +149,13 @@ class Test(BaseHandler):
 
     def _delete_all(self):
         for base in (Competition, UserComp, Scores, Comment):
-            for item in base.all():
-                item.delete()
-        for photo in Photo.all():
-            delete_blob(photo.blob.key())
-            photo.delete()
+            for item in base.query():
+                item.key.delete()
+        for photo in Photo.query():
+            delete_blob(photo.blob)
+            photo.key.delete()
         for user in User.gql('WHERE username != :1', 'test'):
-            user.delete()
+            user.key.delete()
 
 
 app = webapp2.WSGIApplication([('/_admin', Test)], debug=True)

@@ -13,11 +13,11 @@
             <small>No comments until the competition is finished.</small>
             {% endif %}
         </h3>
-        {% for c in comments %}
+        {% for text, username, date in comments %}
         <div class="row">
             <blockquote class="span9">
-                <p><pre>{{c.text|e}}</pre></p>
-                <small>{{c.user.username}}, {{c.format_date()}}</small>
+                <p><pre>{{text|e}}</pre></p>
+                <small>{{username}}, {{date}}</small>
             </blockquote>
         </div>
         {% endfor %}
