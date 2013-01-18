@@ -4,13 +4,7 @@ import logging
 import webapp2
 from webapp2_extras.securecookie import SecureCookieSerializer
 
-from model import (
-    User,
-    Competition,
-    Photo,
-    Comment,
-    recently_completed_competitions
-)
+from model import User
 
 template_dir = os.path.join(os.path.dirname(__file__), 'templates')
 env = jinja2.Environment(loader=jinja2.FileSystemLoader(template_dir),

@@ -113,27 +113,19 @@ class Upload(BaseHandler, blobstore_handlers.BlobstoreUploadHandler):
 
         photo_title = self.request.get('photo-title')
         comp_id = int(self.request.get('comp-id'))
-        comp = self.get_competition(comp_id)
-        #comp = Competition.get_by_id(comp_id)
+        comp = Competition.get_by_id(comp_id)
 
         # add photo details to database
         photo = Photo(
-            user=user,
+            user_key=user.key,
             title=photo_title,
-            blob=blob_info,
-            competition=comp
+            blob=blob_info.key(),
+            comp_key=comp.key
         )
         photo.put()
 
-        # users photos cache is now stale - delete
-        self.delete_cache_user_photos(user_id)
-        # comp photos cache is now stale - delete
-        self.delete_cache_competition_photos(comp_id)
-        # user page cache is now stale - delete
-        self.delete_cache_page_user(user_id)
-
         # add UserComp record
-        usercomp = UserComp(user=user, comp=comp)
+        usercomp = UserComp(user_key=user.key, comp_key=comp.key)
         usercomp.put()
 
         self.redirect('/user')
