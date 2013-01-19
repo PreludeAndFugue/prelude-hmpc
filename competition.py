@@ -68,7 +68,6 @@ class CompetitionHandler(BaseHandler):
             self.view_open(user, comp_id, comp, data)
         elif comp.status == SCORING:
             user_comp = self.get_usercomp(user, comp)
-            logging.info('user: %s, user_comp: %s', user, user_comp)
             if not user or not user_comp:
                 self.view_open(user, comp_id, comp, data)
             else:
@@ -428,7 +427,7 @@ class CompetitionScores(BaseHandler):
         self.response.content_type = 'text/csv'
 
         comp_id = int(comp_id)
-        comp = self.get_competition(comp_id)
+        comp = Competition.get_by_id(comp_id)
 
         logging.info(comp)
 

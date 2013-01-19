@@ -181,7 +181,7 @@ class Photo(ndb.Model):
             cls.comp_key == competition.key,
             cls.user_key == user.key
         )
-        return query
+        return query.get()
 
     def scores(self):
         '''Return a collection of all the scores for this photo as Scores
@@ -275,19 +275,19 @@ def user_scores(user):
 def csv_scores(comp):
     '''Create a csv file for all the scores for a competition.'''
     photos = list(Photo.competition_photos(comp))
-    photos.sort(key=lambda p: p.user.username)
+    photos.sort(key=lambda p: p.user_key.get().username)
 
     buf = StringIO.StringIO()
-    fieldnames = ['Recipient'] + [p.user.username for p in photos]
+    fieldnames = ['Recipient'] + [p.user_key.get().username for p in photos]
     data = csv.DictWriter(buf, fieldnames=fieldnames)
 
     data.writerow(dict((n, n) for n in fieldnames))
 
     for photo in photos:
         row = {}
-        row['Recipient'] = photo.user.username
+        row['Recipient'] = photo.user_key.get().username
         for score in photo.scores():
-            row[score.user_from.username] = score.score
+            row[score.user_from_key.get().username] = score.score
         data.writerow(row)
 
     return buf.getvalue()
