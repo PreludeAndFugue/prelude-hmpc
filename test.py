@@ -12,6 +12,8 @@ from random import randint
 import webapp2
 from webapp2_extras.security import generate_password_hash
 
+import logging
+
 from handler import BaseHandler
 from model import Competition, User, Photo, UserComp, Scores, Comment
 
@@ -66,6 +68,7 @@ class Test(BaseHandler):
             month=5,
             start=date(2012, 5, 1),
             end=date(2012, 5, 31),
+            finished=True
         )
         comp1.status = 2
         comp1.finished = True
@@ -77,6 +80,7 @@ class Test(BaseHandler):
             month=6,
             start=date(2012, 6, 1),
             end=date(2012, 6, 30),
+            finished=False
         )
         comp2.status = 1
         comp2.put()

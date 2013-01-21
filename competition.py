@@ -68,10 +68,7 @@ class CompetitionHandler(BaseHandler):
             self.view_open(user, comp_id, comp, data)
         elif comp.status == SCORING:
             user_comp = self.get_usercomp(user, comp)
-            if not user or not user_comp:
-                self.view_open(user, comp_id, comp, data)
-            else:
-                self.view_scoring(user, comp_id, comp, user_comp, data)
+            self.view_scoring(user, comp_id, comp, user_comp, data)
         else:  # completed
             self.view_complete(user, comp_id, comp, data)
 
@@ -107,36 +104,37 @@ class CompetitionHandler(BaseHandler):
 
     def view_open(self, user, comp_id, comp, data):
         '''Create the competition page when its status is Open.'''
-        photos = []
-        for p in Photo.competition_photos(comp):
-        #for p in self.get_competition_photos(comp_id, comp=comp):
-            title, url, thumb, _, _, _, _ = p.data(128)
-            photos.append((p, title, url, thumb))
+        #for p in Photo.competition_photos(comp):
+        photo_count = len(list(Photo.competition_photos(comp)))
 
         data.update({
-            'photos': photos
+            'photo_count': photo_count
         })
         self.render('competition-open.html', **data)
 
     def view_scoring(self, user, comp_id, comp, user_comp, data):
         '''Create the competition page when its status is Scoring.'''
+        competitor = bool(user) and bool(user_comp)
         to_score = user_comp and not user_comp.submitted_scores
-
-        logging.info('to_score: %s' % to_score)
 
         photos = []
         for p in Photo.competition_photos(comp):
         #for p in self.get_competition_photos(comp_id, comp=comp):
             title, url, thumb, _, _, _, _ = p.data(128)
-            user_photo = p.user.get() == user
-            if not to_score:
-                s = Scores.score_from_user(p, user)
-                score = s.score if s else None
+            if user:
+                user_photo = p.user.get() == user
+                if not to_score:
+                    s = Scores.score_from_user(p, user)
+                    score = s.score if s else None
+                else:
+                    score = None
             else:
+                user_photo = False
                 score = None
             photos.append((p, title, url, thumb, score, user_photo))
 
         data.update({
+            'competitor': competitor,
             'photos': photos,
             'to_score': to_score
         })

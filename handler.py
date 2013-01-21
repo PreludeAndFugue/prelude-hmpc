@@ -44,7 +44,7 @@ class BaseHandler(webapp2.RequestHandler):
         logging.info('get_user -> {}, {}'.format(user_id, username))
         if not user_id:
             # no logged in user cookie
-            return None, ''
+            return None, None
 
         user = User.get_by_id(user_id)
         return user_id, user

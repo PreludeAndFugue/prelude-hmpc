@@ -215,7 +215,7 @@ class Register(BaseUser):
             if user:
                 # email address is attached to other user
                 errors.append(
-                    'This email address is being used by another user'
+                    'This email address is used by another user.'
                 )
                 msg = 'Register: email address already in use: %s'
                 logging.warning(msg, email)

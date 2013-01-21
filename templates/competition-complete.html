@@ -9,8 +9,9 @@
     <h4>
         {{comp.title}}
     </h4>
-    <p>{{description}}</p>
-    <br />
+    {% if description %}
+        <p><span class="label">{{description}}</span></p>
+    {% endif %}
 
     <ul class="thumbnails">
     {% for photo, title, username, url, thumb, position, total_score, id in photos %}

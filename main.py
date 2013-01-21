@@ -26,14 +26,27 @@ class Home(BaseHandler):
         photo_keys = list(Photo.query().fetch(keys_only=True))
         shuffle(photo_keys)
         photos = []
-        for i, key in enumerate(photo_keys[:number]):
-            #photo = Photo.get(key)
+        i = 0
+        for key in photo_keys:
             photo = key.get()
+            if photo.total_score == 0:
+                # only view photos belonging to completed competition -
+                # assuming all photos in completed competitions have non-zero
+                # score
+                # TODO: better way to implement this
+                logging.info("random images: image can't be used")
+                continue
             title = photo.title
             if not title:
                 title = 'Untitled'
             user = photo.user.get().username
             photos.append((i, key.id(), photo.url(size=800), title, user))
+            i += 1
+            if len(photos) == number:
+                # Once we have the required number of photos, we can quit the
+                # loop
+                break
+        logging.info('random photos: %s', photos)
         return photos
 
     def competitions_in_progress(self):

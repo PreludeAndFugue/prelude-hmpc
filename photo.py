@@ -6,6 +6,7 @@ from google.appengine.api import mail
 #from markupsafe import escape
 
 from handler import BaseHandler
+from helper import OPEN
 from model import Photo, Comment
 
 
@@ -26,13 +27,30 @@ class PhotoView(BaseHandler):
             self.render('error.html', **data)
             return
 
+        open_comp = photo.competition.get().status == OPEN
+
+        if open_comp:
+            msg = (
+                'You cannot view pictures in competitions which are still '
+                'open to submissions.'
+            )
+            data = {
+                'page_title': 'Cannot view picture',
+                'user': user,
+                'error_msg': msg
+            }
+            self.render('error.html', **data)
+            return
+
+        #logging.info(dir(Comment.photo_comments(photo)))
+
         data = {
             'page_title': 'Photo',
             'page_subtitle': photo.title,
             'user': user,
             'userid': user_id,
             'photoid': photo_id,
-            'comp_closed': photo.position is not None,
+            'comp_closed': photo.position != 0,
             'url': photo.url(),
             'title': photo.title,
             'comments': Comment.photo_comments(photo)
