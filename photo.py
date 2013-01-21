@@ -18,7 +18,6 @@ class PhotoView(BaseHandler):
         photo_id = int(photo_id)
         #photo = Photo.get_by_id(photo_id)
         photo = self.get_photo(photo_id)
-        open_comp = photo.competition.status == OPEN
 
         if not photo:
             data = {
@@ -28,6 +27,8 @@ class PhotoView(BaseHandler):
             }
             self.render('error.html', **data)
             return
+
+        open_comp = photo.competition.status == OPEN
 
         if open_comp:
             msg = (
