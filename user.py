@@ -117,15 +117,15 @@ class Upload(BaseHandler, blobstore_handlers.BlobstoreUploadHandler):
 
         # add photo details to database
         photo = Photo(
-            user_key=user.key,
+            user=user.key,
             title=photo_title,
             blob=blob_info.key(),
-            comp_key=comp.key
+            competition=comp.key
         )
         photo.put()
 
         # add UserComp record
-        usercomp = UserComp(user_key=user.key, comp_key=comp.key)
+        usercomp = UserComp(user=user.key, comp=comp.key)
         usercomp.put()
 
         self.redirect('/user')

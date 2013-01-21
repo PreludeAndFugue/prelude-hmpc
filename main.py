@@ -32,7 +32,7 @@ class Home(BaseHandler):
             title = photo.title
             if not title:
                 title = 'Untitled'
-            user = photo.user_key.get().username
+            user = photo.user.get().username
             photos.append((i, key.id(), photo.url(size=800), title, user))
         return photos
 
@@ -54,8 +54,8 @@ class Home(BaseHandler):
         for comment in Comment.recent_comments():
             comments.append((
                 comment.text,
-                comment.user_key.get().username,
-                comment.photo_key.id(),
+                comment.user.get().username,
+                comment.photo.id(),
                 comment.format_date()
             ))
         return comments
@@ -70,7 +70,7 @@ class Home(BaseHandler):
                     ordinal(photo.position),
                     klass,
                     photo.total_score,
-                    photo.user_key.get().username
+                    photo.user.get().username
                 ))
             results.append((comp, new_photos))
         return results

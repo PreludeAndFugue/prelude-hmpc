@@ -56,15 +56,15 @@ class PhotoView(BaseHandler):
 
         photo = Photo.get_by_id(photo_id)
         new_comment = Comment(
-            photo_key=photo.key,
-            user_key=user.key,
+            photo=photo.key,
+            user=user.key,
             text=comment
         )
         new_comment.put()
 
         # send an email to the photographer, letting them know of the new
         # comment
-        photo_user = photo.user_key.get()
+        photo_user = photo.user.get()
         to = '{} <{}>'.format(photo_user.username, photo_user.email)
         subject = 'HMPC: New photograph comment'
         body = (

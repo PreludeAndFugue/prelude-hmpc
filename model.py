@@ -96,7 +96,7 @@ class Competition(ndb.Model):
 
     def users(self):
         '''Return a list of users in competition.'''
-        query = UserComp.query(UserComp.comp_key == self.key)
+        query = UserComp.query(UserComp.comp == self.key)
         return query
 
     def __eq__(self, other):
@@ -126,26 +126,26 @@ class UserComp(ndb.Model):
     class. This class is used to tell if a user can submit scores to a
     competition - only when they have submitted photo to competition. And if
     they have submitted scores during the scoring phase of the competition.'''
-    user_key = ndb.KeyProperty(kind=User, required=True)
-    comp_key = ndb.KeyProperty(kind=Competition, required=True)
+    user = ndb.KeyProperty(kind=User, required=True)
+    comp = ndb.KeyProperty(kind=Competition, required=True)
     submitted_scores = ndb.BooleanProperty(default=False)
 
     @classmethod
     def get_usercomp(cls, user, comp):
         '''Return details about a user's participation in a competition.'''
-        query = cls.query(cls.user_key == user.key, cls.comp_key == comp.key)
+        query = cls.query(cls.user == user.key, cls.comp == comp.key)
         return query.get()
 
     @classmethod
     def all_scores_submitted(cls, comp):
         '''Have all scores been submitted for a competition.'''
-        query = cls.query(cls.comp_key == comp.key)
+        query = cls.query(cls.comp == comp.key)
         return all(r.submitted_scores for r in query)
 
 
 class Photo(ndb.Model):
-    user_key = ndb.KeyProperty(kind=User, required=True)
-    comp_key = ndb.KeyProperty(kind=Competition)  # required=True)
+    user = ndb.KeyProperty(kind=User, required=True)
+    competition = ndb.KeyProperty(kind=Competition)  # required=True)
     title = ndb.StringProperty()
     blob = ndb.BlobKeyProperty(required=True)
     upload_date = ndb.DateTimeProperty(auto_now_add=True)
@@ -155,14 +155,14 @@ class Photo(ndb.Model):
     @classmethod
     def user_photos(cls, user, limit=None):
         '''Return all photos of a user.'''
-        query = cls.query(cls.user_key == user.key)
+        query = cls.query(cls.user == user.key)
         query = query.order(cls.upload_date)
         return query.fetch(limit=limit)
 
     @classmethod
     def competition_photos(cls, competition):
         '''Return all photos entered into a competition.'''
-        query = cls.query(cls.comp_key == competition.key)
+        query = cls.query(cls.competition == competition.key)
         query = query.order(-cls.total_score)
         return query
 
@@ -170,7 +170,7 @@ class Photo(ndb.Model):
     def competition_result(cls, competition):
         '''Return all photos entered in a competition and order by total score
         descending.'''
-        query = cls.query(cls.comp_key == competition.key)
+        query = cls.query(cls.competition == competition.key)
         query = query.order(-cls.total_score)
         return query
 
@@ -178,15 +178,15 @@ class Photo(ndb.Model):
     def competition_user(cls, competition, user):
         '''Return the photo entered by user into competition.'''
         query = cls.query(
-            cls.comp_key == competition.key,
-            cls.user_key == user.key
+            cls.competition == competition.key,
+            cls.user == user.key
         )
         return query.get()
 
     def scores(self):
         '''Return a collection of all the scores for this photo as Scores
         objects.'''
-        query = Scores.query(Scores.photo_key == self.key)
+        query = Scores.query(Scores.photo == self.key)
         return query
 
     def data(self, size=211):
@@ -197,7 +197,7 @@ class Photo(ndb.Model):
         date = self.upload_date.strftime('%d %B, %Y')
         position = self.position if self.position is not None else ''
         score = self.total_score if position != '' else ''
-        comp_title = self.comp_key.get().title
+        comp_title = self.competition.get().title
         return title, url, thumb, date, position, score, comp_title
 
     def thumb(self, size=211):
@@ -208,25 +208,25 @@ class Photo(ndb.Model):
 
 
 class Comment(ndb.Model):
-    photo_key = ndb.KeyProperty(kind=Photo, required=True)
-    user_key = ndb.KeyProperty(kind=User, required=True)
+    photo = ndb.KeyProperty(kind=Photo, required=True)
+    user = ndb.KeyProperty(kind=User, required=True)
     submit_date = ndb.DateTimeProperty(auto_now_add=True)
     text = ndb.TextProperty()
 
     @classmethod
     def photo_comments(cls, photo):
-        query = cls.query(cls.photo_key == photo.key)
+        query = cls.query(cls.photo == photo.key)
         query = query.order(cls.submit_date)
         for comment in query:
             yield (
                 comment.text,
-                comment.user_key.get().username,
+                comment.user.get().username,
                 comment.format_date()
             )
 
     @classmethod
     def user_comments(cls, user):
-        query = cls.query(cls.user_key == user.key)
+        query = cls.query(cls.user == user.key)
         query = query.order(-cls.submit_date)
         return query
 
@@ -242,22 +242,22 @@ class Comment(ndb.Model):
 
 
 class Scores(ndb.Model):
-    photo_key = ndb.KeyProperty(kind=Photo, required=True)
-    user_from_key = ndb.KeyProperty(kind=User, required=True)
+    photo = ndb.KeyProperty(kind=Photo, required=True)
+    user_from = ndb.KeyProperty(kind=User, required=True)
     score = ndb.IntegerProperty(required=True)
 
     @classmethod
     def photo_score(cls, photo):
         '''Return the total score for a photo.'''
-        query = cls.query(cls.photo_key == photo.key)
+        query = cls.query(cls.photo == photo.key)
         return sum(s.score for s in query)
 
     @classmethod
     def score_from_user(cls, photo, user):
         '''Return the score submitted by a user for a particular photo.'''
         query = cls.query(
-            cls.photo_key == photo.key,
-            cls.user_from_key == user.key
+            cls.photo == photo.key,
+            cls.user_from == user.key
         )
         return query.get()
 
@@ -275,19 +275,19 @@ def user_scores(user):
 def csv_scores(comp):
     '''Create a csv file for all the scores for a competition.'''
     photos = list(Photo.competition_photos(comp))
-    photos.sort(key=lambda p: p.user_key.get().username)
+    photos.sort(key=lambda p: p.user.get().username)
 
     buf = StringIO.StringIO()
-    fieldnames = ['Recipient'] + [p.user_key.get().username for p in photos]
+    fieldnames = ['Recipient'] + [p.user.get().username for p in photos]
     data = csv.DictWriter(buf, fieldnames=fieldnames)
 
     data.writerow(dict((n, n) for n in fieldnames))
 
     for photo in photos:
         row = {}
-        row['Recipient'] = photo.user_key.get().username
+        row['Recipient'] = photo.user.get().username
         for score in photo.scores():
-            row[score.user_from_key.get().username] = score.score
+            row[score.user_from.get().username] = score.score
         data.writerow(row)
 
     return buf.getvalue()

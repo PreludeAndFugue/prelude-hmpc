@@ -100,14 +100,14 @@ class Test(BaseHandler):
             blob_key = files.blobstore.get_blob_key(file_name)
 
             photo = Photo(
-                user_key=user.key,
-                comp_key=comp.key,
+                user=user.key,
+                comp=comp.key,
                 blob=blob_key,
                 title=title
             )
             photo.put()
             p.append(photo)
-            user_comp = UserComp(user_key=user.key, comp_key=comp.key)
+            user_comp = UserComp(user=user.key, comp=comp.key)
             if comp == comp1:
                 user_comp.submitted_scores = True
             user_comp.put()
@@ -118,11 +118,11 @@ class Test(BaseHandler):
         comp = comps[0]
         scores = []
         for photo, user in product(photos, users):
-            if photo.comp_key.get() != comp or photo.user_key.get() == user:
+            if photo.comp.get() != comp or photo.user.get() == user:
                 continue
             score = Scores(
-                photo_key=photo.key,
-                user_from_key=user.key,
+                photo=photo.key,
+                user_from=user.key,
                 score=randint(1, 10)
             )
             score.put()

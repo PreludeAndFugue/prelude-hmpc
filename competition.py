@@ -92,8 +92,8 @@ class CompetitionHandler(BaseHandler):
             photo = Photo.get_by_id(photo_id)
             #photo = self.get_photo(photo_id)
             new_score = Scores(
-                photo_key=photo.key,
-                user_from_key=user.key,
+                photo=photo.key,
+                user_from=user.key,
                 score=score
             )
             new_score.put()
@@ -128,7 +128,7 @@ class CompetitionHandler(BaseHandler):
         for p in Photo.competition_photos(comp):
         #for p in self.get_competition_photos(comp_id, comp=comp):
             title, url, thumb, _, _, _, _ = p.data(128)
-            user_photo = p.user_key.get() == user
+            user_photo = p.user.get() == user
             if not to_score:
                 s = Scores.score_from_user(p, user)
                 score = s.score if s else None
@@ -151,7 +151,7 @@ class CompetitionHandler(BaseHandler):
             photos.append((
                 p,
                 title,
-                p.user_key.get().username,
+                p.user.get().username,
                 url,
                 thumb,
                 ordinal(position),
@@ -350,7 +350,7 @@ class CompetitionModify(BaseHandler):
     def _data(self, comp, user, **kwds):
         '''Create the data dictionary for the renderer.'''
         users = [
-            (uc.user_key.get().username, 'Yes' if uc.submitted_scores else 'No')
+            (uc.user.get().username, 'Yes' if uc.submitted_scores else 'No')
             for uc in comp.users()
         ]
         data = {
