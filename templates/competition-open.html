@@ -1,33 +1,24 @@
 {% extends "base.html" %}
 {% block title %}Competition: {{month}} {{year}} {% endblock %}
 
-{% block css%}
-<link href="/static/css/lightbox.css" rel="stylesheet" type="text/css" />
-{% endblock %}
-
 {% block nav_comps %} active{% endblock %}
 
 {% block content %}
     <h4>
         {{comp.title}}
     </h4>
-    <p>{{description}}</p>
-    <br />
+    {% if description %}
+        <p>{{description}}</p>
+    {% endif %}
+    <p>This competition is open to submissions. The photographs are hidden until
+     the scoring phase starts.</p>
+    <p>Number of photographs submitted so far: {{photo_count}}</p>
 
     <ul class="thumbnails">
-    {% for photo, title, url, thumb in photos %}
+    {% for _ in range(photo_count) %}
         <li class="span2">
-            <a href="{{url}}" class="thumbnail" rel="lightbox[comp]" title="{{title}}">
-                <img id="thumb" src="{{thumb}}" alt="{{title}}" />
-            </a>
-            <div class="photo-score">
-                <b>{{title}}</b>
-            </div>
+            <img id="thumb" src="/static/img/blank.png" class="img-polaroid"/>
         </li>
     {% endfor %}
     </ul>
-{% endblock %}
-
-{% block js %}
-    <script src="/static/js/lightbox.js"></script>
 {% endblock %}

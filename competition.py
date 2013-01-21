@@ -109,14 +109,11 @@ class CompetitionHandler(BaseHandler):
 
     def view_open(self, user, comp_id, comp, data):
         '''Create the competition page when its status is Open.'''
-        photos = []
         #for p in Photo.competition_photos(comp):
-        for p in self.get_competition_photos(comp_id, comp=comp):
-            title, url, thumb, _, _, _, _ = p.data(128)
-            photos.append((p, title, url, thumb))
+        photo_count = len(self.get_competition_photos(comp_id, comp=comp))
 
         data.update({
-            'photos': photos
+            'photo_count': photo_count
         })
         self.render('competition-open.html', **data)
 
