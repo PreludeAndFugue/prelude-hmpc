@@ -10,7 +10,9 @@
         {{comp.title}}
     </h4>
     <p>{{description}}</p>
-    <br />
+    {% if not competitor %}
+        <p>The competitiors are currently submitting scores.</p>
+    {% endif %}
     <form method="post" class="form-inline">
 
     <ul class="thumbnails">
@@ -20,32 +22,34 @@
                 title="{{title}}">
                 <img id="thumb" src="{{thumb}}" alt="{{title}}" />
             </a>
-            <div class="photo-score">
-                {% if to_score and not user_photo %}
-                    <label for="score" class="control-label">Score</label>
-                    <select name="{{photo.key().id()}}" class="span1">
-                        <option>1</option>
-                        <option>2</option>
-                        <option>3</option>
-                        <option>4</option>
-                        <option>5</option>
-                        <option>6</option>
-                        <option>7</option>
-                        <option>8</option>
-                        <option>9</option>
-                        <option>10</option>
-                    </select>
-                {% elif not to_score and not user_photo %}
-                    <p><b>Score:</b> {{score}}</p>
-                {% else %}
-                    <p>My photo</p>
-                {% endif %}
-            </div>
+            {% if competitor %}
+                <div class="photo-score">
+                    {% if to_score and not user_photo %}
+                        <label for="score" class="control-label">Score</label>
+                        <select name="{{photo.key().id()}}" class="span1">
+                            <option>1</option>
+                            <option>2</option>
+                            <option>3</option>
+                            <option>4</option>
+                            <option>5</option>
+                            <option>6</option>
+                            <option>7</option>
+                            <option>8</option>
+                            <option>9</option>
+                            <option>10</option>
+                        </select>
+                    {% elif not to_score and not user_photo %}
+                        <p><b>Score:</b> {{score}}</p>
+                    {% else %}
+                        <p>My photo</p>
+                    {% endif %}
+                </div>
+            {% endif %}
         </li>
     {% endfor %}
     </ul>
 
-    {% if to_score %}
+    {% if competitor and to_score %}
         <input type="submit" class="btn btn-primary" value="Submit Scores" />
     {% endif %}
 
