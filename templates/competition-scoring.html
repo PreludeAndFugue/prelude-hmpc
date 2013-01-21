@@ -9,7 +9,9 @@
     <h4>
         {{comp.title}}
     </h4>
-    <p>{{description}}</p>
+    {% if description %}
+        <p><span class="label">{{description}}</span></p>
+    {% endif %}
     {% if not competitor %}
         <p>The competitiors are currently submitting scores.</p>
     {% endif %}
