@@ -6,6 +6,19 @@
 {% block nav_user %}active{% endblock %}
 {% block content %}
 
+    {% if need_scores %}
+        <div class="alert alert-warning">
+            Please submit your scores to the following competitions:
+                <ul>
+                    {% for id, title, month, year in need_scores %}
+                        <li><a href="/competition/{{id}}">
+                            {{title}}, ({{month}} {{year}})</a>
+                        </li>
+                    {% endfor %}
+                </ul>
+        </div>
+    {% endif %}
+
     {% if open_comps %}
     <form method="post" action="{{upload_url}}" class="well"
         enctype="multipart/form-data" accept="image/jpeg">
