@@ -301,49 +301,16 @@ class CompetitionModify(BaseHandler):
             new_status
         )
 
-        successful_update = False
-        if new_status == COMPLETED:
-            if comp.status == SCORING:
-                # completing a competition and calculating scores
-                completed = self.calculate_scores(comp)
-                if completed:
-                    successful_update = True
-                else:
-                    # failed to calculate scores
-                    error = (
-                        'Cannot complete competition - '
-                        'not all competitors have submitted scores.'
-                    )
-            elif comp.status == COMPLETED:
-                successful_update = True
-            else:  # comp.status == OPEN
-                # cannot complete an open competition
-                error = (
-                    'Cannot complete an open competition - '
-                    'users have not yet submitted scores.'
-                )
-        elif new_status == SCORING:
-            if comp.status == SCORING:
-                successful_update = True
-            elif comp.status == COMPLETED:
-                error = 'Competition has been completed - cannot change status.'
-            else:  # comp.status == OPEN
-                successful_update = True
-        else:  # new_status == OPEN
-            if comp.status in (SCORING, COMPLETED):
-                error = 'Cannot re-open this competition.'
-            else:  # comp.status == OPEN
-                successful_update = True
-
+        successful_update, error = self._successful_update(comp, new_status)
         if successful_update:
-            self.update_competition(
+            self._update_competition(
                 comp,
                 new_title,
                 new_description,
                 new_status
             )
         else:
-            self.report_error(comp, user, error)
+            self._report_error(comp, user, error)
 
     def _data(self, comp, user, **kwds):
         '''Create the data dictionary for the renderer.'''
@@ -372,7 +339,44 @@ class CompetitionModify(BaseHandler):
         #logging.info('kwds %s' % kwds)
         return data
 
-    def calculate_scores(self, comp):
+    def _successful_update(self, comp, new_status):
+        successful_update = False
+        error = None
+        if new_status == COMPLETED:
+            if comp.status == SCORING:
+                # completing a competition and calculating scores
+                completed = self._calculate_scores(comp)
+                if completed:
+                    successful_update = True
+                else:
+                    # failed to calculate scores
+                    error = (
+                        'Cannot complete competition - '
+                        'not all competitors have submitted scores.'
+                    )
+            elif comp.status == COMPLETED:
+                successful_update = True
+            else:  # comp.status == OPEN
+                # cannot complete an open competition
+                error = (
+                    'Cannot complete an open competition - '
+                    'users have not yet submitted scores.'
+                )
+        elif new_status == SCORING:
+            if comp.status == SCORING:
+                successful_update = True
+            elif comp.status == COMPLETED:
+                error = 'Competition has been completed - cannot change status.'
+            else:  # comp.status == OPEN
+                successful_update = True
+        else:  # new_status == OPEN
+            if comp.status in (SCORING, COMPLETED):
+                error = 'Cannot re-open this competition.'
+            else:  # comp.status == OPEN
+                successful_update = True
+        return successful_update, error
+
+    def _calculate_scores(self, comp):
         '''Calculate the scores for a completed competition.'''
         all_scores = UserComp.all_scores_submitted(comp)
         if not all_scores:
@@ -399,7 +403,7 @@ class CompetitionModify(BaseHandler):
 
         return True
 
-    def update_competition(self, comp, title, description, status):
+    def _update_competition(self, comp, title, description, status):
         '''Update the competition details and redirect to admin page.'''
         comp.title = title
         comp.description = description
@@ -408,7 +412,7 @@ class CompetitionModify(BaseHandler):
         comp.put()
         self.redirect('/competition/admin')
 
-    def report_error(self, comp, user, error):
+    def _report_error(self, comp, user, error):
         '''Competition could not be modified - report error to user.'''
         data = self._data(comp, user, error=error)
         self.render('competition-modify.html', **data)
