@@ -3,9 +3,12 @@ from google.appengine.ext import ndb
 #from google.appengine.ext import db
 from google.appengine.api.images import get_serving_url
 
+from calendar import month_name
 import csv
 import logging
 import StringIO
+
+from helper import SCORING
 
 # the maximum length of the longest dimension of on uploaded photo
 MAX_SIZE = 800
@@ -38,6 +41,21 @@ class User(ndb.Model):
     def user_from_reset_code(cls, reset_code):
         query = cls.query(cls.pass_reset_code == reset_code)
         return query.get()
+
+    def scoring_competitions(self):
+        '''Return a list of competitions for which the user must submit
+        scores.'''
+        user_comps = UserComp.query().filter(UserComp.user == self.key)
+        for user_comp in user_comps:
+            if not user_comp.submitted_scores:
+                comp = user_comp.comp.get()
+                if comp.status == SCORING:
+                    yield (
+                        comp.key.id(),
+                        comp.title,
+                        month_name[comp.month],
+                        comp.year
+                    )
 
     def __eq__(self, other):
         '''Compare to users for equality.'''
