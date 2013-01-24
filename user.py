@@ -61,6 +61,7 @@ class UserPage(BaseHandler):
             'upload_url': upload_url,
             'photos': photos,
             'open_comps': open_comps_no_photos,
+            'need_scores': list(user.scoring_competitions()),
         }
         self.render('user.html', **data)
         # when a new competition is added need to find a way to clear theys
