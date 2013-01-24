@@ -19,9 +19,9 @@
             <label for="comp-id">
                 Select a competition
             </label>
-            <select id="comp-id" name="comp-id">
+            <select class="span6" id="comp-id" name="comp-id">
                 {% for c in open_comps %}
-                <option value="{{c.key().id()}}">{{c.title}}</option>
+                <option value="{{c.key.id()}}">{{c.title}}</option>
                 {% endfor %}
             </select>
             <label for="photo-title">

@@ -16,8 +16,7 @@ class PhotoView(BaseHandler):
         user_id, user = self.get_user()
 
         photo_id = int(photo_id)
-        #photo = Photo.get_by_id(photo_id)
-        photo = self.get_photo(photo_id)
+        photo = Photo.get_by_id(photo_id)
 
         if not photo:
             data = {
@@ -28,7 +27,7 @@ class PhotoView(BaseHandler):
             self.render('error.html', **data)
             return
 
-        open_comp = photo.competition.status == OPEN
+        open_comp = photo.competition.get().status == OPEN
 
         if open_comp:
             msg = (
@@ -54,7 +53,7 @@ class PhotoView(BaseHandler):
             'comp_closed': photo.position != 0,
             'url': photo.url(),
             'title': photo.title,
-            'comments': list(Comment.photo_comments(photo))
+            'comments': Comment.photo_comments(photo)
         }
         self.render('photo.html', **data)
 
@@ -75,18 +74,16 @@ class PhotoView(BaseHandler):
 
         photo = Photo.get_by_id(photo_id)
         new_comment = Comment(
-            photo=photo,
-            user=user,
+            photo=photo.key,
+            user=user.key,
             text=comment
         )
         new_comment.put()
 
-        # need to clear cache of recent comments
-        self.delete_cache_recent_comments()
-
         # send an email to the photographer, letting them know of the new
         # comment
-        to = '{} <{}>'.format(photo.user.username, photo.user.email)
+        photo_user = photo.user.get()
+        to = '{} <{}>'.format(photo_user.username, photo_user.email)
         subject = 'HMPC: New photograph comment'
         body = (
             'You have received a new comment on one of your photographs.'

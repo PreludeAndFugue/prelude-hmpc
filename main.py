@@ -6,7 +6,7 @@ import webapp2
 
 from handler import BaseHandler
 from helper import MONTHS, ordinal
-from model import Photo, Competition
+from model import Photo, Competition, Comment, recently_completed_competitions
 
 
 class Home(BaseHandler):
@@ -23,12 +23,12 @@ class Home(BaseHandler):
         self.render('home.html', **data)
 
     def random_images(self, number=3):
-        photo_keys = list(Photo.all(keys_only=True))
+        photo_keys = list(Photo.query().fetch(keys_only=True))
         shuffle(photo_keys)
         photos = []
         i = 0
         for key in photo_keys:
-            photo = Photo.get(key)
+            photo = key.get()
             if photo.total_score == 0:
                 # only view photos belonging to completed competition -
                 # assuming all photos in completed competitions have non-zero
@@ -39,7 +39,7 @@ class Home(BaseHandler):
             title = photo.title
             if not title:
                 title = 'Untitled'
-            user = photo.user.username
+            user = photo.user.get().username
             photos.append((i, key.id(), photo.url(size=800), title, user))
             i += 1
             if len(photos) == number:
@@ -53,7 +53,7 @@ class Home(BaseHandler):
         competition_data = []
         for comp in Competition.in_progress():
             competition_data.append((
-                comp.key().id(),
+                comp.key.id(),
                 comp.title,
                 comp.description,
                 comp.year,
@@ -64,18 +64,18 @@ class Home(BaseHandler):
 
     def recent_comments(self):
         comments = []
-        for comment in self.get_recent_comments():
+        for comment in Comment.recent_comments():
             comments.append((
                 comment.text,
-                comment.user.username,
-                comment.photo.key().id(),
+                comment.user.get().username,
+                comment.photo.id(),
                 comment.format_date()
             ))
         return comments
 
     def recent_results(self):
         results = []
-        for comp, photos in self.get_recent_results():
+        for comp, photos in recently_completed_competitions():
             new_photos = []
             classes = ('badge-first', 'badge-second', 'badge-third')
             for klass, photo in zip(classes, photos):
@@ -83,7 +83,7 @@ class Home(BaseHandler):
                     ordinal(photo.position),
                     klass,
                     photo.total_score,
-                    photo.user.username
+                    photo.user.get().username
                 ))
             results.append((comp, new_photos))
         return results

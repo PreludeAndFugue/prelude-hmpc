@@ -33,7 +33,7 @@ class BaseUser(BaseHandler):
         return check_password_hash(password, hash_pass)
 
     def set_cookie(self, user):
-        user_id = user.key().id()
+        user_id = user.key.id()
         username = user.username
         template = '%d|%s' % (user_id, username)
         value = self.cookie_serializer.serialize('userid', template)

@@ -15,14 +15,9 @@ class Competitions(BaseHandler):
         '''Show the competitions page.'''
         user_id, user = self.get_user()
 
-        page, key = self.get_page_competitions(user_id)
-        if page:
-            self.write(page)
-            logging.info('Comps: write cached page')
-            return
-
         comps = []
-        for c in self.get_competitions():
+
+        for c in Competition.all():
             month = c.month
             month_word = MONTHS[month]
             user_photo = None
@@ -30,7 +25,7 @@ class Competitions(BaseHandler):
                 user_photo = Photo.competition_user(c, user) is not None
             comps.append((
                 #month,
-                c.key().id(),
+                c.key.id(),
                 month_word,
                 c.year,
                 c.title,
@@ -44,8 +39,7 @@ class Competitions(BaseHandler):
             'comps': comps,
             'months': MONTHS
         }
-        #self.render('competitions.html', **data)
-        self.render_and_cache(key, 'competitions.html', **data)
+        self.render('competitions.html', **data)
 
 
 class CompetitionHandler(BaseHandler):
@@ -53,7 +47,7 @@ class CompetitionHandler(BaseHandler):
         '''Show the competition page.'''
         user_id, user = self.get_user()
         comp_id = int(comp_id)
-        comp = self.get_competition(comp_id)
+        comp = Competition.get_by_id(comp_id)
 
         if comp is None:
             self.redirect('/competitions')
@@ -82,7 +76,7 @@ class CompetitionHandler(BaseHandler):
         '''A user is submitting scores.'''
         user_id, user = self.get_user()
         comp_id = int(comp_id)
-        comp = self.get_competition(comp_id)
+        comp = Competition.get_by_id(comp_id)
 
         if not user or not comp:
             # stop some unauthorised post submissions.
@@ -92,9 +86,13 @@ class CompetitionHandler(BaseHandler):
         results = self.parse_scores(self.request.POST)
 
         for photo_id, score in results.iteritems():
-            #photo = Photo.get_by_id(photo_id)
-            photo = self.get_photo(photo_id)
-            new_score = Scores(photo=photo, user_from=user, score=score)
+            photo = Photo.get_by_id(photo_id)
+            #photo = self.get_photo(photo_id)
+            new_score = Scores(
+                photo=photo.key,
+                user_from=user.key,
+                score=score
+            )
             new_score.put()
 
         # record that user has submitted scores for this comp
@@ -107,7 +105,7 @@ class CompetitionHandler(BaseHandler):
     def view_open(self, user, comp_id, comp, data):
         '''Create the competition page when its status is Open.'''
         #for p in Photo.competition_photos(comp):
-        photo_count = len(self.get_competition_photos(comp_id, comp=comp))
+        photo_count = len(list(Photo.competition_photos(comp)))
 
         data.update({
             'photo_count': photo_count
@@ -120,11 +118,11 @@ class CompetitionHandler(BaseHandler):
         to_score = user_comp and not user_comp.submitted_scores
 
         photos = []
-        #for p in Photo.competition_photos(comp):
-        for p in self.get_competition_photos(comp_id, comp=comp):
+        for p in Photo.competition_photos(comp):
+        #for p in self.get_competition_photos(comp_id, comp=comp):
             title, url, thumb, _, _, _, _ = p.data(128)
             if user:
-                user_photo = p.user == user
+                user_photo = p.user.get() == user
                 if not to_score:
                     s = Scores.score_from_user(p, user)
                     score = s.score if s else None
@@ -145,18 +143,18 @@ class CompetitionHandler(BaseHandler):
     def view_complete(self, user, comp_id, comp, data):
         '''Create the competition page when its status is Completed.'''
         photos = []
-        #for p in Photo.competition_result(comp):
-        for p in self.get_competition_photos(comp_id, comp=comp):
+        for p in Photo.competition_result(comp):
+        #for p in self.get_competition_photos(comp_id, comp=comp):
             title, url, thumb, _, position, score, _ = p.data(128)
             photos.append((
                 p,
                 title,
-                p.user.username,
+                p.user.get().username,
                 url,
                 thumb,
                 ordinal(position),
                 score,
-                p.key().id()
+                p.key.id()
             ))
 
         data.update({
@@ -175,7 +173,7 @@ class CompetitionHandler(BaseHandler):
 
     def get_usercomp(self, user, comp):
         '''Return UserComp object for user and competition.'''
-        if user is not None and comp is not None:
+        if user and comp:
             return UserComp.get_usercomp(user, comp)
         # otherwise return None
 
@@ -188,12 +186,12 @@ class CompetitionAdmin(BaseHandler):
         if not user or not user.admin:
             self.redirect('/')
 
-        comps = self.get_competitions()
+        comps = Competition.all()
 
         data = {
             'page_title': 'Competition Admin',
             'user': user,
-            'comps': [(c.key().id(), c) for c in comps],
+            'comps': [(c.key.id(), c) for c in comps],
             'months': MONTHS
         }
         self.render('competitions-admin.html', **data)
@@ -259,10 +257,6 @@ class CompetitionNew(BaseHandler):
             end=end
         )
         new_comp.put()
-        # created a new competition, so need to delete 'all_comps' from cache
-        self.delete_cache_competitions()
-        # delete cached competitions page
-        self.delete_cache_page_competitions()
         self.redirect('/competition/admin')
 
 
@@ -276,7 +270,7 @@ class CompetitionModify(BaseHandler):
             return
 
         comp_id = int(comp_id)
-        comp = self.get_competition(comp_id)
+        comp = Competition.get_by_id(comp_id)
         if not comp:
             self.redirect('/competition/admin')
             return
@@ -294,16 +288,13 @@ class CompetitionModify(BaseHandler):
         new_title = self.request.get('comp-title')
         new_description = self.request.get('comp-description')
         new_status = int(self.request.get('comp-status'))
-        #comp_id = int(self.request.get('comp-id'))
         comp_id = int(comp_id)
-
-        comp = self.get_competition(comp_id)
+        comp = Competition.get_by_id(comp_id)
 
         if not new_title:
             self.report_error(comp, 'Error - blank title.')
             return
 
-        #logging.info(comp)
         logging.info(
             'updating competition: status %d, new status: %d',
             comp.status,
@@ -317,8 +308,6 @@ class CompetitionModify(BaseHandler):
                 completed = self.calculate_scores(comp)
                 if completed:
                     successful_update = True
-                    # delete cache of recently completed competitions
-                    self.delete_cache_recent_results()
                 else:
                     # failed to calculate scores
                     error = (
@@ -353,21 +342,13 @@ class CompetitionModify(BaseHandler):
                 new_description,
                 new_status
             )
-            # delete stale cache
-            self.delete_cache_competitions()
-            # update cache item for this competition
-            self.set_competition(comp)
-            # delete cache of all forms of the competitions page
-            self.delete_cache_page_competitions()
-            # delete cache of competition photos
-            self.delete_cache_competition_photos(comp_id)
         else:
             self.report_error(comp, user, error)
 
     def _data(self, comp, user, **kwds):
         '''Create the data dictionary for the renderer.'''
         users = [
-            (uc.user.username, 'Yes' if uc.submitted_scores else 'No')
+            (uc.user.get().username, 'Yes' if uc.submitted_scores else 'No')
             for uc in comp.users()
         ]
         data = {
@@ -379,7 +360,7 @@ class CompetitionModify(BaseHandler):
             'status': comp.get_status(),
             'user': user,
             'users': users,
-            'comp_id': comp.key().id(),
+            'comp_id': comp.key.id(),
             'status_values': (
                 (0, 'Open'),
                 (1, 'Scoring'),
@@ -444,7 +425,7 @@ class CompetitionScores(BaseHandler):
         self.response.content_type = 'text/csv'
 
         comp_id = int(comp_id)
-        comp = self.get_competition(comp_id)
+        comp = Competition.get_by_id(comp_id)
 
         logging.info(comp)
 
