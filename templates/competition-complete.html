@@ -20,7 +20,12 @@
                 title="{{title}} submitted by {{username}}, position: {{position}}">
                 <img id="thumb" src="{{thumb}}" alt="{{title}}" />
             </a>
-            <a href="/photo/{{id}}" class="btn comment-button">Comments</a>
+            <div class="photo-title">
+                {{title|truncate(30)}}
+            </div>
+            <div class="photo-comment span2">
+                <a href="/photo/{{id}}" class="btn comment-button">Comments</a>
+            </div>
         </li>
     {% endfor %}
     </ul>

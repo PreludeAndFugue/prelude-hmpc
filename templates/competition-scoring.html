@@ -24,6 +24,9 @@
                 title="{{title}}">
                 <img id="thumb" src="{{thumb}}" alt="{{title}}" />
             </a>
+            <div class="photo-title">
+                {{title|truncate(length=35)}}
+            </div>
             {% if competitor %}
                 <div class="photo-score">
                     {% if to_score and not user_photo %}
@@ -52,6 +55,7 @@
     </ul>
 
     {% if competitor and to_score %}
+        <hr>
         <input type="submit" class="btn btn-primary" value="Submit Scores" />
     {% endif %}
 
