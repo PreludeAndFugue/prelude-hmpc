@@ -21,10 +21,7 @@ section {
 }
 
 .comment-button {
-    display: block;
-    margin: 5px;
-    margin-left: auto;
-    margin-right: auto;
+    text-align: center;
 }
 
 .photo-score {
@@ -34,6 +31,13 @@ section {
 }
 .photo-score p {
     line-height: 30px;
+}
+
+.photo-title {
+    text-align: center;
+    font-style: italic;
+    margin: 8px;
+    height: 40px; /* four lines */
 }
 
 .badge-first {
