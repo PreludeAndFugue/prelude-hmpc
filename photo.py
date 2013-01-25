@@ -28,8 +28,11 @@ class PhotoView(BaseHandler):
             return
 
         open_comp = photo.competition.get().status == OPEN
+        # is this a photo of the logged-in user - a user can always view
+        # their own photos
+        user_photo = photo.user == user.key if user else False
 
-        if open_comp:
+        if open_comp and not user_photo:
             msg = (
                 'You cannot view pictures in competitions which are still '
                 'open to submissions.'
@@ -41,8 +44,6 @@ class PhotoView(BaseHandler):
             }
             self.render('error.html', **data)
             return
-
-        #logging.info(dir(Comment.photo_comments(photo)))
 
         data = {
             'page_title': 'Photo',
