@@ -13,14 +13,16 @@
         </p>
         <p><b>Status:</b> {{status}}</p>
 
-        {% if user_photo %}
-            <p>
-                <span class="label label-success">Photograph submitted.</span>
-            </p>
-        {% else %}
-            <p>
-                <span class="label label-important">No photograph submitted.</span>
-            </p>
+        {% if user %}
+            {% if user_photo %}
+                <p>
+                    <span class="label label-success">Photograph submitted.</span>
+                </p>
+            {% else %}
+                <p>
+                    <span class="label label-important">No photograph submitted.</span>
+                </p>
+            {% endif %}
         {% endif %}
 
         <a href="/competition/{{comp_id}}"

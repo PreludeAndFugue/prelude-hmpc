@@ -20,7 +20,7 @@ class Competitions(BaseHandler):
         for c in Competition.all():
             month = c.month
             month_word = MONTHS[month]
-            user_photo = None
+            user_photo = False
             if user:
                 user_photo = Photo.competition_user(c, user) is not None
             comps.append((
