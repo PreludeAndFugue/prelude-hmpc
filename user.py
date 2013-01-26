@@ -60,7 +60,7 @@ class UserPage(BaseHandler):
             'page_subtitle': user.username,
             'upload_url': upload_url,
             'photos': photos,
-            'open_comps': open_comps_no_photos,
+            'open_comps_no_photos': open_comps_no_photos,
             'need_scores': list(user.scoring_competitions()),
         }
         self.render('user.html', **data)

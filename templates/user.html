@@ -19,7 +19,7 @@
         </div>
     {% endif %}
 
-    {% if open_comps %}
+    {% if open_comps_no_photos %}
     <div style="position: relative;">
     <form method="post" action="{{upload_url}}" class="well" id="upload-form"
         enctype="multipart/form-data" accept="image/jpeg">
@@ -34,7 +34,7 @@
                 Select a competition
             </label>
             <select class="span6" id="comp-id" name="comp-id">
-                {% for c in open_comps %}
+                {% for c in open_comps_no_photos %}
                 <option value="{{c.key.id()}}">{{c.title}}</option>
                 {% endfor %}
             </select>
@@ -71,9 +71,10 @@
     </div>
     {% endif %}
 
-    {% if not open_comps %}
+    {% if not open_comps_no_photos %}
     <div class="alert alert-info">
-        There is currently no open competition.
+        There is currently no open competition, or you have submitted a photograph
+        to all open competitions.
     </div>
     {% endif %}
 
