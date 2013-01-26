@@ -20,7 +20,8 @@
     {% endif %}
 
     {% if open_comps %}
-    <form method="post" action="{{upload_url}}" class="well"
+    <div style="position: relative;">
+    <form method="post" action="{{upload_url}}" class="well" id="upload-form"
         enctype="multipart/form-data" accept="image/jpeg">
         <p>
             There are competitions in progress and you haven't submitted a
@@ -47,8 +48,15 @@
             <input class="span6" id="photo-submit" name="photo-submit"
                 type="file" />
         </div>
-        <input type="submit" class="btn btn-primary" value="Submit" />
+        <br />
+        <input type="submit" class="btn btn-primary" value="Submit" id="upload-photo"/>
+
+        <div class="form-overlay" id="form-overlay">
+            <p>Uploading image. Please wait...</p>
+        </div>
+
     </form>
+    </div>
     {% endif %}
 
     {% if not_jpg %}
@@ -89,5 +97,14 @@
         </li>
     {% endfor %}
     </ul>
+
+{% endblock %}
+
+{% block script %}
+$(function() {
+    $('#upload-photo').click(function() {
+        $('#form-overlay').fadeIn();
+    });
+});
 
 {% endblock %}
