@@ -7,7 +7,7 @@ from google.appengine.api import mail
 
 from handler import BaseHandler
 from helper import OPEN
-from model import Photo, Comment
+from model import Photo, Comment, UserComp
 
 
 class PhotoView(BaseHandler):
@@ -101,7 +101,91 @@ class PhotoView(BaseHandler):
 
         self.redirect(self.request.path)
 
+
+class PhotoDelete(BaseHandler):
+    '''Delete photographs.
+
+    Only when the photograph belongs to an open competition. The photograph
+    can be deleted by the owner or an administrator.
+
+    Items to delete
+    ---------------
+    photo
+    UserComp record
+
+    Shouldn't be any comments to delete for a photo in an open competition.
+    '''
+    def get(self, photo_id):
+        photo_id = int(photo_id)
+        data, error = self._check(photo_id)
+
+        if error:
+            self.render('error.html', **data)
+            return
+
+        self.render('photo-delete.html', **data)
+
+    def post(self, photo_id):
+        photo_id = int(photo_id)
+        data, error = self._check(photo_id)
+
+        if error:
+            self.render('error.html', **data)
+            return
+
+        # delete photo here
+        #user = data['user']
+        comp = data['comp']
+        photo = data['photo']
+        photo_user = photo.user.get()
+        user_comp = UserComp.get_usercomp(photo_user, comp)
+
+        photo.key.delete()
+        user_comp.key.delete()
+
+        referrer = str(self.request.get('referrer'))
+        self.redirect(referrer)
+
+    def _check(self, photo_id):
+        '''Helper method which checks the proper permissions for deleting the
+        photograph.'''
+        user_id, user = self.get_user()
+        if not user:
+            self.redirect('/')
+
+        referrer = self.request.referrer
+        data = {
+            'page_title': 'Delete Photograph',
+            'user': user,
+            'referrer': referrer if referrer else '/',
+        }
+
+        photo = Photo.get_by_id(photo_id)
+        if not photo:
+            data['error_msg'] = "Photograph doesn't exist."
+            return data, True
+
+        comp = photo.competition.get()
+        if comp.status != OPEN:
+            error_msg = "Can only delete a photograph from an open competition."
+            data['error_msg'] = error_msg
+            return data, True
+
+        photo_user = photo.user.id()
+        if not user.admin and user_id != photo_user:
+            error_msg = "You don't have permission to delete this photograph."
+            data['error_msg'] = error_msg
+            return data, True
+
+        # no errors
+        data['photo'] = photo
+        data['url'] = photo.url(400)
+        data['title'] = photo.title
+        data['comp'] = comp
+        return data, False
+
 routes = [
     (r'/photo/(\d+)', PhotoView),
+    (r'/photo/delete/(\d+)', PhotoDelete)
 ]
 app = webapp2.WSGIApplication(routes=routes, debug=True)
