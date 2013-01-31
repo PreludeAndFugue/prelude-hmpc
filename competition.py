@@ -314,10 +314,19 @@ class CompetitionModify(BaseHandler):
 
     def _data(self, comp, user, **kwds):
         '''Create the data dictionary for the renderer.'''
-        users = [
-            (uc.user.get().username, 'Yes' if uc.submitted_scores else 'No')
-            for uc in comp.users()
-        ]
+        users = []
+        photos = []
+        status = comp.status
+        for uc in comp.users():
+            user1 = uc.user.get()
+            users.append((
+                user1.username,
+                'Yes' if uc.submitted_scores else 'No'
+            ))
+            if status == OPEN:
+                photo = Photo.competition_user(comp, user1)
+                photos.append(photo.key.id())
+
         data = {
             'page_title': 'Modify Competition',
             'title': comp.title,
@@ -327,6 +336,7 @@ class CompetitionModify(BaseHandler):
             'status': comp.get_status(),
             'user': user,
             'users': users,
+            'photos': photos,
             'comp_id': comp.key.id(),
             'status_values': (
                 (0, 'Open'),

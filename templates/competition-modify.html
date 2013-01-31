@@ -59,12 +59,13 @@
 {% if users %}
 <div>
     <h3>Competitors</h3>
-    <div class="span4">
+    <div class="span6">
     <table class="table">
         <thead>
             <tr>
                 <th class="span2">User</th>
-                <th class="span3">Submitted scores</th>
+                <th class="span2">Submitted scores</th>
+                <th class="span2"></th>
             </tr>
         </thead>
         <tbody>
@@ -72,6 +73,11 @@
             <tr>
                 <td>{{user}}</td>
                 <td>{{submitted}}</td>
+                {% if status == 'Open' %}
+                <td>
+                    <a href="/photo/delete/{{photos[loop.index0]}}">Delete Photograph</a>
+                </td>
+                {% endif %}
             </tr>
             {% endfor %}
         </tbody>

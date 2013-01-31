@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Delete Photo: {{title}}{% endblock %}
+
+{% block content %}
+    <div id="photo">
+        <img src="{{url}}" alt="{{title}}" class="img-polaroid" />
+    </div>
+
+    <br />
+
+    <div>
+        <form method="post">
+            <p>Do you really want to delete this photograph?</p>
+            <input type="hidden" value="{{referrer}}" name="referrer" />
+            <input type="submit" class="btn btn-danger" value="Delete" />
+            <a href="{{referrer}}" class="btn">Cancel</a>
+        </form>
+    </div>
+    
+
+{% endblock %}
