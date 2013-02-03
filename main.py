@@ -3,6 +3,7 @@
 import logging
 from random import shuffle
 import webapp2
+import markdown
 
 from handler import BaseHandler
 from helper import MONTHS, ordinal
@@ -65,8 +66,13 @@ class Home(BaseHandler):
     def recent_comments(self):
         comments = []
         for comment in Comment.recent_comments(6):
-            comments.append((
+            text = markdown.markdown(
                 comment.text,
+                output_format='html5',
+                safe_mode='replace',
+            )
+            comments.append((
+                text,
                 comment.user.get().username,
                 comment.photo.id(),
                 comment.format_date()
