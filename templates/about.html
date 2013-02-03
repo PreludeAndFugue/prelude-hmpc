@@ -3,10 +3,15 @@
 {% block nav_about %}active{% endblock %}
 {% block content %}
 
+<p>
+    A website for hosting photograph competitions. You need to
+    <a href="/register">register</a> to compete.
+</p>
+
 <h4>Rules</h4>
 <p>
-    A photograph must be taken during the month of the competition to which it
-    is being submitted.
+    The first rule of <em>HMPC</em> is a  photograph must be taken during the
+    month of the competition to which it is being submitted.
 </p>
 
 <h4>Comments</h4>
@@ -18,20 +23,25 @@
 <p>
     To add links to your comments, you can either surround the link with angle
     brackets. This input
-    <pre>&lt;http://www.bbc.co.uk&gt;</pre>
-    will produce this
-    <pre><a href="http://www.bbc.co.uk">http://www.bbc.co.uk</a></pre>
 </p>
-<p>
-    Or you can turn text into a link. This input
-    <pre>[The BBC](http://www.bbc.co.uk)</pre>
-    will produce this
-    <pre><a href="http://www.bbc.co.uk">The BBC</a></pre>
-</p>
+<pre>&lt;http://www.bbc.co.uk&gt;</pre>
+
+<p>will produce this</p>
+
+<pre><a href="http://www.bbc.co.uk">http://www.bbc.co.uk</a></pre>
+<p>Or you can turn text into a link. This input</p>
+<pre>[The BBC](http://www.bbc.co.uk)</pre>
+
+<p>will produce this</p>
+
+<pre><a href="http://www.bbc.co.uk">The BBC</a></pre>
+
 <p>To emphasise words, you can surround words with asterisks, like so:</p>
+
 <pre>*single asterisks*
 **double asterisks**
 </pre>
+
 <p>
     The submitted comment will then look like the following
     <pre><em>single asterisks</em>
