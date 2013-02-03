@@ -117,6 +117,26 @@ class Competition(ndb.Model):
         query = UserComp.query(UserComp.comp == self.key)
         return query
 
+    #@ndb.transactional(xg=True)
+    def delete(self):
+        '''Delete a competition.
+
+        Items to delete UserComps, Photos, Comments, Scores
+        '''
+        all_keys = []
+        for usercomp in self.users():
+            all_keys.append(usercomp.key)
+        for photo in Photo.competition_photos(self):
+            all_keys.append(photo.key)
+            for comment in photo.comments():
+                all_keys.append(comment.key)
+            for score in photo.scores():
+                all_keys.append(score.key)
+        all_keys.append(self.key)
+
+        logging.info(all_keys)
+        ndb.delete_multi(all_keys)
+
     def __eq__(self, other):
         '''Compare competitions for equality.'''
         #logging.info('compare comps: %r, %r', self, other)
@@ -159,6 +179,9 @@ class UserComp(ndb.Model):
         '''Have all scores been submitted for a competition.'''
         query = cls.query(cls.comp == comp.key)
         return all(r.submitted_scores for r in query)
+
+    def __str__(self):
+        return 'UserComp({}, {})'.format(self.comp.get(), self.user.get())
 
 
 class Photo(ndb.Model):
@@ -224,6 +247,19 @@ class Photo(ndb.Model):
     def url(self, size=MAX_SIZE):
         return get_serving_url(self.blob, size=size)
 
+    def comments(self):
+        query = Comment.query(Comment.photo == self.key)
+        return query
+
+    def __str__(self):
+        return 'Photo(id={}, compid={})'.format(
+            self.key.id(),
+            self.competition.id()
+        )
+
+    def __repr__(self):
+        return self.__str__()
+
 
 class Comment(ndb.Model):
     photo = ndb.KeyProperty(kind=Photo, required=True)
@@ -268,6 +304,9 @@ class Scores(ndb.Model):
     def photo_score(cls, photo):
         '''Return the total score for a photo.'''
         query = cls.query(cls.photo == photo.key)
+        #scores = [s.score for s in query]
+        #logging.info(scores)
+        #return sum(scores)
         return sum(s.score for s in query)
 
     @classmethod

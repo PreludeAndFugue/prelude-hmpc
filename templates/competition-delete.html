@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Delete Competition{% endblock %}
+{% block nav_comps %} active{% endblock %}
+{% block content %}
+
+
+<p>
+    You are about to delete this competition. If you do so you will also delete
+    all photographs, scores and comments associated with this competition.
+</p>
+<p>
+    This cannot be undone.
+</p>
+
+<table class="table">
+    <thead>
+        <th class="span1"></th>
+        <th class="span5"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Title</td><td>{{comp.title}}</td>
+        </tr>
+        <tr>
+            <td>Description</td><td>{{comp.description}}</td>
+        </tr>
+        <tr>
+            <td>Year</td><td>{{comp.year}}</td>
+        </tr>
+        <tr>
+            <td>Month</td><td>{{comp.month}}</td>
+        </tr>
+        <tr>
+            <td>Start</td><td>{{comp.start}}</td>
+        </tr>
+        <tr>
+            <td>End</td><td>{{comp.end}}</td>
+        </tr>
+        <tr>
+            <td>Finished</td><td>{{comp.finished}}</td>
+        </tr>
+        <tr>
+            <td>Status</td><td>{{comp.status}}</td>
+        </tr>
+        <tr>
+            <td>Challenge</td><td>{{comp.challenge}}</td>
+        </tr>
+    </tbody>
+</table>
+
+<form method="post">
+    <input type="submit" class="btn btn-danger" value="Delete">
+    <a href="/competition/modify/{{comp_id}}" class="btn">Cancel</a>
+</form>
+
+
+
+{% endblock %}

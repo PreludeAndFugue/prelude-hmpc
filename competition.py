@@ -445,12 +445,50 @@ class CompetitionScores(BaseHandler):
 
         self.write(csv_scores(comp))
 
+
+class CompetitionDelete(BaseHandler):
+    def get(self, comp_id):
+        user_id, user = self.get_user()
+        if not user or not user.admin:
+            self.redirect('/')
+            return
+
+        comp_id = int(comp_id)
+        comp = Competition.get_by_id(comp_id)
+
+        data = {
+            'user': user,
+            'page_title': 'Delete Competition',
+            'comp_id': comp_id,
+            'comp': comp,
+        }
+        self.render('competition-delete.html', **data)
+
+    def post(self, comp_id):
+        '''
+        Delete a competition, photographs, comments
+        '''
+        user_id, user = self.get_user()
+        if not user or not user.admin:
+            self.redirect('/')
+            return
+
+        comp_id = int(comp_id)
+        comp = Competition.get_by_id(comp_id)
+        logging.info('Deleting comp: %s' % comp)
+
+        comp.delete()
+
+        self.redirect('/competition/admin')
+
+
 routes = [
     (r'/competitions', Competitions),
     (r'/competition/(\d+)', CompetitionHandler),
     (r'/competition/admin', CompetitionAdmin),
     (r'/competition/new', CompetitionNew),
     (r'/competition/modify/(\d+)', CompetitionModify),
-    (r'/competition/scores/(\d+)/scores_\d+.csv', CompetitionScores)
+    (r'/competition/scores/(\d+)/scores_\d+.csv', CompetitionScores),
+    (r'/competition/delete/(\d+)', CompetitionDelete),
 ]
 app = webapp2.WSGIApplication(routes=routes, debug=True)
