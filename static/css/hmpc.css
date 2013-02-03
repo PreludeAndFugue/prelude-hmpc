@@ -72,3 +72,10 @@ section {
 .highlight-user {
     background-color: #eeeeee;
 }
+
+/* fix bootstrap blockquote p font-size */
+blockquote p {
+    font-size: 14px;
+    line-height: 20px;
+    margin-bottom: 15px;
+}

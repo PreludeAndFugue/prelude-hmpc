@@ -61,7 +61,7 @@
             {% for text, user, photo_id, date in comments %}
                 <div>
                     <blockquote>
-                        <p><pre>{{text|e}}</pre></p>
+                        {{text|safe}}
                         <small>{{user}}, {{date}}
                             <span class="pull-right">
                                 <a href="/photo/{{photo_id}}">View photo</a>
