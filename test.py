@@ -31,10 +31,10 @@ class Test(BaseHandler):
         delete = self.request.get('delete')
 
         if not delete:
-            user = self._create_users()
-            comps = self._create_competition()
-            photos = self._upload_photos(user, comps)
-            self._create_scores(user, comps, photos)
+            users = self._create_users()
+            comps = self._create_competitions()
+            photos = self._upload_photos(users, comps)
+            self._create_scores(users, comps, photos)
         else:
             self._delete_all()
         self.redirect('/')
@@ -60,7 +60,7 @@ class Test(BaseHandler):
             users.append(user)
         return users
 
-    def _create_competition(self):
+    def _create_competitions(self):
         comp1 = Competition(
             title='May photographs',
             description='',
@@ -68,10 +68,9 @@ class Test(BaseHandler):
             month=5,
             start=date(2012, 5, 1),
             end=date(2012, 5, 31),
-            finished=True
+            finished=True,
+            status=2
         )
-        comp1.status = 2
-        comp1.finished = True
         comp1.put()
         comp2 = Competition(
             title='June photographs',
@@ -80,9 +79,9 @@ class Test(BaseHandler):
             month=6,
             start=date(2012, 6, 1),
             end=date(2012, 6, 30),
-            finished=False
+            finished=False,
+            status=1
         )
-        comp2.status = 1
         comp2.put()
         return (comp1, comp2)
 
@@ -105,7 +104,7 @@ class Test(BaseHandler):
 
             photo = Photo(
                 user=user.key,
-                comp=comp.key,
+                competition=comp.key,
                 blob=blob_key,
                 title=title
             )
@@ -120,22 +119,33 @@ class Test(BaseHandler):
     def _create_scores(self, users, comps, photos):
         # the first of the two competitions is complete
         comp = comps[0]
+        comp_photos = [p for p in photos if p.competition == comp.key]
+        logging.info(comp)
+        logging.info(photos)
+        logging.info(comp_photos)
         scores = []
-        for photo, user in product(photos, users):
-            if photo.comp.get() != comp or photo.user.get() == user:
+        for photo, user in product(comp_photos, users):
+            if photo.user.get() == user:
                 continue
             score = Scores(
                 photo=photo.key,
                 user_from=user.key,
                 score=randint(1, 10)
             )
-            score.put()
+            logging.info(score)
+            score_key = score.put()
+            logging.info(score_key)
             scores.append(score)
 
         # calculate total scores
         results = []
-        for photo in Photo.competition_photos(comp):
-            total_score = Scores.photo_score(photo)
+        for photo in comp_photos:
+            logging.info(photo)
+            total_score = 0
+            for score in scores:
+                if score.photo == photo.key:
+                    total_score += score.score
+            logging.info('total score: %s' % total_score)
             results.append((total_score, photo))
         results.sort(reverse=True)
 
