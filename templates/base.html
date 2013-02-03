@@ -10,7 +10,7 @@
     <div class="navbar">
         <div class="navbar-inner">
             <div class="container">
-                <a class="brand" href="/">HMPC</a>
+                <a class="brand" href="/">HMPC 2013</a>
 
                 <ul class="nav">
                     <li id="nav-home" class="{% block nav_home %}{% endblock %}">
@@ -81,9 +81,11 @@
     </div>
 
     <div class="container">
+        {% if page_title %}
         <div class="page-header">
             <h1>{{page_title}} <small>{{page_subtitle}}</small></h1>
         </div>
+        {% endif %}
 
         {% block content %}{% endblock %}
     </div>
