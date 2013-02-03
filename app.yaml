@@ -70,6 +70,10 @@ handlers:
   script: photo.app
   secure: never
 
+- url: /comment/edit/.*
+  script: comment.app
+  secure: never
+
 - url: /competitions
   script: competition.app
   secure: never

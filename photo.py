@@ -3,8 +3,6 @@
 import webapp2
 import logging
 from google.appengine.api import mail
-#from markupsafe import escape
-import markdown
 
 from handler import BaseHandler
 from helper import OPEN
@@ -72,12 +70,6 @@ class PhotoView(BaseHandler):
 
         logging.info(user_id)
         logging.info(photo_id)
-        logging.info(markdown.markdown(comment))
-        comment = markdown.markdown(
-            comment,
-            output_format='html5',
-            safe_mode='replace',
-        )
 
         photo = Photo.get_by_id(photo_id)
         new_comment = Comment(

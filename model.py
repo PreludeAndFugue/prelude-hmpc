@@ -2,6 +2,7 @@
 from google.appengine.ext import ndb
 #from google.appengine.ext import db
 from google.appengine.api.images import get_serving_url
+import markdown
 
 from calendar import month_name
 import csv
@@ -272,9 +273,16 @@ class Comment(ndb.Model):
         query = cls.query(cls.photo == photo.key)
         query = query.order(cls.submit_date)
         for comment in query:
-            yield (
+            text = markdown.markdown(
                 comment.text,
+                output_format='html5',
+                safe_mode='replace',
+            )
+            yield (
+                comment.key.id(),
+                text,
                 comment.user.get().username,
+                comment.user.id(),
                 comment.format_date()
             )
 
