@@ -16,7 +16,7 @@
         {% for text, username, date in comments %}
         <div class="row">
             <blockquote class="span9">
-                <p><pre>{{text|e}}</pre></p>
+                {{text|safe}}
                 <small>{{username}}, {{date}}</small>
             </blockquote>
         </div>
