@@ -28,7 +28,7 @@
     </div>
 
     <div class="row">
-        <div class="span6">
+        <div class="span5">
             <h3>Competitions in progress</h3>
             {% for id, title, description, year, month, status in competitions %}
             <h4><a href="competition/{{id}}">{{title}}</a> <small>{{month}} {{year}}</small></h4>
@@ -56,7 +56,7 @@
             {% endfor %}
         </div>
 
-        <div class="span6">
+        <div class="span7">
             <h3>Recent Comments</h3>
             {% for text, user, photo_id, date in comments %}
                 <div>

@@ -13,7 +13,7 @@ class Home(BaseHandler):
     def get(self):
         user_id, user = self.get_user()
         data = {
-            'page_title': 'Monthly Photographs 2013',
+            #'page_title': 'Monthly Photographs 2013',
             'photos': self.random_images(4),
             'user': user,
             'competitions': self.competitions_in_progress(),
@@ -64,7 +64,7 @@ class Home(BaseHandler):
 
     def recent_comments(self):
         comments = []
-        for comment in Comment.recent_comments():
+        for comment in Comment.recent_comments(6):
             comments.append((
                 comment.text,
                 comment.user.get().username,
