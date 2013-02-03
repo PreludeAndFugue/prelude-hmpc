@@ -55,7 +55,7 @@ class PhotoView(BaseHandler):
             'comp_closed': photo.position != 0,
             'url': photo.url(),
             'title': photo.title,
-            'comments': Comment.photo_comments(photo)
+            'comments': list(Comment.photo_comments(photo))
         }
         self.render('photo.html', **data)
 
