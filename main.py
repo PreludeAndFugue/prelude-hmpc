@@ -89,4 +89,22 @@ class Home(BaseHandler):
         return results
 
 
-app = webapp2.WSGIApplication([('/', Home)], debug=True)
+class About(BaseHandler):
+    def get(self):
+        user_id, user = self.get_user()
+
+        data = {
+            'user': user,
+            'page_title': 'About'
+        }
+
+        self.render('about.html', **data)
+
+
+app = webapp2.WSGIApplication(
+    [
+        ('/', Home),
+        ('/about', About)
+    ],
+    debug=True
+)
