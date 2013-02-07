@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Edit Comment{% endblock %}
+
+{% block content %}
+
+<form method="post">
+    <textarea name="comment-text" id="comment" class="span12" rows="6">{{comment.text}}</textarea>
+    <br />
+    <input type="hidden" name="photo_id" value="{{photo_id}}" />
+    <input type="submit" class="btn btn-primary" value="Update" />
+    <a href="/photo/{{photo_id}}" class="btn">Cancel</a>
+</form>
+
+
+{% endblock %}

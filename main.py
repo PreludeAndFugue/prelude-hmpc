@@ -3,6 +3,7 @@
 import logging
 from random import shuffle
 import webapp2
+import markdown
 
 from handler import BaseHandler
 from helper import MONTHS, ordinal
@@ -65,8 +66,13 @@ class Home(BaseHandler):
     def recent_comments(self):
         comments = []
         for comment in Comment.recent_comments(6):
-            comments.append((
+            text = markdown.markdown(
                 comment.text,
+                output_format='html5',
+                safe_mode='replace',
+            )
+            comments.append((
+                text,
                 comment.user.get().username,
                 comment.photo.id(),
                 comment.format_date()
@@ -78,10 +84,11 @@ class Home(BaseHandler):
         for comp, photos in recently_completed_competitions():
             new_photos = []
             classes = ('badge-first', 'badge-second', 'badge-third')
-            for klass, photo in zip(classes, photos):
+            for photo in photos:
+                logging.info(photo.position)
                 new_photos.append((
                     ordinal(photo.position),
-                    klass,
+                    classes[photo.position - 1],
                     photo.total_score,
                     photo.user.get().username
                 ))

@@ -13,11 +13,17 @@
             <small>No comments until the competition is finished.</small>
             {% endif %}
         </h3>
-        {% for text, username, date in comments %}
+        {% for comment_id, text, username, user_id, date in comments %}
         <div class="row">
             <blockquote class="span9">
                 {{text|safe}}
-                <small>{{username}}, {{date}}</small>
+                <small>{{username}}, {{date}}
+                    <!-- did logged in user write this comment -->
+                    {% if user_id == userid or user.admin %}
+                    <span class="pull-right">
+                        <a href="/comment/edit/{{comment_id}}">Edit</a></span>
+                    {% endif %}
+                </small>
             </blockquote>
         </div>
         {% endfor %}
