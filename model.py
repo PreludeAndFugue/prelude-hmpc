@@ -2,6 +2,7 @@
 from google.appengine.ext import ndb
 #from google.appengine.ext import db
 from google.appengine.api.images import Image, get_serving_url
+import markdown
 
 from calendar import month_name
 import csv
@@ -275,9 +276,16 @@ class Comment(ndb.Model):
         query = cls.query(cls.photo == photo.key)
         query = query.order(cls.submit_date)
         for comment in query:
-            yield (
+            text = markdown.markdown(
                 comment.text,
+                output_format='html5',
+                safe_mode='replace',
+            )
+            yield (
+                comment.key.id(),
+                text,
                 comment.user.get().username,
+                comment.user.id(),
                 comment.format_date()
             )
 
@@ -360,6 +368,9 @@ def recently_completed_competitions():
     for comp in comps.fetch(2):
         logging.info('recently_completed_competitions comp: %s', comp)
         # only the top three results
-        photos = list(Photo.competition_photos(comp))[:3]
+        photos = list(
+            photo for photo in Photo.competition_photos(comp)
+            if photo.position <= 3
+        )
         results.append((comp, photos))
     return results

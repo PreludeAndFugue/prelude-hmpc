@@ -1,5 +1,5 @@
 application: prelude-hmpc
-version: 3
+version: 3-1
 runtime: python27
 api_version: 1
 threadsafe: yes
@@ -68,6 +68,10 @@ handlers:
 
 - url: /photo/.*
   script: photo.app
+  secure: never
+
+- url: /comment/edit/.*
+  script: comment.app
   secure: never
 
 - url: /competitions
