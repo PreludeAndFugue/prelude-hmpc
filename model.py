@@ -365,6 +365,9 @@ def recently_completed_competitions():
     for comp in comps.fetch(2):
         logging.info('recently_completed_competitions comp: %s', comp)
         # only the top three results
-        photos = list(Photo.competition_photos(comp))[:3]
+        photos = list(
+            photo for photo in Photo.competition_photos(comp)
+            if photo.position <= 3
+        )
         results.append((comp, photos))
     return results
