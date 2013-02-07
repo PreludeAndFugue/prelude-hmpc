@@ -19,6 +19,9 @@ class PhotoView(BaseHandler):
         photo_id = int(photo_id)
         photo = Photo.get_by_id(photo_id)
 
+        logging.info('hello from photoview')
+        logging.info('exif data: %s' % photo.exif())
+
         if not photo:
             data = {
                 'page_title': 'Error',
@@ -70,7 +73,6 @@ class PhotoView(BaseHandler):
         comment = self.request.get('comment-text')
         #comment = escape(comment)
 
-        logging.info(user_id)
         logging.info(photo_id)
         logging.info(markdown.markdown(comment))
         comment = markdown.markdown(

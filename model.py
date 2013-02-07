@@ -1,7 +1,7 @@
 
 from google.appengine.ext import ndb
 #from google.appengine.ext import db
-from google.appengine.api.images import get_serving_url
+from google.appengine.api.images import Image, get_serving_url
 
 from calendar import month_name
 import csv
@@ -246,6 +246,9 @@ class Photo(ndb.Model):
 
     def url(self, size=MAX_SIZE):
         return get_serving_url(self.blob, size=size)
+
+    def exif(self):
+        return Image(blob_key=self.blob).get_original_metadata()
 
     def comments(self):
         query = Comment.query(Comment.photo == self.key)
