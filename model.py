@@ -303,6 +303,42 @@ class Comment(ndb.Model):
         return self.submit_date.strftime('%H:%M, %d-%b-%Y')
 
 
+class Note(ndb.Model):
+    user = ndb.KeyProperty(kind=User, required=True)
+    submit_date = ndb.DateTimeProperty(auto_now_add=True)
+    title = ndb.StringProperty()
+    text = ndb.TextProperty()
+
+    @classmethod
+    def user_notes(cls, user):
+        query = cls.query(cls.user == user.key)
+        query = query.order(-cls.submit_date)
+        return query
+
+    @classmethod
+    def recent_notes(cls, limit=4, offset=0):
+        query = cls.query()
+        query = query.order(-cls.submit_date)
+        for note in query.fetch(limit, offset=offset):
+            text = markdown.markdown(
+                note.text,
+                output_format='html5',
+                safe_mode='replace',
+            )
+            yield (
+                note.key.id(),
+                note.title,
+                text,
+                note.user.get().username,
+                note.user.id(),
+                note.format_date()
+            )
+
+    def format_date(self):
+        '''Format the stored submit date for pretty printing.'''
+        return self.submit_date.strftime('%H:%M, %d-%b-%Y')
+
+
 class Scores(ndb.Model):
     photo = ndb.KeyProperty(kind=Photo, required=True)
     user_from = ndb.KeyProperty(kind=User, required=True)
