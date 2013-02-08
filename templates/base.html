@@ -50,10 +50,18 @@
                     </li>
                     {% endif %}
 
+                    <li id="nav-about"
+                        class="{% block nav_about %}{% endblock %}">
+                        <a href="/about">About</a>
+                    </li>
+
+                </ul>
+                <ul class="nav pull-right">
                     <li id="nav-contact"
                         class="{% block nav_contact %}{% endblock %}">
                         <a href="/contact">Contact</a>
                     </li>
+
                     <li class="divider-vertical"></li>
 
                     {% if user %}
@@ -69,12 +77,6 @@
                         <a href="/register">Register</a>
                     </li>
                     {% endif %}
-                </ul>
-                <ul class="nav pull-right">
-                    <li id="nav-about"
-                        class="{% block nav_about %}{% endblock %}">
-                        <a href="/about">About</a>
-                    </li>
                 </ul>
             </div>
         </div>
