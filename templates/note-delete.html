@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}New Note{% endblock %}
+
+{% block content %}
+    <p>You are about to delete this comment. You cannot undo this action.</p>
+
+    <table class="table">
+        <tbody>
+            <tr>
+                <td class="span1">Title</td><td>{{note.title}}</td>
+            </tr>
+            <tr>
+                <td>Text</td><td>{{note.markdown()|safe}}</td>
+            </tr>
+            <tr>
+                <td>User</td><td>{{note.user.get().username}}</td>
+            </tr>
+            <tr>
+                <td>Date</td><td>{{note.format_date()}}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <form method="post">
+        <input type="submit" class="btn btn-danger" value="Delete">
+        <a href="/notes" class="btn">Cancel</a>
+    </form>
+{% endblock %}
