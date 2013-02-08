@@ -28,7 +28,7 @@
     </div>
 
     <div class="row">
-        <div class="span5">
+        <div class="span6">
             <h3>Competitions in progress</h3>
             {% for id, title, description, year, month, status in competitions %}
             <h4><a href="competition/{{id}}">{{title}}</a> <small>{{month}} {{year}}</small></h4>
@@ -36,12 +36,14 @@
             <p>{{description}}</p>
             {% endfor %}
 
+            <hr />
+
             <h3>Recent Results</h3>
             {% for comp, photos in results %}
                 <h4>
                     {{comp.title}}
                     <small>
-                        <a href="/competition/{{comp.key.id()}}">Full results</a>
+                        <a href="/competition/{{comp.key.id()}}">Full result</a>
                     </small>
                 </h4>
                 {% for ordinal, klass, score, user in photos %}
@@ -54,9 +56,27 @@
                 </div>
                 {% endfor %}
             {% endfor %}
+
+            <hr />
+
+            <h3>
+                Recent Notes
+                <small>
+                    <a href="/notes">View all Notes</a>
+                </small>
+            </h3>
+            {% for id, title, text, username, userid, date in notes %}
+                <div class="note">
+                    <h4>{{title}}</h4>
+                    <blockquote>
+                        {{text|safe}}
+                        <small>{{username}}, {{date}}</small>
+                    </blockquote>
+                </div>
+            {% endfor %}
         </div>
 
-        <div class="span7">
+        <div class="span6">
             <h3>Recent Comments</h3>
             {% for text, user, photo_id, date in comments %}
                 <div>
