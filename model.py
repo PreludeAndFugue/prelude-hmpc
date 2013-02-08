@@ -394,18 +394,19 @@ def recently_completed_competitions():
 
 
 def blob_exif(blob_key):
+    '''Extract EXIF data from the blob data.'''
     keys = (
             ('make', 'Make', '?'),
             ('model', 'Model', '?'),
             ('datetime', 'DateTimeDigitized', '0001:01:01 00:00:00'),
             ('iso', 'ISOSpeedRatings', 0),
-            ('focal_length', 'FocalLength', '0'),
+            ('focal_length', 'FocalLength', 0),
             ('lens', 'Lens', '?'),
             ('exposure_time', 'ExposureTime', 0)
         )
     data = {}
     im = Image(blob_key=blob_key)
-    im.resize(width=100)
+    im.rotate(0)
     im.execute_transforms(parse_source_metadata=True)
     exif = im.get_original_metadata()
     for key, key_exif, default in keys:
