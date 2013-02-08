@@ -94,6 +94,10 @@ handlers:
   script: note.app
   secure: never
 
+- url: /note/delete/.*
+  script: note.app
+  secure: never
+
 - url: /_admin
   script: test.app
   secure: never

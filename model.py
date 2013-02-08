@@ -338,6 +338,15 @@ class Note(ndb.Model):
         '''Format the stored submit date for pretty printing.'''
         return self.submit_date.strftime('%H:%M, %d-%b-%Y')
 
+    def markdown(self):
+        '''Apply markdown to the comment text.'''
+        text = markdown.markdown(
+            self.text,
+            output_format='html5',
+            safe_mode='replace',
+        )
+        return text
+
 
 class Scores(ndb.Model):
     photo = ndb.KeyProperty(kind=Photo, required=True)

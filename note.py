@@ -71,7 +71,7 @@ class NoteNew(BaseHandler):
             'userid': user_id,
             'note': note,
         }
-        self.render('note-edit.html', **data)
+        self.render('note-new.html', **data)
 
     def post(self):
         user_id, user = self.get_user()
@@ -107,7 +107,25 @@ class NoteNew(BaseHandler):
         self.redirect('/notes')
 
 
-class NoteEdit(BaseHandler):
+class NoteChange(BaseHandler):
+    def _check(self, user, note):
+        '''Check to make sure comment exists and the user can edit it.'''
+        data = {
+            'page_title': 'Error',
+            'user': user,
+        }
+        if not note:
+            data['error_msg'] = 'Could not find Note.'
+            return True, data
+
+        if note.user.id() != user.key.id() and not user.admin:
+            data['error_msg'] = 'You cannot edit this comment.'
+            return True, data
+
+        return False, None
+
+
+class NoteEdit(NoteChange):
     def get(self, note_id=0):
         '''Edit a note'''
         user_id, user = self.get_user()
@@ -167,25 +185,52 @@ class NoteEdit(BaseHandler):
 
         self.redirect('/notes')
 
-    def _check(self, user, note):
-        '''Check to make sure comment exists and the user can edit it.'''
+
+class NoteDelete(NoteChange):
+    def get(self, note_id=0):
+        user_id, user = self.get_user()
+        if not user:
+            self.redirect('/')
+            return
+
+        note_id = int(note_id)
+        note = Note.get_by_id(note_id)
+
+        error, data = self._check(user, note)
+        if error:
+            self.render('error.html', **data)
+            return
+
         data = {
-            'page_title': 'Error',
+            'page_title': 'Delete Note',
             'user': user,
+            'note': note,
         }
-        if not note:
-            data['error_msg'] = 'Could not find Note.'
-            return True, data
 
-        if note.user.id() != user.key.id() and not user.admin:
-            data['error_msg'] = 'You cannot edit this comment.'
-            return True, data
+        self.render('note-delete.html', **data)
 
-        return False, None
+    def post(self, note_id=0):
+        user_id, user = self.get_user()
+        if not user:
+            self.redirect('/')
+
+        note_id = int(note_id)
+        note = Note.get_by_id(note_id)
+
+        error, data = self._check(user, note)
+        if error:
+            self.render('error.html', **data)
+            return
+
+        note.key.delete()
+
+        self.redirect('/notes')
+
 
 routes = [
     (r'/notes', Notes),
     (r'/note/edit/(\d+)', NoteEdit),
+    (r'/note/delete/(\d+)', NoteDelete),
     (r'/note/new', NoteNew),
 ]
 app = webapp2.WSGIApplication(routes=routes, debug=True)
