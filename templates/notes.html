@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Notes{% endblock %}
+
+{% block content %}
+
+    {% if user %}
+        <a href="/note/new" class="btn btn-primary">New Note</a>
+    {% endif %}
+
+    {% for id, title, text, username, userid, date in notes %}
+        <h4>{{title}}</h4>
+        <blockquote>
+            {{text|safe}}
+            <small>
+                {{username}}, {{date}}
+                {% if user_id == userid or user.admin %}
+                    <span class="pull-right">
+                        <a href="/note/edit/{{id}}">Edit</a>
+                    </span>
+                {% endif %}
+            </small>
+        </blockquote>
+    {% endfor %}
+
+    <ul class="pager">
+        <li class="previous {{more_old}}">
+            {% if more_old == 'disabled' %}
+                <span>&larr; Older</span>
+            {% else %}
+                <a href="?start={{after}}">&larr; Older</a>
+            {% endif%}
+        </li>
+        <li class="next {{more_new}}">
+            {% if more_new == 'disabled' %}
+                <span>Newer &rarr;</span>
+            {% else %}
+                <a href="?start={{before}}">Newer &rarr;</a>
+            {% endif %}
+        </li>
+    </ul>
+{% endblock %}
