@@ -82,6 +82,22 @@ handlers:
   script: competition.app
   secure: never
 
+- url: /notes
+  script: note.app
+  secure: never
+
+- url: /note/new
+  script: note.app
+  secure: never
+
+- url: /note/edit/.*
+  script: note.app
+  secure: never
+
+- url: /note/delete/.*
+  script: note.app
+  secure: never
+
 - url: /_admin
   script: test.app
   secure: never
