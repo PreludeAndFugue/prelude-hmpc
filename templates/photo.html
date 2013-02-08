@@ -6,6 +6,47 @@
         <img src="{{url}}" alt="{{title}}" class="img-polaroid" />
     </div>
 
+    <div class="row">
+    <div class="accordion span6 photo-exif" id="photo-exif">
+        <div class="accordion-group">
+            <div class="accordion-heading">
+                <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion2" href="#collapseOne">
+                    EXIF data
+                </a>
+            </div>
+            <div id="collapseOne" class="accordion-body collapse">
+                <div class="accordion-inner">
+                    <table class="table">
+                        <tbody class="span5">
+                            <tr>
+                                <td class="span1">Make</td><td class="span4">{{make}}</td>
+                            </tr>
+                            <tr>
+                                <td>Model</td><td>{{model}}</td>
+                            </tr>
+                            <tr>
+                                <td>Date</td><td>{{datetime}}</td>
+                            </tr>
+                            <tr>
+                                <td>ISO</td><td>{{iso}}</td>
+                            </tr>
+                            <tr>
+                                <td>Focal Length</td><td>{{focal_length}} mm</td>
+                            </tr>
+                            <tr>
+                                <td>Lens</td><td>{{lens}}</td>
+                            </tr>
+                            <tr>
+                                <td>Exposure</td><td>1/{{exposure_time}} s</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+
     <div id="comments">
         <h3>
             Comments

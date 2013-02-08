@@ -7,7 +7,7 @@ import webapp2
 import logging
 
 from handler import BaseHandler
-from model import Photo, UserComp, Competition
+from model import Photo, UserComp, Competition, blob_exif
 from helper import OPEN, ordinal
 
 
@@ -116,12 +116,15 @@ class Upload(BaseHandler, blobstore_handlers.BlobstoreUploadHandler):
         comp_id = int(self.request.get('comp-id'))
         comp = Competition.get_by_id(comp_id)
 
+        exif = blob_exif(blob_info.key())
+
         # add photo details to database
         photo = Photo(
             user=user.key,
             title=photo_title,
             blob=blob_info.key(),
-            competition=comp.key
+            competition=comp.key,
+            **exif
         )
         photo.put()
 

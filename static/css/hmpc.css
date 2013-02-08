@@ -2,6 +2,11 @@ section {
     margin-bottom: 30px;
 }
 
+.photo-exif {
+    margin-top: 20px;
+    margin-bottom: 0px;
+}
+
 .img-carousel {
     background-repeat: no-repeat;
     background-position: center;
