@@ -4,11 +4,8 @@
 {% block nav_comps %} active{% endblock %}
 
 {% block content %}
-    <h4>
-        {{comp.title}}
-    </h4>
     {% if description %}
-        <p><span class="label">{{description}}</span></p>
+        <p><strong>Theme:</strong> {{description}}</p>
     {% endif %}
     <p>This competition is open to submissions. The photographs are hidden until
      the scoring phase starts.</p>
