@@ -102,9 +102,9 @@ handlers:
   script: test.app
   secure: never
 
-#- url: /helper/.*
-#  script: helps.app
-#  secure: never
+- url: /help/comments
+  script: help.help.app
+  secure: never
 
 - url: /about
   script: main.app
