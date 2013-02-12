@@ -2,11 +2,6 @@ section {
     margin-bottom: 30px;
 }
 
-.photo-exif {
-    margin-top: 20px;
-    margin-bottom: 0px;
-}
-
 .img-carousel {
     background-repeat: no-repeat;
     background-position: center;
@@ -60,6 +55,20 @@ section {
     font-style: italic;
     margin: 8px;
     height: 40px; /* four lines */
+}
+
+.photo-exif {
+    position: absolute;
+    margin: 10px;
+    display: none;
+}
+
+#exif-data-table {
+    display: none;
+}
+
+.popover-content {
+    font-size: 12px;
 }
 
 .badge-first {

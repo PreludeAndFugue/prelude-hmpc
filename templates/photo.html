@@ -3,48 +3,11 @@
 
 {% block content %}
     <div id="photo">
-        <img src="{{url}}" alt="{{title}}" class="img-polaroid" />
-    </div>
-
-    <div class="row">
-    <div class="accordion span6 photo-exif" id="photo-exif">
-        <div class="accordion-group">
-            <div class="accordion-heading">
-                <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion2" href="#collapseOne">
-                    EXIF data
-                </a>
-            </div>
-            <div id="collapseOne" class="accordion-body collapse">
-                <div class="accordion-inner">
-                    <table class="table">
-                        <tbody class="span5">
-                            <tr>
-                                <td class="span1">Make</td><td class="span4">{{make}}</td>
-                            </tr>
-                            <tr>
-                                <td>Model</td><td>{{model}}</td>
-                            </tr>
-                            <tr>
-                                <td>Date</td><td>{{datetime}}</td>
-                            </tr>
-                            <tr>
-                                <td>ISO</td><td>{{iso}}</td>
-                            </tr>
-                            <tr>
-                                <td>Focal Length</td><td>{{focal_length}} mm</td>
-                            </tr>
-                            <tr>
-                                <td>Lens</td><td>{{lens}}</td>
-                            </tr>
-                            <tr>
-                                <td>Exposure</td><td>1/{{exposure_time}} s</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+        <div class="photo-exif">
+            <a href="#" class="btn" id="show-exif">
+                View EXIF data</a>
         </div>
-    </div>
+        <img src="{{url}}" alt="{{title}}" class="img-polaroid" />
     </div>
 
     <div id="comments">
@@ -89,4 +52,35 @@
     </div>
     {% endif %}
 
+    <div id="exif-data-table">
+        <ul class="unstyled" id="exif-data">
+            <li><strong>Make</strong> {{make}}</li>
+            <li><strong>Model</strong> {{model}}</li>
+            <li><strong>Taken</strong> {{datetime}}</li>
+            <li><strong>ISO</strong> {{iso}}</li>
+            <li><strong>Exposure</strong> {{exposure_time}}</li>
+            <li><strong>Copyright</strong> </li>
+        </ul>
+    </div>
+
+{% endblock %}
+
+{% block script %}
+$(function() {
+    $('#photo').mouseenter(function() {
+        $('.photo-exif').fadeIn();
+    }).mouseleave(function() {
+        $('.photo-exif').fadeOut();
+    });
+
+    var contents = $('#exif-data-table').html();
+    $('#show-exif').popover({
+        content: contents,
+        html: true,
+        title: 'EXIF data',
+        //trigger: 'hover'
+    }).click(function(e) {
+        e.preventDefault();
+    });
+});
 {% endblock %}

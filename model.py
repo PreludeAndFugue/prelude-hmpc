@@ -259,14 +259,14 @@ class Photo(ndb.Model):
 
     def exif(self):
         return {
-        'make': self.make,
-        'model': self.model,
-        'datetime': self.datetime,
-        'iso': self.iso,
-        'focal_length': self.focal_length,
-        'lens': self.lens,
-        'exposure_time': self.exposure_time,
-    }
+            'make': self.make,
+            'model': self.model,
+            'datetime': self.datetime,
+            'iso': self.iso,
+            'focal_length': self.focal_length,
+            'lens': self.lens,
+            'exposure_time': self.exposure_time,
+        }
 
     def comments(self):
         query = Comment.query(Comment.photo == self.key)
