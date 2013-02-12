@@ -2,9 +2,6 @@ test/photo*
 static/css/bootstrap*
 static/js/bootstrap*
 
-# some files to update data on the server
-helper/*
-
 # ignore markdown
 markdown
 
