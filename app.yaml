@@ -74,6 +74,10 @@ handlers:
   script: comment.app
   secure: never
 
+- url: /comments
+  script: comment.app
+  secure: never
+
 - url: /competitions
   script: competition.app
   secure: never
