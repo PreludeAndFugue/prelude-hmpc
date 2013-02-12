@@ -6,25 +6,19 @@
 {% block nav_comps %} active{% endblock %}
 {% block content %}
 
-    <h4>
-        {{comp.title}}
-    </h4>
     {% if description %}
-        <p><span class="label">{{description}}</span></p>
+        <p><strong>Theme:</strong> {{description}}</p>
     {% endif %}
 
     <ul class="thumbnails">
-    {% for photo, title, username, url, thumb, position, total_score, id in photos %}
+    {% for photo in photos %}
         <li class="span2">
-            <a href="{{url}}" class="thumbnail" rel="lightbox[comp]"
-                title="{{title}} submitted by {{username}}, position: {{position}}">
-                <img id="thumb" src="{{thumb}}" alt="{{title}}" />
+            <a href="{{photo.url()}}" class="thumbnail" rel="lightbox[comp]"
+                title="{{photo.title}} submitted by {{photo.username()}}, position: {{photo.ordinal_position()}}">
+                <img id="thumb" src="{{photo.thumb(128)}}" alt="{{photo.title}}" />
             </a>
             <div class="photo-title">
-                {{title|truncate(30)}}
-            </div>
-            <div class="photo-comment span2">
-                <a href="/photo/{{id}}" class="btn comment-button">Comments</a>
+                {{photo.title|default('Untitled', true)|truncate(30)}}
             </div>
         </li>
     {% endfor %}
@@ -40,26 +34,31 @@
             </tr>
         </thead>
         <tbody>
-            {% for photo, title, username, url, thumb, position, total_score, id in photos %}
-                {% if user.username == username %}
+            {% for photo in photos %}
+                {% if user.username == photo.username() %}
                     <tr class="highlight-user">
                 {% else %}
                     <tr>
                 {% endif %}
                 <td class="centred">
-                {% if position == '1st' %}
+                {% if photo.ordinal_position() == '1st' %}
                     <span class="centred badge badge-first">
-                {% elif position == '2nd' %}
+                {% elif photo.ordinal_position() == '2nd' %}
                     <span class="centred badge badge-second">
-                {% elif position == '3rd' %}
+                {% elif photo.ordinal_position() == '3rd' %}
                     <span class="centred badge badge-third">
                 {% else %}
                     <span class="centred badge">
                 {% endif %}
-                {{position}}<span></td>
-                <td><span class="pull-right">{{total_score}}</span></td>
-                <td>{{username}}</td>
-                <td>{{title}}</td>
+                {{photo.ordinal_position()}}<span></td>
+                <td><span class="pull-right">{{photo.total_score}}</span></td>
+                <td>{{photo.username()}}</td>
+                <td>{{photo.title}}</td>
+                <td>
+                    <a href="/photo/{{photo.key.id()}}">
+                    Comments: {{photo.comment_count}}
+                    </a>
+                </td>
             </tr>
             {% endfor %}
         </tbody>

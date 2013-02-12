@@ -41,6 +41,14 @@ section {
     text-align: center;
 }
 
+.thumbnails > li {
+    margin-bottom: 1px;
+}
+
+.page-header {
+    margin-bottom: 10px;
+}
+
 .photo-score {
     text-align: center;
     margin: 10px;

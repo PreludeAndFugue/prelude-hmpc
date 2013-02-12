@@ -9,7 +9,7 @@ import csv
 import logging
 import StringIO
 
-from helper import SCORING
+from helper import SCORING, ordinal
 
 # the maximum length of the longest dimension of on uploaded photo
 MAX_SIZE = 800
@@ -193,6 +193,7 @@ class Photo(ndb.Model):
     upload_date = ndb.DateTimeProperty(auto_now_add=True)
     position = ndb.IntegerProperty(default=0)
     total_score = ndb.IntegerProperty(default=0)
+    comment_count = ndb.IntegerProperty(default=0)
 
     @classmethod
     def user_photos(cls, user, limit=None):
@@ -247,6 +248,12 @@ class Photo(ndb.Model):
 
     def url(self, size=MAX_SIZE):
         return get_serving_url(self.blob, size=size)
+
+    def ordinal_position(self):
+        return ordinal(self.position)
+
+    def username(self):
+        return self.user.get().username
 
     def comments(self):
         query = Comment.query(Comment.photo == self.key)
