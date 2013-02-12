@@ -1,22 +1,17 @@
 {% extends "base.html" %}
-{% block title %}Notes{% endblock %}
-{% block nav_notes %}active{% endblock %}
+{% block title %}Comments{% endblock %}
+{% block nav_comments %}active{% endblock %}
 
 {% block content %}
 
-    {% if user %}
-        <a href="/note/new" class="btn btn-primary">New Note</a>
-    {% endif %}
-
-    {% for id, title, text, username, userid, date in notes %}
-        <h4>{{title}}</h4>
+    {% for comment in comments %}
         <blockquote>
-            {{text|safe}}
+            {{comment.markdown()|safe}}
             <small>
-                {{username}}, {{date}}
+                {{comment.username()}}, {{comment.format_date()}}
                 {% if user_id == userid or user.admin %}
                     <span class="pull-right">
-                        <a href="/note/edit/{{id}}">Edit</a>
+                        <a href="/comment/edit/{{comment.key.id()}}">Edit</a>
                     </span>
                 {% endif %}
             </small>
