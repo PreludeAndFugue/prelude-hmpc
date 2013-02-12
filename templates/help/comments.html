@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}admin stuff{% endblock %}
+
+{% block content %}
+
+<p>helper hello</p>
+
+{% for photo in photos %}
+    <p>Photo: {{photo.key.id()}}, comments: {{photo.comments().count()}}</p>
+{% endfor %}
+
+{% endblock %}
