@@ -343,6 +343,12 @@ class Comment(ndb.Model):
         '''Format the stored submit date for pretty printing.'''
         return self.submit_date.strftime('%H:%M, %d-%b-%Y')
 
+    def photo_thumbnail(self):
+        return self.photo.get().thumb(42)
+
+    def photo_id(self):
+        return self.photo.id()
+
 
 class Note(ndb.Model):
     user = ndb.KeyProperty(kind=User, required=True)

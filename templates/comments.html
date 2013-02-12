@@ -6,6 +6,11 @@
 
     {% for comment in comments %}
         <blockquote>
+            <div class="pull-left" style="margin: 0px 10px 5px 0px;">
+                <a class="thumbnail" href="photo/{{comment.photo_id()}}">
+                    <img src="{{comment.photo_thumbnail()}}">
+                </a>
+            </div>
             {{comment.markdown()|safe}}
             <small>
                 {{comment.username()}}, {{comment.format_date()}}
