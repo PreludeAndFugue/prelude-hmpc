@@ -6,11 +6,8 @@
 {% block nav_comps %} active{% endblock %}
 {% block content %}
 
-    <h4>
-        {{comp.title}}
-    </h4>
     {% if description %}
-        <p><span class="label">{{description}}</span></p>
+        <p><strong>Theme:</strong> {{description}}</p>
     {% endif %}
     {% if not competitor %}
         <p>The competitiors are currently submitting scores.</p>

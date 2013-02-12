@@ -59,7 +59,7 @@ class CompetitionHandler(BaseHandler):
             'comp': comp,
             'year': comp.year,
             'month': month_str,
-            'page_title': 'Competition: %s %d' % (month_str, comp.year),
+            'page_title': comp.title,
             'page_subtitle': comp.get_status(),
             'description': comp.description,
         }
@@ -142,25 +142,7 @@ class CompetitionHandler(BaseHandler):
 
     def view_complete(self, user, comp_id, comp, data):
         '''Create the competition page when its status is Completed.'''
-        photos = []
-        for p in Photo.competition_result(comp):
-        #for p in self.get_competition_photos(comp_id, comp=comp):
-            title, url, thumb, _, position, score, _ = p.data(128)
-            photos.append((
-                p,
-                title,
-                p.user.get().username,
-                url,
-                thumb,
-                ordinal(position),
-                score,
-                p.key.id()
-            ))
-
-        data.update({
-            'photos': photos
-        })
-
+        data['photos'] = list(Photo.competition_result(comp))
         self.render('competition-complete.html', **data)
 
     def parse_scores(self, scores):
