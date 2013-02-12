@@ -65,6 +65,20 @@ section {
     height: 40px; /* four lines */
 }
 
+.photo-exif {
+    position: absolute;
+    margin: 10px;
+    display: none;
+}
+
+#exif-data-table {
+    display: none;
+}
+
+.popover-content {
+    font-size: 12px;
+}
+
 .badge-first {
     background-color: #D4AF37;
 }

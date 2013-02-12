@@ -1,11 +1,12 @@
 
 from google.appengine.ext import ndb
 #from google.appengine.ext import db
-from google.appengine.api.images import get_serving_url
+from google.appengine.api.images import Image, get_serving_url
 import markdown
 
 from calendar import month_name
 import csv
+import datetime
 import logging
 import StringIO
 
@@ -193,6 +194,15 @@ class Photo(ndb.Model):
     upload_date = ndb.DateTimeProperty(auto_now_add=True)
     position = ndb.IntegerProperty(default=0)
     total_score = ndb.IntegerProperty(default=0)
+    # exif data
+    make = ndb.StringProperty()
+    model = ndb.StringProperty()
+    datetime = ndb.DateTimeProperty()
+    iso = ndb.IntegerProperty()
+    focal_length = ndb.IntegerProperty()
+    lens = ndb.StringProperty()
+    exposure_time = ndb.IntegerProperty()
+    copyright = ndb.StringProperty()
     comment_count = ndb.IntegerProperty(default=0)
 
     @classmethod
@@ -248,6 +258,18 @@ class Photo(ndb.Model):
 
     def url(self, size=MAX_SIZE):
         return get_serving_url(self.blob, size=size)
+
+    def exif(self):
+        return {
+            'make': self.make,
+            'model': self.model,
+            'datetime': self.datetime,
+            'iso': self.iso,
+            'focal_length': self.focal_length,
+            'lens': self.lens,
+            'exposure_time': self.exposure_time,
+            'copyright': self.copyright,
+        }
 
     def ordinal_position(self):
         return ordinal(self.position)
@@ -423,3 +445,37 @@ def recently_completed_competitions():
         )
         results.append((comp, photos))
     return results
+
+
+def blob_exif(blob_key):
+    '''Extract EXIF data from the blob data.'''
+    keys = (
+            ('make', 'Make', '?'),
+            ('model', 'Model', '?'),
+            ('datetime', 'DateTimeDigitized', '0001:01:01 00:00:00'),
+            ('iso', 'ISOSpeedRatings', 0),
+            ('focal_length', 'FocalLength', 0),
+            ('lens', 'Lens', '?'),
+            ('exposure_time', 'ExposureTime', 0),
+            ('copyright', 'Copyright', '')
+        )
+    data = {}
+    im = Image(blob_key=blob_key)
+    im.rotate(0)
+    im.execute_transforms(parse_source_metadata=True)
+    exif = im.get_original_metadata()
+    for key, key_exif, default in keys:
+        if key == 'datetime':
+            dt = exif.get(key_exif, default)
+            data[key] = datetime.datetime.strptime(dt, '%Y:%m:%d %H:%M:%S')
+        elif key == 'focal_length':
+            data[key] = int(exif.get(key_exif, default))
+        elif key == 'exposure_time':
+            t = exif.get(key_exif, default)
+            if t == 0:
+                data[key] = t
+            else:
+                data[key] = int(round(1 / t))
+        else:
+            data[key] = exif.get(key_exif, default)
+    return data
