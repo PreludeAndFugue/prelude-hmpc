@@ -6,61 +6,93 @@
 {% block nav_comps %} active{% endblock %}
 {% block content %}
 
-    <h4>
-        {{comp.title}}
-    </h4>
     {% if description %}
-        <p><span class="label">{{description}}</span></p>
+        <p><strong>Theme:</strong> {{description}}</p>
     {% endif %}
     {% if not competitor %}
         <p>The competitiors are currently submitting scores.</p>
     {% endif %}
-    <form method="post" class="form-inline">
 
-    <ul class="thumbnails">
-    {% for photo, title, url, thumb, score, user_photo in photos %}
-        <li class="span2">
-            <a href="{{url}}" class="thumbnail" rel="lightbox[comp]"
-                title="{{title}}">
-                <img id="thumb" src="{{thumb}}" alt="{{title}}" />
-            </a>
-            <div class="photo-title">
-                {{title|truncate(length=35)}}
-            </div>
-            {% if competitor %}
-                <div class="photo-score">
-                    {% if to_score and not user_photo %}
-                        <label for="score" class="control-label">Score</label>
-                        <select name="{{photo.key.id()}}" class="span1">
-                            <option>1</option>
-                            <option>2</option>
-                            <option>3</option>
-                            <option>4</option>
-                            <option>5</option>
-                            <option>6</option>
-                            <option>7</option>
-                            <option>8</option>
-                            <option>9</option>
-                            <option>10</option>
-                        </select>
-                    {% elif not to_score and not user_photo %}
-                        <p><b>Score:</b> {{score}}</p>
-                    {% else %}
-                        <p>My photo</p>
-                    {% endif %}
+    {% if competitor and to_score %}
+    <form method="post" class="form-inline" id="scores">
+    {% endif %}
+
+        <ul class="thumbnails">
+        {% for photo, title, url, thumb, score, user_photo in photos %}
+            <li class="span2">
+                <a href="{{url}}" class="thumbnail" rel="lightbox[comp]"
+                    title="{{title}}">
+                    <img id="thumb" src="{{thumb}}" alt="{{title}}" />
+                </a>
+                <div class="photo-title">
+                    {{title|truncate(length=35)}}
                 </div>
-            {% endif %}
-        </li>
-    {% endfor %}
-    </ul>
+                {% if competitor %}
+                    <div class="photo-score control-group">
+                        {% if to_score and not user_photo %}
+                            <label for="score" class="control-label">Score</label>
+                            <select name="{{photo.key.id()}}" class="span1">
+                                <option selected="selected">-</option>
+                                <option>0</option>
+                                <option>1</option>
+                                <option>2</option>
+                                <option>3</option>
+                                <option>4</option>
+                                <option>5</option>
+                                <option>6</option>
+                                <option>7</option>
+                                <option>8</option>
+                                <option>9</option>
+                                <option>10</option>
+                            </select>
+                        {% elif not to_score and not user_photo %}
+                            <p><b>Score:</b> {{score}}</p>
+                        {% else %}
+                            <p>My photo</p>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </li>
+        {% endfor %}
+        </ul>
 
     {% if competitor and to_score %}
         <hr>
         <input type="submit" class="btn btn-primary" value="Submit Scores" />
+    </form>
+
+    <div class="alert alert-error" id="error-message" style="display: none;">
+        You have not submitted a score for all photos. Please add scores to
+        the items that have turned red.
+    </div>
     {% endif %}
 
 {% endblock %}
 
 {% block js %}
 <script src="/static/js/lightbox.js"></script>
+{% endblock %}
+
+
+{% block script %}
+/*
+Make sure user submits scores for all photos.
+*/
+$(function() {
+    $('#scores').submit(function() {
+        var faulty = false;
+        $('select').each(function(i, el) {
+            if (el.value === '-') {
+                faulty = true;
+                $(el).parent().addClass('error');
+            }
+        });
+        if (faulty) {
+            $('#error-message').fadeIn();
+            return false;
+        } else {
+            return true;
+        }
+    });
+});
 {% endblock %}

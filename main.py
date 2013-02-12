@@ -7,7 +7,13 @@ import markdown
 
 from handler import BaseHandler
 from helper import MONTHS, ordinal
-from model import Photo, Competition, Comment, recently_completed_competitions
+from model import (
+    Photo,
+    Competition,
+    Comment,
+    Note,
+    recently_completed_competitions,
+)
 
 
 class Home(BaseHandler):
@@ -19,7 +25,8 @@ class Home(BaseHandler):
             'user': user,
             'competitions': self.competitions_in_progress(),
             'comments': self.recent_comments(),
-            'results': self.recent_results()
+            'results': self.recent_results(),
+            'notes': Note.recent_notes(),
         }
         self.render('home.html', **data)
 
@@ -65,7 +72,7 @@ class Home(BaseHandler):
 
     def recent_comments(self):
         comments = []
-        for comment in Comment.recent_comments(6):
+        for comment in Comment.recent_comments(7):
             text = markdown.markdown(
                 comment.text,
                 output_format='html5',

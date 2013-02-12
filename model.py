@@ -10,7 +10,7 @@ import datetime
 import logging
 import StringIO
 
-from helper import SCORING
+from helper import SCORING, ordinal
 
 # the maximum length of the longest dimension of on uploaded photo
 MAX_SIZE = 800
@@ -202,6 +202,7 @@ class Photo(ndb.Model):
     focal_length = ndb.IntegerProperty()
     lens = ndb.StringProperty()
     exposure_time = ndb.IntegerProperty()
+    comment_count = ndb.IntegerProperty(default=0)
 
     @classmethod
     def user_photos(cls, user, limit=None):
@@ -268,6 +269,12 @@ class Photo(ndb.Model):
             'exposure_time': self.exposure_time,
         }
 
+    def ordinal_position(self):
+        return ordinal(self.position)
+
+    def username(self):
+        return self.user.get().username
+
     def comments(self):
         query = Comment.query(Comment.photo == self.key)
         return query
@@ -321,6 +328,51 @@ class Comment(ndb.Model):
     def format_date(self):
         '''Format the stored submit date for pretty printing.'''
         return self.submit_date.strftime('%H:%M, %d-%b-%Y')
+
+
+class Note(ndb.Model):
+    user = ndb.KeyProperty(kind=User, required=True)
+    submit_date = ndb.DateTimeProperty(auto_now_add=True)
+    title = ndb.StringProperty()
+    text = ndb.TextProperty()
+
+    @classmethod
+    def user_notes(cls, user):
+        query = cls.query(cls.user == user.key)
+        query = query.order(-cls.submit_date)
+        return query
+
+    @classmethod
+    def recent_notes(cls, limit=4, offset=0):
+        query = cls.query()
+        query = query.order(-cls.submit_date)
+        for note in query.fetch(limit, offset=offset):
+            text = markdown.markdown(
+                note.text,
+                output_format='html5',
+                safe_mode='replace',
+            )
+            yield (
+                note.key.id(),
+                note.title,
+                text,
+                note.user.get().username,
+                note.user.id(),
+                note.format_date()
+            )
+
+    def format_date(self):
+        '''Format the stored submit date for pretty printing.'''
+        return self.submit_date.strftime('%H:%M, %d-%b-%Y')
+
+    def markdown(self):
+        '''Apply markdown to the comment text.'''
+        text = markdown.markdown(
+            self.text,
+            output_format='html5',
+            safe_mode='replace',
+        )
+        return text
 
 
 class Scores(ndb.Model):
