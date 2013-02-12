@@ -102,7 +102,7 @@ handlers:
   script: test.app
   secure: never
 
-- url: /help/comments
+- url: /help/.*
   script: help.help.app
   secure: never
 

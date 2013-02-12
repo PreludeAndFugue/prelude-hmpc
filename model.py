@@ -202,6 +202,7 @@ class Photo(ndb.Model):
     focal_length = ndb.IntegerProperty()
     lens = ndb.StringProperty()
     exposure_time = ndb.IntegerProperty()
+    copyright = ndb.StringProperty()
     comment_count = ndb.IntegerProperty(default=0)
 
     @classmethod
@@ -267,6 +268,7 @@ class Photo(ndb.Model):
             'focal_length': self.focal_length,
             'lens': self.lens,
             'exposure_time': self.exposure_time,
+            'copyright': self.copyright,
         }
 
     def ordinal_position(self):
@@ -454,7 +456,8 @@ def blob_exif(blob_key):
             ('iso', 'ISOSpeedRatings', 0),
             ('focal_length', 'FocalLength', 0),
             ('lens', 'Lens', '?'),
-            ('exposure_time', 'ExposureTime', 0)
+            ('exposure_time', 'ExposureTime', 0),
+            ('copyright', 'Copyright', '')
         )
     data = {}
     im = Image(blob_key=blob_key)
