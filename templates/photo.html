@@ -3,6 +3,10 @@
 
 {% block content %}
     <div id="photo">
+        <div class="photo-exif">
+            <a href="#" class="btn" id="show-exif">
+                View EXIF data</a>
+        </div>
         <img src="{{url}}" alt="{{title}}" class="img-polaroid" />
     </div>
 
@@ -48,4 +52,35 @@
     </div>
     {% endif %}
 
+    <div id="exif-data-table">
+        <ul class="unstyled" id="exif-data">
+            <li><strong>Make</strong> {{make}}</li>
+            <li><strong>Model</strong> {{model}}</li>
+            <li><strong>Taken</strong> {{datetime}}</li>
+            <li><strong>ISO</strong> {{iso}}</li>
+            <li><strong>Exposure</strong> 1/{{exposure_time}}s</li>
+            <li><strong>Copyright</strong> {{copyright}}</li>
+        </ul>
+    </div>
+
+{% endblock %}
+
+{% block script %}
+$(function() {
+    $('#photo').mouseenter(function() {
+        $('.photo-exif').fadeIn();
+    }).mouseleave(function() {
+        $('.photo-exif').fadeOut();
+    });
+
+    var contents = $('#exif-data-table').html();
+    $('#show-exif').popover({
+        content: contents,
+        html: true,
+        title: 'EXIF data',
+        //trigger: 'hover'
+    }).click(function(e) {
+        e.preventDefault();
+    });
+});
 {% endblock %}

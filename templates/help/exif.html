@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}admin stuff{% endblock %}
+
+{% block content %}
+
+{% for photo, exif in photos %}
+    <p>Photo {{photo}}</p>
+    <p>{{exif}}</p>
+{% endfor %}
+
+{% endblock %}

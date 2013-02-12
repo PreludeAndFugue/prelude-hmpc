@@ -17,6 +17,8 @@ class PhotoView(BaseHandler):
         photo_id = int(photo_id)
         photo = Photo.get_by_id(photo_id)
 
+        logging.info('exif data: %s' % photo.exif())
+
         if not photo:
             data = {
                 'page_title': 'Error',
@@ -55,6 +57,7 @@ class PhotoView(BaseHandler):
             'title': photo.title,
             'comments': list(Comment.photo_comments(photo))
         }
+        data.update(photo.exif())
         self.render('photo.html', **data)
 
     def post(self, photo_id=0):
@@ -68,7 +71,6 @@ class PhotoView(BaseHandler):
         comment = self.request.get('comment-text')
         #comment = escape(comment)
 
-        logging.info(user_id)
         logging.info(photo_id)
 
         photo = Photo.get_by_id(photo_id)
