@@ -117,8 +117,8 @@ class About(BaseHandler):
 
 app = webapp2.WSGIApplication(
     [
-        ('/', Home),
-        ('/about', About)
+        (r'/', Home),
+        (r'/about', About)
     ],
     debug=True
 )

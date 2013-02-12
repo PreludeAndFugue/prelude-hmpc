@@ -2,10 +2,10 @@ application: prelude-hmpc
 version: 3-1
 runtime: python27
 api_version: 1
-threadsafe: yes
+threadsafe: true
 
 builtins:
-#- remote_api: on
+- remote_api: on
 
 default_expiration: "7d"
 
@@ -102,11 +102,15 @@ handlers:
   script: test.app
   secure: never
 
-- url: .*
+#- url: /helper/.*
+#  script: helps.app
+#  secure: never
+
+- url: /about
   script: main.app
   secure: never
 
-- url: /about
+- url: .*
   script: main.app
   secure: never
 
