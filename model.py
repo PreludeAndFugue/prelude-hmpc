@@ -322,14 +322,32 @@ class Comment(ndb.Model):
         return query
 
     @classmethod
-    def recent_comments(cls, limit=5):
+    def recent_comments(cls, limit=5, offset=0):
         query = cls.query()
         query = query.order(-cls.submit_date)
-        return query.fetch(limit)
+        return query.fetch(limit, offset=offset)
+
+    def username(self):
+        return self.user.get().username
+
+    def markdown(self):
+        '''Apply markdown to the comment text.'''
+        text = markdown.markdown(
+            self.text,
+            output_format='html5',
+            safe_mode='replace',
+        )
+        return text
 
     def format_date(self):
         '''Format the stored submit date for pretty printing.'''
         return self.submit_date.strftime('%H:%M, %d-%b-%Y')
+
+    def photo_thumbnail(self):
+        return self.photo.get().thumb(42)
+
+    def photo_id(self):
+        return self.photo.id()
 
 
 class Note(ndb.Model):
@@ -368,7 +386,7 @@ class Note(ndb.Model):
         return self.submit_date.strftime('%H:%M, %d-%b-%Y')
 
     def markdown(self):
-        '''Apply markdown to the comment text.'''
+        '''Apply markdown to the note text.'''
         text = markdown.markdown(
             self.text,
             output_format='html5',

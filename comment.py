@@ -7,6 +7,45 @@ from handler import BaseHandler
 from model import Comment
 
 
+class Comments(BaseHandler):
+    def get(self):
+        user_id, user = self.get_user()
+
+        start = self.request.get('start')
+        logging.info('start: %s', start)
+
+        if not start:
+            start = 0
+        else:
+            start = int(start)
+            if start > 1000000:
+                start = 0
+
+        if start == 0:
+            before = 0
+            after = 10
+        else:
+            before = start - 10
+            after = start + 10
+
+        comments = list(Comment.recent_comments(10, start))
+        logging.info(len(comments))
+        more_old = '' if len(comments) == 10 else 'disabled'
+        more_new = '' if start > 0 else 'disabled'
+
+        data = {
+            'page_title': 'Comments',
+            'user': user,
+            'comments': comments,
+            'before': before,
+            'after': after,
+            'more_old': more_old,
+            'more_new': more_new,
+        }
+
+        self.render('comments.html', **data)
+
+
 class CommentEdit(BaseHandler):
     def get(self, comment_id=0):
         '''Edit a comment'''
@@ -74,5 +113,6 @@ class CommentEdit(BaseHandler):
 
 routes = [
     (r'/comment/edit/(\d+)', CommentEdit),
+    (r'/comments', Comments),
 ]
 app = webapp2.WSGIApplication(routes=routes, debug=True)
