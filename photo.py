@@ -79,6 +79,10 @@ class PhotoView(BaseHandler):
         )
         new_comment.put()
 
+        # keep track of the total number of comments
+        photo.comment_count += 1
+        photo.put()
+
         # send an email to the photographer, letting them know of the new
         # comment
         photo_user = photo.user.get()
