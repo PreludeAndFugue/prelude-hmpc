@@ -10,7 +10,7 @@ import datetime
 import logging
 import StringIO
 
-from helper import SCORING, ordinal
+from helper import COMPLETED, SCORING, ordinal
 
 # the maximum length of the longest dimension of on uploaded photo
 MAX_SIZE = 800
@@ -25,6 +25,7 @@ class User(ndb.Model):
     admin = ndb.BooleanProperty(default=False)
     pass_reset_code = ndb.StringProperty()
     pass_reset_expire = ndb.DateTimeProperty()
+    bio = ndb.TextProperty()
 
     @classmethod
     def user_from_name(cls, name):
@@ -58,6 +59,13 @@ class User(ndb.Model):
                         month_name[comp.month],
                         comp.year
                     )
+
+    def bio_markdown(self):
+        return markdown.markdown(
+            self.bio,
+            output_format='html5',
+            safe_mode='replace',
+        )
 
     def __eq__(self, other):
         '''Compare to users for equality.'''
@@ -213,6 +221,15 @@ class Photo(ndb.Model):
         return query.fetch(limit=limit)
 
     @classmethod
+    def user_photos_complete(cls, user, limit=None):
+        '''Return all photos of a user in completed competitions.'''
+        query = cls.query(cls.user == user.key)
+        query = query.order(cls.upload_date)
+        for photo in query:
+            if photo.competition.get().status == COMPLETED:
+                yield photo
+
+    @classmethod
     def competition_photos(cls, competition):
         '''Return all photos entered into a competition.'''
         query = cls.query(cls.competition == competition.key)
@@ -276,6 +293,9 @@ class Photo(ndb.Model):
 
     def username(self):
         return self.user.get().username
+
+    def get_competition(self):
+        return self.competition.get()
 
     def comments(self):
         query = Comment.query(Comment.photo == self.key)

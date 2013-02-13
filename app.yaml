@@ -66,6 +66,10 @@ handlers:
   script: user.app
   secure: never
 
+- url: /user/.*
+  script: user.app
+  secure: never
+
 - url: /photo/.*
   script: photo.app
   secure: never
