@@ -7,7 +7,7 @@ import webapp2
 import logging
 
 from handler import BaseHandler
-from model import Photo, UserComp, Competition, blob_exif
+from model import User, Photo, UserComp, Competition, blob_exif
 from helper import OPEN, ordinal
 
 
@@ -32,12 +32,8 @@ class UserPage(BaseHandler):
         if open_comps_no_photos:
             upload_url = blobstore.create_upload_url('/upload')
 
-        #logging.info(open_comps)
-        #logging.info(open_comps_no_photos)
-
         photos = []
         for p in Photo.user_photos(user):
-        #for p in self.get_user_photos(user_id):
             title, url, thumb, date, position, score, comp_title = p.data()
             position = '%s place' % ordinal(position) if position else ''
             score = '%d points' % score if score else ''
@@ -52,8 +48,6 @@ class UserPage(BaseHandler):
                 comp_title
             ))
 
-        #logging.info(comp_photo)
-
         data = {
             'user': user,
             'page_title': 'User',
@@ -64,9 +58,6 @@ class UserPage(BaseHandler):
             'need_scores': list(user.scoring_competitions()),
         }
         self.render('user.html', **data)
-        # when a new competition is added need to find a way to clear theys
-        # cache of user pages since they will all be out of date
-        #self.render_and_cache(key, 'user.html', **data)
 
     def post(self):
         # submitting a photograph - handled by Upload class
@@ -135,8 +126,36 @@ class Upload(BaseHandler, blobstore_handlers.BlobstoreUploadHandler):
         self.redirect('/user')
 
 
+class UserView(BaseHandler):
+    def get(self, user_view_id):
+        user_id, user = self.get_user()
+        user_view_id = int(user_view_id)
+        user_view = User.get_by_id(user_view_id)
+
+        if not user_view:
+            data = {
+                'user': user,
+                'page_title': 'Error',
+                'error_msg': 'Cannot find User',
+            }
+            self.render('error.html', **data)
+            return
+
+        photos = Photo.user_photos_complete(user_view)
+
+        data = {
+            'page_title': 'User',
+            'page_subtitle': user_view.username,
+            'user': user,
+            'user_view': user_view,
+            'photos': photos,
+        }
+
+        self.render('user-view.html', **data)
+
 routes = [
-    ('/user', UserPage),
-    ('/upload', Upload),
+    (r'/user', UserPage),
+    (r'/upload', Upload),
+    (r'/user/(\d+)', UserView),
 ]
 app = webapp2.WSGIApplication(routes=routes, debug=True)

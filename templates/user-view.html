@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}User: {{user_view.username}}{% endblock %}
+
+{% block content %}
+
+    <ul class="thumbnails">
+    {% for photo in photos %}
+        <li class="span3">
+            <a href="/photo/{{photo.key.id()}}" class="thumbnail" title="{{photo.title}}">
+                <img src="{{photo.thumb()}}" alt="{{photo.title}}" />
+            </a>
+            <p>
+                <em>{{photo.title|default('Untitled', true)}}</em>
+                <br />
+                {{photo.get_competition().title}}
+                <br />
+                Score: {{photo.total_score}}
+                <br />
+                Position: {{photo.ordinal_position()}}
+            </p>
+        </li>
+    {% endfor %}
+    </ul>
+
+{% endblock %}
+
+{% block script %}
+{% endblock %}
