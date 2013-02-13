@@ -80,6 +80,7 @@ class Home(BaseHandler):
             )
             comments.append((
                 text,
+                comment.user.id(),
                 comment.user.get().username,
                 comment.photo.id(),
                 comment.format_date()
@@ -97,7 +98,8 @@ class Home(BaseHandler):
                     ordinal(photo.position),
                     classes[photo.position - 1],
                     photo.total_score,
-                    photo.user.get().username
+                    photo.user.id(),
+                    photo.user.get().username,
                 ))
             results.append((comp, new_photos))
         return results

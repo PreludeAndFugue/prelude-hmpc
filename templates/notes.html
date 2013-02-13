@@ -13,7 +13,7 @@
         <blockquote>
             {{text|safe}}
             <small>
-                {{username}}, {{date}}
+                <a href="/user/{{userid}}">{{username}}</a>, {{date}}
                 {% if user_id == userid or user.admin %}
                     <span class="pull-right">
                         <a href="/note/edit/{{id}}">Edit</a>

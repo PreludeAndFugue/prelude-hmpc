@@ -46,13 +46,15 @@
                         <a href="/competition/{{comp.key.id()}}">Full result</a>
                     </small>
                 </h4>
-                {% for ordinal, klass, score, user in photos %}
+                {% for ordinal, klass, score, userid, user in photos %}
                 <div class="row">
                     <div class="span1">
                         <span class="badge {{klass}}">{{ordinal}}</span>
                         <span class="pull-right">{{score}}</span>
                     </div>
-                    <div class="span4">{{user}}</div>
+                    <div class="span4">
+                        <a href="/user/{{userid}}">{{user}}</a>
+                    </div>
                 </div>
                 {% endfor %}
             {% endfor %}
@@ -70,7 +72,10 @@
                     <h4>{{title}}</h4>
                     <blockquote>
                         {{text|safe}}
-                        <small>{{username}}, {{date}}</small>
+                        <small>
+                            <a href="/user/{{userid}}">{{username}}</a>,
+                            {{date}}
+                        </small>
                     </blockquote>
                 </div>
             {% endfor %}
@@ -78,11 +83,11 @@
 
         <div class="span6">
             <h3>Recent Comments</h3>
-            {% for text, user, photo_id, date in comments %}
+            {% for text, userid, user, photo_id, date in comments %}
                 <div>
                     <blockquote>
                         {{text|safe}}
-                        <small>{{user}}, {{date}}
+                        <small><a href="/user/{{userid}}">{{user}}</a>, {{date}}
                             <span class="pull-right">
                                 <a href="/photo/{{photo_id}}">View photo</a>
                             </span>
