@@ -153,9 +153,25 @@ class UserView(BaseHandler):
 
         self.render('user-view.html', **data)
 
+
+class UserViewEdit(BaseHandler):
+    def get(self):
+        user_id, user = self.get_user()
+        if not user:
+            self.redirect('/')
+            return
+
+        data = {
+            'page_title': 'Edit Public Profile',
+            'user': user,
+        }
+
+        self.render('user-view-edit.html', **data)
+
 routes = [
     (r'/user', UserPage),
     (r'/upload', Upload),
     (r'/user/(\d+)', UserView),
+    (r'/user/edit', UserViewEdit),
 ]
 app = webapp2.WSGIApplication(routes=routes, debug=True)

@@ -45,8 +45,18 @@
                     {% endif %}
 
                     {% if user %}
-                    <li id="nav-user" class="{% block nav_user %}{% endblock %}">
-                        <a href="/user">User [{{user.username}}]</a>
+                    <li id="nav-user" class="dropdown{% block nav_user %}{% endblock %}">
+                        <a href="/user" class="dropdown-toggle" data-target="#" data-toggle="dropdown">User [{{user.username}}]
+                            <b class="caret"></b>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li id="">
+                                <a href="/user">Profile</a>
+                            </li>
+                            <li id="user-public">
+                                <a href="/user/edit">Edit Public Profile</a>
+                            </li>
+                        </ul>
                     </li>
                     {% endif %}
 
