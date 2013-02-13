@@ -50,10 +50,14 @@
                             <b class="caret"></b>
                         </a>
                         <ul class="dropdown-menu">
-                            <li id="">
+                            <li id="nav-user-private">
                                 <a href="/user">Profile</a>
                             </li>
-                            <li id="user-public">
+                            <li class="divider"></li>
+                            <li id="nav-user-public">
+                                <a href="/user/{{user.key.id()}}">Public Profile</a>
+                            </li>
+                            <li id="nav-user-public-edit">
                                 <a href="/user/edit">Edit Public Profile</a>
                             </li>
                         </ul>
