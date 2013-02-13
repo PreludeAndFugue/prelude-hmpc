@@ -52,7 +52,11 @@
                 {% endif %}
                 {{photo.ordinal_position()}}<span></td>
                 <td><span class="pull-right">{{photo.total_score}}</span></td>
-                <td>{{photo.username()}}</td>
+                <td>
+                    <a href="/user/{{photo.user.id()}}">
+                        {{photo.username()}}
+                    </a>
+                </td>
                 <td>{{photo.title}}</td>
                 <td>
                     <a href="/photo/{{photo.key.id()}}">

@@ -13,7 +13,8 @@
             </div>
             {{comment.markdown()|safe}}
             <small>
-                {{comment.username()}}, {{comment.format_date()}}
+                <a href="/user/{{comment.user.id()}}">{{comment.username()}}</a>,
+                {{comment.format_date()}}
                 {% if user_id == userid or user.admin %}
                     <span class="pull-right">
                         <a href="/comment/edit/{{comment.key.id()}}">Edit</a>

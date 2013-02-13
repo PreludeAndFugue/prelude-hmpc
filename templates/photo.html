@@ -5,7 +5,8 @@
     <div id="photo">
         <div class="photo-exif">
             <a href="#" class="btn" id="show-exif">
-                View EXIF data</a>
+                View EXIF data
+            </a>
         </div>
         <img src="{{url}}" alt="{{title}}" class="img-polaroid" />
     </div>
@@ -21,7 +22,7 @@
         <div class="row">
             <blockquote class="span9">
                 {{text|safe}}
-                <small>{{username}}, {{date}}
+                <small><a href="/user/{{user_id}}">{{username}}</a>, {{date}}
                     <!-- did logged in user write this comment -->
                     {% if user_id == userid or user.admin %}
                     <span class="pull-right">
