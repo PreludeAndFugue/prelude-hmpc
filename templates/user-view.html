@@ -3,6 +3,21 @@
 
 {% block content %}
 
+{% if user_view.bio %}
+<div id="bio" class="row">
+    <div class="span12">
+        {% if user and user_view.key.id() == user.key.id() %}
+            <div><a href="/user/edit" class="btn">Edit Details</a></div>
+            <br />
+        {% endif %}
+        {{user_view.bio_markdown()|safe}}
+    </div>
+</div>
+
+<hr />
+{% endif %}
+
+<div>
     <ul class="thumbnails">
     {% for photo in photos %}
         <li class="span3">
@@ -21,6 +36,7 @@
         </li>
     {% endfor %}
     </ul>
+</div>
 
 {% endblock %}
 

@@ -168,6 +168,18 @@ class UserViewEdit(BaseHandler):
 
         self.render('user-view-edit.html', **data)
 
+    def post(self):
+        user_id, user = self.get_user()
+        if not user:
+            self.redirect('/')
+            return
+
+        bio = self.request.get('bio')
+        user.bio = bio
+        user.put()
+
+        self.redirect('/user/%d' % user_id)
+
 routes = [
     (r'/user', UserPage),
     (r'/upload', Upload),

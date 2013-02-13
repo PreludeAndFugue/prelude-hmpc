@@ -3,7 +3,12 @@
 
 {% block content %}
 
-
+<form method="post">
+    <textarea id="bio" name="bio" rows="15" class="span12">{{user.bio}}</textarea>
+    <br />
+    <input type="submit" class="btn btn-primary" value="Update">
+    <a href="/user" class="btn">Cancel</a>
+</form>
 
 
 {% endblock %}

@@ -25,6 +25,7 @@ class User(ndb.Model):
     admin = ndb.BooleanProperty(default=False)
     pass_reset_code = ndb.StringProperty()
     pass_reset_expire = ndb.DateTimeProperty()
+    bio = ndb.TextProperty()
 
     @classmethod
     def user_from_name(cls, name):
@@ -58,6 +59,13 @@ class User(ndb.Model):
                         month_name[comp.month],
                         comp.year
                     )
+
+    def bio_markdown(self):
+        return markdown.markdown(
+            self.bio,
+            output_format='html5',
+            safe_mode='replace',
+        )
 
     def __eq__(self, other):
         '''Compare to users for equality.'''
