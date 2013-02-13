@@ -17,8 +17,6 @@ class PhotoView(BaseHandler):
         photo_id = int(photo_id)
         photo = Photo.get_by_id(photo_id)
 
-        logging.info('exif data: %s' % photo.exif())
-
         if not photo:
             data = {
                 'page_title': 'Error',
