@@ -280,7 +280,7 @@ class Photo(ndb.Model):
         return {
             'make': self.make,
             'model': self.model,
-            'datetime': self.datetime,
+            'datetime': self.format_date(),
             'iso': self.iso,
             'focal_length': self.focal_length,
             'lens': self.lens,
@@ -300,6 +300,15 @@ class Photo(ndb.Model):
     def comments(self):
         query = Comment.query(Comment.photo == self.key)
         return query
+
+    def format_date(self):
+        if self.datetime:
+            day = self.datetime.day
+            day = ordinal(day)
+            rest = self.datetime.strftime('%B %Y')
+            return ' '.join((day, rest))
+        else:
+            return '?'
 
     def __str__(self):
         return 'Photo(id={}, compid={})'.format(

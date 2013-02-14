@@ -79,6 +79,11 @@ section {
     font-size: 12px;
 }
 
+/* override bootstrap */
+.popover {
+    width: 300px;
+}
+
 .badge-first {
     background-color: #D4AF37;
 }

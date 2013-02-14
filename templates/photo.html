@@ -53,16 +53,36 @@
     </div>
     {% endif %}
 
-    <div id="exif-data-table">
-        <ul class="unstyled" id="exif-data">
-            <li><strong>Make</strong> {{make}}</li>
-            <li><strong>Model</strong> {{model}}</li>
-            <li><strong>Taken</strong> {{datetime}}</li>
-            <li><strong>ISO</strong> {{iso}}</li>
-            <li><strong>Exposure</strong> 1/{{exposure_time}}s</li>
-            <li><strong>Copyright</strong> {{copyright}}</li>
-        </ul>
-    </div>
+    <table style="font-size: 12px;" id="exif-data-table">
+        <tr>
+            <td><strong>Camera</strong></td>
+            <td>{{model}}</td>
+        </tr>
+        <tr>
+            <td><strong>Focal Length</strong></td>
+            <td>{{focal_length}}mm</td>
+        </tr>
+        <tr>
+            <td><strong>Shutter Speed</strong></td>
+            <td>1/{{exposure_time}}s</td>
+        </tr>
+        <tr>
+            <td><strong>Aperture</strong></td>
+            <td>f/--</td>
+        </tr>
+        <tr>
+            <td><strong>ISO</strong></td>
+            <td>{{iso}}</td>
+        </tr>
+        <tr>
+            <td><strong>Taken</strong></td>
+            <td>{{datetime}}</td>
+        </tr>
+        <tr>
+            <td><strong>Copyright</strong></td>
+            <td>{{copyright}}</td>
+        </tr>
+    </table>
 
 {% endblock %}
 
