@@ -203,14 +203,15 @@ class Photo(ndb.Model):
     position = ndb.IntegerProperty(default=0)
     total_score = ndb.IntegerProperty(default=0)
     # exif data
-    make = ndb.StringProperty()
-    model = ndb.StringProperty()
+    make = ndb.StringProperty(default='')
+    model = ndb.StringProperty(default='')
     datetime = ndb.DateTimeProperty()
-    iso = ndb.IntegerProperty()
-    focal_length = ndb.IntegerProperty()
-    lens = ndb.StringProperty()
-    exposure_time = ndb.IntegerProperty()
-    copyright = ndb.StringProperty()
+    iso = ndb.IntegerProperty(default=0)
+    focal_length = ndb.IntegerProperty(default=0)
+    lens = ndb.StringProperty(default='')
+    aperture = ndb.FloatProperty(default=0.0)
+    exposure_time = ndb.IntegerProperty(default=0)
+    copyright = ndb.StringProperty(default='')
     comment_count = ndb.IntegerProperty(default=0)
 
     @classmethod
@@ -285,6 +286,7 @@ class Photo(ndb.Model):
             'focal_length': self.focal_length,
             'lens': self.lens,
             'exposure_time': self.exposure_time,
+            'aperture': self.aperture,
             'copyright': self.copyright,
         }
 
@@ -499,11 +501,12 @@ def blob_exif(blob_key):
     keys = (
             ('make', 'Make', '?'),
             ('model', 'Model', '?'),
-            ('datetime', 'DateTimeDigitized', '0001:01:01 00:00:00'),
+            ('datetime', 'DateTimeDigitized', '1990:01:01 00:00:00'),
             ('iso', 'ISOSpeedRatings', 0),
             ('focal_length', 'FocalLength', 0),
             ('lens', 'Lens', '?'),
             ('exposure_time', 'ExposureTime', 0),
+            ('aperture', ['ApertureValue', 'MaxApertureValue'], 0.0),
             ('copyright', 'Copyright', '')
         )
     data = {}
@@ -511,6 +514,7 @@ def blob_exif(blob_key):
     im.rotate(0)
     im.execute_transforms(parse_source_metadata=True)
     exif = im.get_original_metadata()
+    logging.info(exif)
     for key, key_exif, default in keys:
         if key == 'datetime':
             dt = exif.get(key_exif, default)
@@ -523,6 +527,11 @@ def blob_exif(blob_key):
                 data[key] = t
             else:
                 data[key] = int(round(1 / t))
+        elif key == 'aperture':
+            app, max_app = key_exif
+            aperture = exif.get(app, None)
+            aperture = exif.get(max_app, default) if not aperture else aperture
+            data[key] = aperture
         else:
             data[key] = exif.get(key_exif, default)
     return data
