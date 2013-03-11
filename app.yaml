@@ -70,6 +70,10 @@ handlers:
   script: user.app
   secure: never
 
+- url: /upload_extra
+  script: user.app
+  secure: never
+
 - url: /photo/.*
   script: photo.app
   secure: never

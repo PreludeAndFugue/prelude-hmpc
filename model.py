@@ -320,6 +320,82 @@ class Photo(ndb.Model):
         return self.__str__()
 
 
+class ExtraPhoto(ndb.Model):
+    user = ndb.KeyProperty(kind=User, required=True)
+    title = ndb.StringProperty()
+    blob = ndb.BlobKeyProperty(required=True)
+    month = ndb.IntegerProperty(required=True)
+    upload_date = ndb.DateTimeProperty(auto_now_add=True)
+    # exif data
+    make = ndb.StringProperty()
+    model = ndb.StringProperty()
+    datetime = ndb.DateTimeProperty()
+    iso = ndb.IntegerProperty()
+    focal_length = ndb.IntegerProperty()
+    lens = ndb.StringProperty()
+    exposure_time = ndb.IntegerProperty()
+    copyright = ndb.StringProperty()
+    comment_count = ndb.IntegerProperty(default=0)
+
+    @classmethod
+    def user_photos(cls, user, limit=None):
+        '''Return all photos of a user.'''
+        query = cls.query(cls.user == user.key)
+        query = query.order(cls.upload_date)
+        return query.fetch(limit=limit)
+
+    def data(self, size=211):
+        '''Return information about photo and urls for image and thumb.'''
+        title = self.title if self.title else 'Untitled'
+        url = get_serving_url(self.blob, size=MAX_SIZE)
+        thumb = get_serving_url(self.blob, size=size, crop=True)
+        date = self.upload_date.strftime('%d %B, %Y')
+        return title, url, thumb, date
+
+    def thumb(self, size=211):
+        return get_serving_url(self.blob, size=size, crop=True)
+
+    def url(self, size=MAX_SIZE):
+        return get_serving_url(self.blob, size=size)
+
+    def exif(self):
+        return {
+            'make': self.make,
+            'model': self.model,
+            'datetime': self.format_date(),
+            'iso': self.iso,
+            'focal_length': self.focal_length,
+            'lens': self.lens,
+            'exposure_time': self.exposure_time,
+            'copyright': self.copyright,
+        }
+
+    def username(self):
+        return self.user.get().username
+
+    def comments(self):
+        query = Comment.query(Comment.photo == self.key)
+        return query
+
+    def format_date(self):
+        if self.datetime:
+            day = self.datetime.day
+            day = ordinal(day)
+            rest = self.datetime.strftime('%B %Y')
+            return ' '.join((day, rest))
+        else:
+            return '?'
+
+    def __str__(self):
+        return 'Photo(user={}, title={})'.format(
+            self.user.get().username,
+            self.title,
+        )
+
+    def __repr__(self):
+        return self.__str__()
+
+
 class Comment(ndb.Model):
     photo = ndb.KeyProperty(kind=Photo, required=True)
     user = ndb.KeyProperty(kind=User, required=True)
@@ -497,15 +573,15 @@ def recently_completed_competitions():
 def blob_exif(blob_key):
     '''Extract EXIF data from the blob data.'''
     keys = (
-            ('make', 'Make', '?'),
-            ('model', 'Model', '?'),
-            ('datetime', 'DateTimeDigitized', '0001:01:01 00:00:00'),
-            ('iso', 'ISOSpeedRatings', 0),
-            ('focal_length', 'FocalLength', 0),
-            ('lens', 'Lens', '?'),
-            ('exposure_time', 'ExposureTime', 0),
-            ('copyright', 'Copyright', '')
-        )
+        ('make', 'Make', '?'),
+        ('model', 'Model', '?'),
+        ('datetime', 'DateTimeDigitized', '0001:01:01 00:00:00'),
+        ('iso', 'ISOSpeedRatings', 0),
+        ('focal_length', 'FocalLength', 0),
+        ('lens', 'Lens', '?'),
+        ('exposure_time', 'ExposureTime', 0),
+        ('copyright', 'Copyright', '')
+    )
     data = {}
     im = Image(blob_key=blob_key)
     im.rotate(0)

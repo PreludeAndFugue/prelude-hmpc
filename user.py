@@ -7,7 +7,7 @@ import webapp2
 import logging
 
 from handler import BaseHandler
-from model import User, Photo, UserComp, Competition, blob_exif
+from model import User, Photo, ExtraPhoto, UserComp, Competition, blob_exif
 from helper import OPEN, ordinal
 
 
@@ -142,6 +142,7 @@ class UserView(BaseHandler):
             return
 
         photos = Photo.user_photos_complete(user_view)
+        extra_photos = ExtraPhoto.user_photos(user_view)
 
         data = {
             'page_title': 'User',
@@ -149,9 +150,82 @@ class UserView(BaseHandler):
             'user': user,
             'user_view': user_view,
             'photos': photos,
+            'extra_photos': extra_photos,
+            'upload_url': blobstore.create_upload_url('/upload_extra'),
         }
 
         self.render('user-view.html', **data)
+
+    def post(self):
+        pass
+
+
+class UploadExtra(BaseHandler, blobstore_handlers.BlobstoreUploadHandler):
+    def get(self):
+        self.redirect('/user')
+
+    def post(self):
+        user_id, user = self.get_user()
+        #user_id, username = self.get_cookie()
+        upload_files = self.get_uploads('photo-submit')
+
+        if not upload_files:
+            data = {
+                'user': user,
+                'page_title': 'Upload error',
+                'error': 'You forgot to select an image file.'
+            }
+            self.render('upload_error.html', **data)
+            return
+
+        blob_info = upload_files[0]
+
+        if blob_info.content_type != 'image/jpeg':
+            # only store jpegs - delete file otherwise
+            blob_info.delete()
+            data = {
+                'user': user,
+                'page_title': 'Upload error',
+                'error': (
+                    'You tried to upload a file which was '
+                    'not a jpeg image.'
+                )
+            }
+            self.render('upload_error.html', **data)
+            return
+
+        if blob_info.size > 1024 * 1024:
+            # only store jpegs - delete file otherwise
+            blob_info.delete()
+            data = {
+                'user': user,
+                'page_title': 'Upload error',
+                'error': (
+                    'You tried to upload a file which was '
+                    'larger than 1MB.'
+                )
+            }
+            self.render('upload_error.html', **data)
+            return
+
+        photo_title = self.request.get('photo-title')
+        month = int(self.request.get('photo-month'))
+        exif = blob_exif(blob_info.key())
+
+        logging.info('Photo title: %s' % photo_title)
+
+        # add photo details to database
+        photo = ExtraPhoto(
+            user=user.key,
+            title=photo_title,
+            month=month,
+            blob=blob_info.key(),
+            **exif
+        )
+        logging.info('new extra photo: %s' % photo)
+        photo.put()
+
+        self.redirect('/user/%d' % user_id)
 
 
 class UserViewEdit(BaseHandler):
@@ -184,6 +258,7 @@ routes = [
     (r'/user', UserPage),
     (r'/upload', Upload),
     (r'/user/(\d+)', UserView),
+    (r'/upload_extra', UploadExtra),
     (r'/user/edit', UserViewEdit),
 ]
 app = webapp2.WSGIApplication(routes=routes, debug=True)

@@ -18,6 +18,7 @@
 {% endif %}
 
 <div>
+    <h4>Competition Photographs</h4>
     <ul class="thumbnails">
     {% for photo in photos %}
         <li class="span3">
@@ -38,7 +39,116 @@
     </ul>
 </div>
 
+<div>
+    <div>
+        <h4>Extra Photographs</h4>
+    </div>
+
+    {% if user and user_view.key.id() == user.key.id() %}
+    <div class="accordion" id="accordion">
+        <div class="accordion-group">
+            <div class="accordion-heading">
+                <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#uploaddetails">
+                    Upload an extra photograph
+                </a>
+            </div>
+            <div id="uploaddetails" class="accordion-body collapse">
+                <div class="accordion-inner">
+                    <p>
+                        You can upload extra photographs to your public profile.
+                        They will be displayed in this section. There is a limit
+                        to what you can upload:
+                        <ul>
+                            <li>Maximum file size: 1MB.</li>
+                            <li>File type: jpeg.</li>
+                            <li>Total number of uploads: 36.</li>
+                        </ul>
+                    </p>
+                    <form method="post" action="{{upload_url}}" enctype="multipart/form-data">
+                        <label for="photo-title">
+                            Photograph title (optional)
+                        </label>
+                        <input class="span6" type="text" name="photo-title" id="photo-title" />
+                        <label for="photo-month">
+                            Month
+                        </label>
+                        <select id="photo-month" name="photo-month">
+                            <option value="0">-- Select a month --</option>
+                            <option value="1">January 2013</option>
+                            <option value="2">February 2013</option>
+                            <option value="3">March 2013</option>
+                            <option value="4">April 2013</option>
+                            <option value="5">May 2013</option>
+                            <option value="6">June 2013</option>
+                            <option value="7">July 2013</option>
+                            <option value="8">August 2013</option>
+                            <option value="9">September 2013</option>
+                            <option value="10">October 2013</option>
+                            <option value="11">November 2013</option>
+                            <option value="12">December 2013</option>
+                        </select>
+                        <label for="photo-submit">
+                            Browse for file
+                        </label>
+                        <input class="span6" id="photo-submit" name="photo-submit"
+                            type="file" />
+                        <br />
+                        <br />
+                        <input type="submit" class="btn btn-primary" value="Submit" id="upload-photo"/>
+
+                        <div style="display: none;" id="upload-error">
+                            <br />
+                            <div class="alert alert-error">
+                                <p>
+                                    Upload error: make sure you have chosen a month and a photo. Title is optional.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="form-overlay" id="form-overlay">
+                            <p>Uploading image. Please wait...</p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+     <ul class="thumbnails">
+    {% for photo in extra_photos %}
+        <li class="span3">
+            <a href="/photo/{{photo.key.id()}}" class="thumbnail" title="{{photo.title}}">
+                <img src="{{photo.thumb()}}" alt="{{photo.title}}" />
+            </a>
+            <p>
+                <em>{{photo.title|default('Untitled', true)}}</em>
+            </p>
+        </li>
+    {% endfor %}
+    </ul>
+
+</div>
+
 {% endblock %}
 
 {% block script %}
+$(function() {
+    $('#upload-photo').click(function() {
+        var month = $('#photo-month').val();
+        var photo_count = $('#photo-submit')[0].files.length;
+
+        console.log(month === '0');
+        console.log(photo_count !== 1);
+        if (month === '0' || photo_count !== 1) {
+            console.log('error');
+            $('#upload-error').fadeIn();
+            return false;
+        } else {
+            $('#form-overlay').fadeIn();
+            return true;
+        }
+    });
+});
+
 {% endblock %}
