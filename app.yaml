@@ -1,5 +1,5 @@
 application: prelude-hmpc
-version: 3-2
+version: 3-3
 runtime: python27
 api_version: 1
 threadsafe: true
@@ -56,10 +56,6 @@ handlers:
 
 - url: /contact
   script: user_admin.app
-  secure: never
-
-- url: /user
-  script: user.app
   secure: never
 
 - url: /upload
@@ -127,4 +123,7 @@ libraries:
   version: "2.5.1"
 
 - name: jinja2
+  version: latest
+
+- name: PIL
   version: latest

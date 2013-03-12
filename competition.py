@@ -302,7 +302,7 @@ class CompetitionModify(BaseHandler):
         for uc in comp.users():
             user1 = uc.user.get()
             users.append((
-                user1.username,
+                user1,
                 'Yes' if uc.submitted_scores else 'No'
             ))
             if status == OPEN:

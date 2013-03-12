@@ -101,13 +101,7 @@ class Login(BaseUser):
 
         # user exists - set cookie and redirect
         self.set_cookie(user)
-        self.redirect('/user')
-
-
-class Logout(BaseHandler):
-    def get(self):
-        self.response.delete_cookie('userid')
-        self.redirect('/')
+        self.redirect('/user/%d' % user.key.id())
 
 
 class Register(BaseUser):
