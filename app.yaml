@@ -58,19 +58,11 @@ handlers:
   script: user_admin.app
   secure: never
 
-- url: /user
-  script: user.app
-  secure: never
-
 - url: /upload
   script: user.app
   secure: never
 
 - url: /user/.*
-  script: user.app
-  secure: never
-
-- url: /upload_extra
   script: user.app
   secure: never
 
@@ -131,4 +123,7 @@ libraries:
   version: "2.5.1"
 
 - name: jinja2
+  version: latest
+
+- name: PIL
   version: latest

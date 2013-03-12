@@ -4,13 +4,12 @@ from google.appengine.ext import ndb
 from google.appengine.api.images import Image, get_serving_url
 import markdown
 
-from calendar import month_name
 import csv
 import datetime
 import logging
 import StringIO
 
-from helper import COMPLETED, SCORING, ordinal
+from helper import COMPLETED, SCORING, ordinal, MONTHS
 
 # the maximum length of the longest dimension of on uploaded photo
 MAX_SIZE = 800
@@ -25,7 +24,7 @@ class User(ndb.Model):
     admin = ndb.BooleanProperty(default=False)
     pass_reset_code = ndb.StringProperty()
     pass_reset_expire = ndb.DateTimeProperty()
-    bio = ndb.TextProperty()
+    bio = ndb.TextProperty(default='')
     extra_photo_count = ndb.IntegerProperty(default=0)
 
     @classmethod
@@ -54,23 +53,18 @@ class User(ndb.Model):
             if not user_comp.submitted_scores:
                 comp = user_comp.comp.get()
                 if comp.status == SCORING:
-                    yield (
-                        comp.key.id(),
-                        comp.title,
-                        month_name[comp.month],
-                        comp.year
-                    )
+                    yield comp
 
     def bio_markdown(self):
         return markdown.markdown(
-            self.bio,
+            self.bio if self.bio else "*...no details...*",
             output_format='html5',
             safe_mode='replace',
         )
 
     def __eq__(self, other):
         '''Compare to users for equality.'''
-        return self.username == other.username
+        return self.key.id() == other.key.id()
 
     def __str__(self):
         params = (self.username, self.email, self.verified, self.admin)
@@ -127,6 +121,10 @@ class Competition(ndb.Model):
         '''Return a list of users in competition.'''
         query = UserComp.query(UserComp.comp == self.key)
         return query
+
+    def month_text(self):
+        '''Return the month as a string name.'''
+        return MONTHS[self.month]
 
     #@ndb.transactional(xg=True)
     def delete(self):
