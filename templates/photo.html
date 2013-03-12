@@ -14,7 +14,7 @@
     <div id="comments">
         <h3>
             Comments
-            {% if not comp_closed %}
+            {% if not can_comment %}
             <small>No comments until the competition is finished.</small>
             {% endif %}
         </h3>
@@ -37,7 +37,7 @@
         {% endif %}
     </div>
 
-    {% if user and comp_closed %}
+    {% if can_comment %}
     <div id="new-comment">
         <form method="post">
             <fieldset>

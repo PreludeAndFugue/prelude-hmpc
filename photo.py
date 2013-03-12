@@ -46,7 +46,7 @@ class PhotoView(BaseHandler):
             'user': user,
             'userid': user_id,
             'photoid': photo_id,
-            'comp_closed': photo.position != 0,
+            'can_comment': self._can_comment(user, photo),
             'url': photo.url(),
             'title': photo.title,
             'comments': list(Comment.photo_comments(photo))
@@ -64,6 +64,16 @@ class PhotoView(BaseHandler):
             return True
         # a user can view all their own photos at any time
         if user and photo.user == user.key:
+            return True
+        return False
+
+    def _can_comment(self, user, photo):
+        if not user:
+            return False
+        comp = photo.competition
+        if comp is None:
+            return True
+        if comp.get().status == COMPLETED:
             return True
         return False
 
