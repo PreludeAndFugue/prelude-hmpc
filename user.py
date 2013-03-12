@@ -7,8 +7,8 @@ import webapp2
 import logging
 
 from handler import BaseHandler
-from model import User, Photo, ExtraPhoto, UserComp, Competition, blob_exif
-from helper import OPEN, ordinal
+from model import User, Photo, UserComp, Competition, blob_exif
+from helper import MONTHS, OPEN, ordinal, MAX_EXTRA_PHOTO
 
 
 class UserPage(BaseHandler):
@@ -142,7 +142,7 @@ class UserView(BaseHandler):
             return
 
         photos = Photo.user_photos_complete(user_view)
-        extra_photos = ExtraPhoto.user_photos(user_view)
+        extra_photos = Photo.extra_photos(user_view)
 
         data = {
             'page_title': 'User',
@@ -151,6 +151,10 @@ class UserView(BaseHandler):
             'user_view': user_view,
             'photos': photos,
             'extra_photos': extra_photos,
+            'upload_extra': (user.extra_photo_count < MAX_EXTRA_PHOTO
+            if user else False),
+            'max_extra_photos': MAX_EXTRA_PHOTO,
+            'months': MONTHS,
             'upload_url': blobstore.create_upload_url('/upload_extra'),
         }
 
@@ -185,6 +189,7 @@ class UploadExtra(BaseHandler, blobstore_handlers.BlobstoreUploadHandler):
             blob_info.delete()
             data = {
                 'user': user,
+                'public_profile': True,
                 'page_title': 'Upload error',
                 'error': (
                     'You tried to upload a file which was '
@@ -194,15 +199,16 @@ class UploadExtra(BaseHandler, blobstore_handlers.BlobstoreUploadHandler):
             self.render('upload_error.html', **data)
             return
 
-        if blob_info.size > 1024 * 1024:
+        if blob_info.size > 512 * 1024:
             # only store jpegs - delete file otherwise
             blob_info.delete()
             data = {
                 'user': user,
+                'public_profile': True,
                 'page_title': 'Upload error',
                 'error': (
                     'You tried to upload a file which was '
-                    'larger than 1MB.'
+                    'larger than 512kB.'
                 )
             }
             self.render('upload_error.html', **data)
@@ -215,15 +221,17 @@ class UploadExtra(BaseHandler, blobstore_handlers.BlobstoreUploadHandler):
         logging.info('Photo title: %s' % photo_title)
 
         # add photo details to database
-        photo = ExtraPhoto(
+        photo = Photo(
             user=user.key,
             title=photo_title,
             month=month,
             blob=blob_info.key(),
             **exif
         )
-        logging.info('new extra photo: %s' % photo)
         photo.put()
+        logging.info('new extra photo: %s' % photo)
+        user.extra_photo_count += 1
+        user.put()
 
         self.redirect('/user/%d' % user_id)
 

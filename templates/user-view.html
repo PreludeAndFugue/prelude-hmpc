@@ -39,12 +39,14 @@
     </ul>
 </div>
 
+<hr />
+
 <div>
     <div>
         <h4>Extra Photographs</h4>
     </div>
 
-    {% if user and user_view.key.id() == user.key.id() %}
+    {% if upload_extra and user and user_view.key.id() == user.key.id() %}
     <div class="accordion" id="accordion">
         <div class="accordion-group">
             <div class="accordion-heading">
@@ -59,9 +61,9 @@
                         They will be displayed in this section. There is a limit
                         to what you can upload:
                         <ul>
-                            <li>Maximum file size: 1MB.</li>
+                            <li>Maximum file size: 512kB.</li>
                             <li>File type: jpeg.</li>
-                            <li>Total number of uploads: 36.</li>
+                            <li>Total number of uploads: {{max_extra_photos}} ({{max_extra_photos - user.extra_photo_count}} remaining).</li>
                         </ul>
                     </p>
                     <form method="post" action="{{upload_url}}" enctype="multipart/form-data">
@@ -115,18 +117,21 @@
     </div>
     {% endif %}
 
-     <ul class="thumbnails">
-    {% for photo in extra_photos %}
-        <li class="span3">
-            <a href="/photo/{{photo.key.id()}}" class="thumbnail" title="{{photo.title}}">
-                <img src="{{photo.thumb()}}" alt="{{photo.title}}" />
-            </a>
-            <p>
-                <em>{{photo.title|default('Untitled', true)}}</em>
-            </p>
-        </li>
+    {% for group in extra_photos|groupby('month') %}
+        <h5>{{ months[group.grouper] }}</h5>
+        <ul class="thumbnails">
+            {% for photo in group.list %}
+            <li class="span2">
+                <a href="/photo/{{photo.key.id()}}" class="thumbnail" title="{{photo.title}}">
+                    <img src="{{photo.thumb(140)}}" alt="{{photo.title}}" />
+                </a>
+                <p>
+                    <em>{{photo.title|default('Untitled', true)}}</em>
+                </p>
+            </li>
+            {% endfor %}
+        </ul>
     {% endfor %}
-    </ul>
 
 </div>
 
