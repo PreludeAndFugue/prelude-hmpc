@@ -4,13 +4,12 @@ from google.appengine.ext import ndb
 from google.appengine.api.images import Image, get_serving_url
 import markdown
 
-from calendar import month_name
 import csv
 import datetime
 import logging
 import StringIO
 
-from helper import COMPLETED, SCORING, ordinal
+from helper import COMPLETED, SCORING, ordinal, MONTHS
 
 # the maximum length of the longest dimension of on uploaded photo
 MAX_SIZE = 800
@@ -25,7 +24,8 @@ class User(ndb.Model):
     admin = ndb.BooleanProperty(default=False)
     pass_reset_code = ndb.StringProperty()
     pass_reset_expire = ndb.DateTimeProperty()
-    bio = ndb.TextProperty()
+    bio = ndb.TextProperty(default='')
+    extra_photo_count = ndb.IntegerProperty(default=0)
 
     @classmethod
     def user_from_name(cls, name):
@@ -53,23 +53,18 @@ class User(ndb.Model):
             if not user_comp.submitted_scores:
                 comp = user_comp.comp.get()
                 if comp.status == SCORING:
-                    yield (
-                        comp.key.id(),
-                        comp.title,
-                        month_name[comp.month],
-                        comp.year
-                    )
+                    yield comp
 
     def bio_markdown(self):
         return markdown.markdown(
-            self.bio,
+            self.bio if self.bio else "*...no details...*",
             output_format='html5',
             safe_mode='replace',
         )
 
     def __eq__(self, other):
         '''Compare to users for equality.'''
-        return self.username == other.username
+        return self.key.id() == other.key.id()
 
     def __str__(self):
         params = (self.username, self.email, self.verified, self.admin)
@@ -126,6 +121,10 @@ class Competition(ndb.Model):
         '''Return a list of users in competition.'''
         query = UserComp.query(UserComp.comp == self.key)
         return query
+
+    def month_text(self):
+        '''Return the month as a string name.'''
+        return MONTHS[self.month]
 
     #@ndb.transactional(xg=True)
     def delete(self):
@@ -196,7 +195,7 @@ class UserComp(ndb.Model):
 
 class Photo(ndb.Model):
     user = ndb.KeyProperty(kind=User, required=True)
-    competition = ndb.KeyProperty(kind=Competition)  # required=True)
+    competition = ndb.KeyProperty(kind=Competition, default=None)  # required=True)
     title = ndb.StringProperty()
     blob = ndb.BlobKeyProperty(required=True)
     upload_date = ndb.DateTimeProperty(auto_now_add=True)
@@ -212,22 +211,28 @@ class Photo(ndb.Model):
     exposure_time = ndb.IntegerProperty()
     copyright = ndb.StringProperty()
     comment_count = ndb.IntegerProperty(default=0)
+    # for extra photos
+    month = ndb.IntegerProperty(default=1)
 
     @classmethod
     def user_photos(cls, user, limit=None):
         '''Return all photos of a user.'''
         query = cls.query(cls.user == user.key)
-        query = query.order(cls.upload_date)
+        query = query.filter(cls.competition != None)
+        #query = query.order(cls.upload_date)
         return query.fetch(limit=limit)
 
     @classmethod
     def user_photos_complete(cls, user, limit=None):
         '''Return all photos of a user in completed competitions.'''
         query = cls.query(cls.user == user.key)
-        query = query.order(cls.upload_date)
+        query = query.filter(cls.competition != None)
+        photos = []
         for photo in query:
             if photo.competition.get().status == COMPLETED:
-                yield photo
+                photos.append(photo)
+        photos.sort(key=lambda p: p.upload_date)
+        return photos
 
     @classmethod
     def competition_photos(cls, competition):
@@ -245,11 +250,21 @@ class Photo(ndb.Model):
         return query
 
     @classmethod
+    def extra_photos(cls, user):
+        '''Return all extra photos for a particular user.'''
+        query = cls.query(
+            cls.competition == None,
+            cls.user == user.key,
+        )
+        query = query.order(cls.month)
+        return query
+
+    @classmethod
     def competition_user(cls, competition, user):
         '''Return the photo entered by user into competition.'''
         query = cls.query(
             cls.competition == competition.key,
-            cls.user == user.key
+            cls.user == user.key,
         )
         return query.get()
 
@@ -311,9 +326,11 @@ class Photo(ndb.Model):
             return '?'
 
     def __str__(self):
+        competition = self.competition
+        competition = competition.id() if competition else None
         return 'Photo(id={}, compid={})'.format(
             self.key.id(),
-            self.competition.id()
+            competition,
         )
 
     def __repr__(self):
@@ -497,15 +514,15 @@ def recently_completed_competitions():
 def blob_exif(blob_key):
     '''Extract EXIF data from the blob data.'''
     keys = (
-            ('make', 'Make', '?'),
-            ('model', 'Model', '?'),
-            ('datetime', 'DateTimeDigitized', '0001:01:01 00:00:00'),
-            ('iso', 'ISOSpeedRatings', 0),
-            ('focal_length', 'FocalLength', 0),
-            ('lens', 'Lens', '?'),
-            ('exposure_time', 'ExposureTime', 0),
-            ('copyright', 'Copyright', '')
-        )
+        ('make', 'Make', '?'),
+        ('model', 'Model', '?'),
+        ('datetime', 'DateTimeDigitized', '1950:01:01 00:00:00'),
+        ('iso', 'ISOSpeedRatings', 0),
+        ('focal_length', 'FocalLength', 0),
+        ('lens', 'Lens', '?'),
+        ('exposure_time', 'ExposureTime', 0),
+        ('copyright', 'Copyright', '')
+    )
     data = {}
     im = Image(blob_key=blob_key)
     im.rotate(0)

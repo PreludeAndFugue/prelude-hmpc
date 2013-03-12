@@ -6,7 +6,7 @@ import webapp2
 import markdown
 
 from handler import BaseHandler
-from helper import MONTHS, ordinal
+from helper import MONTHS, ordinal, COMPLETED
 from model import (
     Photo,
     Competition,
@@ -37,23 +37,18 @@ class Home(BaseHandler):
         i = 0
         for key in photo_keys:
             photo = key.get()
-            if photo.total_score == 0:
+            if photo.competition and photo.competition.get().status == COMPLETED:
                 # only view photos belonging to completed competition -
-                # assuming all photos in completed competitions have non-zero
-                # score
-                # TODO: better way to implement this
-                logging.info("random images: image can't be used")
-                continue
-            title = photo.title
-            if not title:
-                title = 'Untitled'
-            user = photo.user.get().username
-            photos.append((i, key.id(), photo.url(size=800), title, user))
-            i += 1
-            if len(photos) == number:
-                # Once we have the required number of photos, we can quit the
-                # loop
-                break
+                title = photo.title
+                if not title:
+                    title = 'Untitled'
+                user = photo.user.get().username
+                photos.append((i, key.id(), photo.url(size=800), title, user))
+                i += 1
+                if len(photos) == number:
+                    # Once we have the required number of photos, we can quit the
+                    # loop
+                    break
         logging.info('random photos: %s', photos)
         return photos
 
@@ -93,7 +88,6 @@ class Home(BaseHandler):
             new_photos = []
             classes = ('badge-first', 'badge-second', 'badge-third')
             for photo in photos:
-                logging.info(photo.position)
                 new_photos.append((
                     ordinal(photo.position),
                     classes[photo.position - 1],

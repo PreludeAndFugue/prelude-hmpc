@@ -6,5 +6,9 @@
         {{error}}
     </div>
 
-    <a href="/user" class="btn btn-primary">Return to user page</a>
+    {% if public_profile %}
+        <a href="/user/{{user.key.id()}}" class="btn btn-primary">Return to user page</a>
+    {% else %}
+        <a href="/user" class="btn btn-primary">Return to user page</a>
+    {% endif %}
 {% endblock %}

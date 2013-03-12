@@ -1,23 +1,85 @@
 {% extends "base.html" %}
 {% block title %}User: {{user_view.username}}{% endblock %}
-
+{% block nav_user %} active{% endblock %}
 {% block content %}
 
-{% if user_view.bio %}
-<div id="bio" class="row">
-    <div class="span12">
-        {% if user and user_view.key.id() == user.key.id() %}
+{% if need_scores or need_photos %}
+<h4>Competition Updates</h4>
+{% endif %}
+
+{% if need_scores %}
+    <div class="alert alert-warning">
+        Please submit your scores to the following competitions:
+            <ul>
+            {% for comp in need_scores %}
+                <li><a href="/competition/{{comp.key.id()}}">
+                    {{comp.title}}, ({{comp.month_text()}} {{comp.year}})</a>
+                </li>
+            {% endfor %}
+            </ul>
+    </div>
+{% endif %}
+
+{% if need_photos %}
+    <div style="position: relative;">
+    <form method="post" action="{{upload_url}}" class="well" id="upload-form"
+        enctype="multipart/form-data" accept="image/jpeg">
+        <p>
+            There are competitions in progress and you haven't submitted a
+            photograph for at least one of them. Note that only
+            <span class="label">jpg</span> files can be
+            submitted.
+        </p>
+        <div class="clearfix">
+            <label for="comp-id">
+                Select a competition
+            </label>
+            <select class="span6" id="comp-id" name="comp-id">
+                {% for c in need_photos %}
+                <option value="{{c.key.id()}}">{{c.title}}</option>
+                {% endfor %}
+            </select>
+            <label for="photo-title">
+                Photograph title (optional)
+            </label>
+            <input class="span6" type="text" name="photo-title" id="photo-title" />
+            <label for="photo-submit">
+                Browse for file
+            </label>
+            <input class="span6" id="photo-submit" name="photo-submit"
+                type="file" />
+        </div>
+        <br />
+        <input type="submit" class="btn btn-primary" value="Submit" id="upload-photo"/>
+
+        <div class="form-overlay" id="upload-overlay">
+            <p>Uploading image. Please wait...</p>
+        </div>
+
+    </form>
+    </div>
+{% endif %}
+
+{% if need_scores or need_photos %}
+<hr>
+{% endif %}
+
+
+<div id="bio">
+    <h4>Personal Information</h4>
+    <div>
+        {{user_view.bio_markdown()|safe}}
+        {% if my_page %}
             <div><a href="/user/edit" class="btn">Edit Details</a></div>
             <br />
         {% endif %}
-        {{user_view.bio_markdown()|safe}}
     </div>
 </div>
 
 <hr />
-{% endif %}
 
-<div>
+<div id="comp-photos">
+    <h4>Competition Photographs</h4>
     <ul class="thumbnails">
     {% for photo in photos %}
         <li class="span3">
@@ -28,17 +90,154 @@
                 <em>{{photo.title|default('Untitled', true)}}</em>
                 <br />
                 {{photo.get_competition().title}}
-                <br />
-                Score: {{photo.total_score}}
-                <br />
-                Position: {{photo.ordinal_position()}}
+                {% if photo.position %}
+                    <br />
+                    Score: {{photo.total_score}}
+                    <br />
+                    Position: {{photo.ordinal_position()}}
+                {% endif %}
             </p>
         </li>
     {% endfor %}
     </ul>
+    {% if not photos %}
+        <p><em>No competition photographs.</em></p>
+    {% endif%}
+</div>
+
+<hr />
+
+<div id="extra-photos">
+    <h4>Extra Photographs</h4>
+
+    {% if upload_extra and my_page %}
+    <div class="accordion" id="accordion">
+        <div class="accordion-group">
+            <div class="accordion-heading">
+                <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#uploaddetails">
+                    Upload an extra photograph
+                </a>
+            </div>
+            <div id="uploaddetails" class="accordion-body collapse">
+                <div class="accordion-inner">
+                    <p>
+                        You can upload extra photographs to your public profile.
+                        They will be displayed in this section. There is a limit
+                        to what you can upload:
+                        <ul>
+                            <li>Maximum file size: 512kB.</li>
+                            <li>File type: jpeg.</li>
+                            <li>Total number of uploads: {{max_extra_photos}} ({{max_extra_photos - user.extra_photo_count}} remaining).</li>
+                        </ul>
+                    </p>
+                    <form method="post" action="{{upload_extra_url}}" enctype="multipart/form-data">
+                        <label for="photo-title">
+                            Photograph title (optional)
+                        </label>
+                        <input class="span6" type="text" name="photo-extra-title" id="photo-extra-title" />
+                        <label for="photo-month">
+                            Month
+                        </label>
+                        <select id="photo-extra-month" name="photo-extra-month">
+                            <option value="0">-- Select a month --</option>
+                            <option value="1">January 2013</option>
+                            <option value="2">February 2013</option>
+                            <option value="3">March 2013</option>
+                            <option value="4">April 2013</option>
+                            <option value="5">May 2013</option>
+                            <option value="6">June 2013</option>
+                            <option value="7">July 2013</option>
+                            <option value="8">August 2013</option>
+                            <option value="9">September 2013</option>
+                            <option value="10">October 2013</option>
+                            <option value="11">November 2013</option>
+                            <option value="12">December 2013</option>
+                        </select>
+                        <label for="photo-submit">
+                            Browse for file
+                        </label>
+                        <input class="span6" id="photo-extra-submit" name="photo-extra-submit"
+                            type="file" />
+                        <input id="is_photo_extra" name="is_photo_extra" type="hidden" value="1" />
+                        <br />
+                        <br />
+                        <input type="submit" class="btn btn-primary" value="Submit" id="upload-extra-photo"/>
+
+                        <div style="display: none;" id="upload-extra-error">
+                            <br />
+                            <div class="alert alert-error">
+                                <p>
+                                    Upload error: make sure you have chosen a month and a photo. Title is optional.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="form-overlay" id="upload-extra-overlay">
+                            <p>Uploading image. Please wait...</p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% for group in extra_photos|groupby('month') %}
+        <h5>{{ months[group.grouper] }}</h5>
+        <ul class="thumbnails">
+            {% for photo in group.list %}
+            <li class="span2">
+                <a href="/photo/{{photo.key.id()}}" class="thumbnail" title="{{photo.title}}">
+                    <img src="{{photo.thumb(140)}}" alt="{{photo.title}}" />
+                </a>
+                <p>
+                    <em>{{photo.title|default('Untitled', true)}}</em>
+                </p>
+            </li>
+            {% endfor %}
+        </ul>
+    {% endfor %}
+
+    {% if extra_photos.count() == 0 %}
+        {% if my_page %}
+            <p><em>You haven't uploaded any extra photographs.</em></p>
+        {% else %}
+            <p><em>User hasn't uploaded any extra photographs.</em></p>
+        {% endif %}
+    {% endif %}
+
 </div>
 
 {% endblock %}
 
 {% block script %}
+$(function() {
+
+    // competition photo upload
+    $('#upload-photo').click(function() {
+        console.log('uploading competition photo');
+        var photo_count = $('#photo-submit')[0].files.length;
+        if (photo_count !== 1) {
+            return false;
+        } else {
+            console.log('successful upload competition photo');
+            $('#upload-overlay').fadeIn();
+            return true;
+        }
+    });
+
+    // extra photo upload
+    $('#upload-extra-photo').click(function() {
+        var month = $('#photo-extra-month').val();
+        var photo_count = $('#photo-extra-submit')[0].files.length;
+        if (month === '0' || photo_count !== 1) {
+            $('#upload-extra-error').fadeIn();
+            return false;
+        } else {
+            $('#upload-extra-overlay').fadeIn();
+            return true;
+        }
+    });
+});
+
 {% endblock %}

@@ -5,7 +5,7 @@ import logging
 from google.appengine.api import mail
 
 from handler import BaseHandler
-from helper import OPEN
+from helper import OPEN, COMPLETED
 from model import Photo, Comment, UserComp
 
 
@@ -26,15 +26,11 @@ class PhotoView(BaseHandler):
             self.render('error.html', **data)
             return
 
-        open_comp = photo.competition.get().status == OPEN
-        # is this a photo of the logged-in user - a user can always view
-        # their own photos
-        user_photo = photo.user == user.key if user else False
-
-        if open_comp and not user_photo:
+        can_view = self._can_view_photo(photo, user)
+        if not can_view:
             msg = (
-                'You cannot view pictures in competitions which are still '
-                'open to submissions.'
+                'You cannot view pictures in competitions which are not '
+                'finished.'
             )
             data = {
                 'page_title': 'Cannot view picture',
@@ -57,6 +53,19 @@ class PhotoView(BaseHandler):
         }
         data.update(photo.exif())
         self.render('photo.html', **data)
+
+    def _can_view_photo(self, photo, user):
+        '''Check to see if the photo can be viewed.'''
+        # all extra photos can be viewed
+        if not photo.competition:
+            return True
+        # all photos in completed competitons can be viewed
+        if photo.competition.get().status == COMPLETED:
+            return True
+        # a user can view all their own photos at any time
+        if user and photo.user == user.key:
+            return True
+        return False
 
     def post(self, photo_id=0):
         '''Adding a new comment to a photo.'''

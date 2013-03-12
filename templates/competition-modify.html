@@ -72,7 +72,7 @@
         <tbody>
             {% for user, submitted in users %}
             <tr>
-                <td>{{user}}</td>
+                <td><a href="/user/{{user.key.id()}}">{{user.username}}</a></td>
                 <td>{{submitted}}</td>
                 {% if status == 'Open' %}
                 <td>
