@@ -7,7 +7,7 @@ import logging
 
 from handler import BaseHandler
 from model import Competition, Photo, Scores, UserComp, csv_scores
-from helper import OPEN, SCORING, COMPLETED, MONTHS, ordinal
+from helper import OPEN, SCORING, COMPLETED, MONTHS
 
 
 class Competitions(BaseHandler):
