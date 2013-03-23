@@ -335,6 +335,7 @@ class Photo(ndb.Model):
             all scores
             the UserComp if it exists
             the blob
+            Also, if an extra photo, reduce the extra photo count by one
         '''
         all_keys = []
         if self.competition:
@@ -343,6 +344,10 @@ class Photo(ndb.Model):
                 UserComp.comp == self.competition
             ).get()
             all_keys.append(user_comp.key)
+        else:
+            user = self.user.get()
+            user.extra_photo_count -= 1
+            user.put()
         for comment_key in Comment.query(
                 Comment.photo == self.key).fetch(keys_only=True):
             all_keys.append(comment_key)
