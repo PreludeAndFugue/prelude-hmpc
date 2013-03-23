@@ -96,7 +96,7 @@ class Test(BaseHandler):
         p = []
         all_data = zip(product(users, comps), photos, titles)
         for (user, comp), photo_path, title in all_data:
-            file_name = files.blobstore.create(mime_type='application/jpeg')
+            file_name = files.blobstore.create(mime_type='image/jpeg')
             with files.open(file_name, 'a') as f:
                 f.write(open(photo_path, 'rb').read())
             files.finalize(file_name)

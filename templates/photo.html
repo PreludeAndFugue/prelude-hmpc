@@ -11,6 +11,18 @@
         <img src="{{url}}" alt="{{title}}" class="img-polaroid" />
     </div>
 
+    {% if delete_my_photo %}
+    <div id="delete-photo">
+        <p>
+        You can delete your extra photo (or, if this is not your photograph,
+        you are an admin user):
+        <a href="/photo/delete/{{photoid}}" alt="Delete photograph" class="btn btn-danger">
+            Delete
+        </a>
+        </p>
+    </div>
+    {% endif %}
+
     <div id="comments">
         <h3>
             Comments

@@ -47,6 +47,7 @@ class PhotoView(BaseHandler):
             'userid': user_id,
             'photoid': photo_id,
             'can_comment': self._can_comment(user, photo),
+            'delete_my_photo': self._can_delete(user, photo),
             'url': photo.url(),
             'title': photo.title,
             'comments': list(Comment.photo_comments(photo))
@@ -76,6 +77,18 @@ class PhotoView(BaseHandler):
         if comp.get().status == COMPLETED:
             return True
         return False
+
+    def _can_delete(self, user, photo):
+        '''A user can delete their own extra photos.'''
+        if not user:
+            return False
+        extra_photo = photo.competition is None
+        if not extra_photo:
+            return False
+        my_photo = photo.user == user.key
+        if not my_photo and not user.admin:
+            return False
+        return True
 
     def post(self, photo_id=0):
         '''Adding a new comment to a photo.'''
@@ -154,22 +167,27 @@ class PhotoDelete(BaseHandler):
             self.render('error.html', **data)
             return
 
-        # delete photo here
-        #user = data['user']
-        comp = data['comp']
         photo = data['photo']
-        photo_user = photo.user.get()
-        user_comp = UserComp.get_usercomp(photo_user, comp)
-
-        photo.key.delete()
-        user_comp.key.delete()
+        photo.delete()
 
         referrer = str(self.request.get('referrer'))
+        if 'photo' in referrer:
+            # This photo is being deleted by the user from the photo page. So
+            # should redirect them back to their own user page.
+            referrer = '/user/%s' % data['userid']
         self.redirect(referrer)
 
     def _check(self, photo_id):
         '''Helper method which checks the proper permissions for deleting the
-        photograph.'''
+        photograph.
+
+        Return
+        ------
+        data : dict
+            Data to be passed to the template.
+        error : boolean
+            True if user has permission to delete the photo
+        '''
         user_id, user = self.get_user()
         if not user:
             self.redirect('/')
@@ -177,6 +195,7 @@ class PhotoDelete(BaseHandler):
         referrer = self.request.referrer
         data = {
             'page_title': 'Delete Photograph',
+            'userid': user_id,
             'user': user,
             'referrer': referrer if referrer else '/',
         }
@@ -186,14 +205,21 @@ class PhotoDelete(BaseHandler):
             data['error_msg'] = "Photograph doesn't exist."
             return data, True
 
-        comp = photo.competition.get()
-        if comp.status != OPEN:
-            error_msg = "Can only delete a photograph from an open competition."
-            data['error_msg'] = error_msg
-            return data, True
+        my_photo = user_id == photo.user.id()
+        extra_photo = photo.competition is None
 
-        photo_user = photo.user.id()
-        if not user.admin and user_id != photo_user:
+        if not extra_photo:
+            comp = photo.competition.get()
+            if comp.status != OPEN:
+                error_msg = "Can only delete a photograph from an open competition."
+                data['error_msg'] = error_msg
+                return data, True
+        else:
+            comp = None
+
+        #photo_user = photo.user.id()
+        #if not user.admin and user_id != photo_user:
+        if not self._user_permission(user, extra_photo, my_photo):
             error_msg = "You don't have permission to delete this photograph."
             data['error_msg'] = error_msg
             return data, True
@@ -204,6 +230,17 @@ class PhotoDelete(BaseHandler):
         data['title'] = photo.title
         data['comp'] = comp
         return data, False
+
+    def _user_permission(self, user, extra_photo, my_photo):
+        '''Does the user have permission to delete this photo.'''
+        # can delete an extra photo if it's your photo
+        logging.info('extra: %s, my_photo: %s, admin: %s' %
+                    (extra_photo, my_photo, user.admin))
+        if user.admin:
+            return True
+        if extra_photo and my_photo:
+            return True
+        return False
 
 routes = [
     (r'/photo/(\d+)', PhotoView),

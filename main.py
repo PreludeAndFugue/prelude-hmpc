@@ -34,22 +34,26 @@ class Home(BaseHandler):
         photo_keys = list(Photo.query().fetch(keys_only=True))
         shuffle(photo_keys)
         photos = []
-        i = 0
         for key in photo_keys:
             photo = key.get()
+            if photo is None:
+                # on the dev server, after a photo delete, the key is still in
+                # the database when the homepage loads. So need this check to
+                # make sure this is not the recently deleted photo.
+                # TODO: fix this...
+                continue
             if photo.competition and photo.competition.get().status == COMPLETED:
                 # only view photos belonging to completed competition -
                 title = photo.title
                 if not title:
                     title = 'Untitled'
                 user = photo.user.get().username
-                photos.append((i, key.id(), photo.url(size=800), title, user))
-                i += 1
+                photos.append((key.id(), photo.url(size=800), title, user))
                 if len(photos) == number:
                     # Once we have the required number of photos, we can quit the
                     # loop
                     break
-        logging.info('random photos: %s', photos)
+        #logging.info('random photos: %s', photos)
         return photos
 
     def competitions_in_progress(self):

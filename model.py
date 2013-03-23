@@ -1,4 +1,5 @@
 
+from google.appengine.ext import blobstore
 from google.appengine.ext import ndb
 #from google.appengine.ext import db
 from google.appengine.api.images import Image, get_serving_url
@@ -141,6 +142,7 @@ class Competition(ndb.Model):
                 all_keys.append(comment.key)
             for score in photo.scores():
                 all_keys.append(score.key)
+            blobstore.delete(photo.blob)
         all_keys.append(self.key)
 
         logging.info(all_keys)
@@ -335,6 +337,42 @@ class Photo(ndb.Model):
             return ' '.join((day, rest))
         else:
             return '?'
+
+    def delete(self):
+        '''Delete the photograph.
+
+        To delete a photograph, need to delete the following:
+            all comments
+            all scores
+            the UserComp if it exists
+            the blob
+            Also, if an extra photo, reduce the extra photo count by one
+        '''
+        all_keys = []
+        if self.competition:
+            user_comp = UserComp.query(
+                UserComp.user == self.user,
+                UserComp.comp == self.competition
+            ).get()
+            all_keys.append(user_comp.key)
+        else:
+            user = self.user.get()
+            user.extra_photo_count -= 1
+            user.put()
+        for comment_key in Comment.query(
+                Comment.photo == self.key).fetch(keys_only=True):
+            all_keys.append(comment_key)
+        for score_key in Scores.query(
+                Scores.photo == self.key).fetch(keys_only=True):
+            all_keys.append(score_key)
+        all_keys.append(self.key)
+        blobstore.delete(self.blob)
+        ndb.delete_multi(all_keys)
+
+    def delete_comments(self):
+        '''Delete comments associated with this photo.'''
+        query = Comment.query(Comment.photo == self.key)
+        ndb.delete_multi(list(query.fetch(keys_only=True)))
 
     def __str__(self):
         competition = self.competition
