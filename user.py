@@ -131,10 +131,8 @@ class Upload(BaseHandler, blobstore_handlers.BlobstoreUploadHandler):
         else:
             extra_data = self._comp_photo(user)
 
-        photo_title = self.request.get('photo-extra-title')
         photo_data = {
             'user': user.key,
-            'title': photo_title,
             'blob': blob_info.key(),
         }
 
@@ -150,17 +148,19 @@ class Upload(BaseHandler, blobstore_handlers.BlobstoreUploadHandler):
         self.redirect('/user/%d' % user_id)
 
     def _extra_photo(self, user):
+        photo_title = self.request.get('photo-extra-title')
         month = int(self.request.get('photo-extra-month'))
         user.extra_photo_count += 1
         user.put()
-        return {'month': month}
+        return {'month': month, 'title': photo_title}
 
     def _comp_photo(self, user):
+        photo_title = self.request.get('photo-title')
         comp_id = int(self.request.get('comp-id'))
         comp = Competition.get_by_id(comp_id)
         usercomp = UserComp(user=user.key, comp=comp.key)
         usercomp.put()
-        return {'competition': comp.key}
+        return {'competition': comp.key, 'title': photo_title}
 
 
 class UserViewEdit(BaseHandler):
