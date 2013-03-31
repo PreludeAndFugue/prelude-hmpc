@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Login As{% endblock %}
+{% block nav_login %}active{% endblock %}
+{% block content %}
+    <div class="row">
+        <div class="span4">
+            <form method="post">
+
+                <label for="email">Admin Email Address</label>
+                <input type="text" name="email" id="email"
+                    value="{{email}}" class="span4" />
+
+                <label for="password">Admin Password</label>
+                <input type="password" name="password" id="password" class="span4" />
+
+                <label for="other-user">Login as (username)</label>
+                <input type="text" name="other-user" id="other-user" class="span4" />
+
+                <br />
+
+                <button type="submit" class="btn btn-primary">Login</button>
+            </form>
+        </div>
+
+        {% if errors %}
+        <div class="span5">
+            <div class="alert alert-error">
+                There were some errors with your login:
+                <ul>
+                    {% for error in errors %}
+                    <li>{{error}}</li>
+                    {% endfor %}
+                </ul>
+                {% if contact %}
+                    <a href="/contact" class="btn">Contact admin</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+{% endblock %}

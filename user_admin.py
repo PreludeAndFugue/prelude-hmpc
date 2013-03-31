@@ -90,10 +90,12 @@ class Login(BaseUser):
 
         # unverified user
         if not user.verified:
-            errors.append('Your account has not yet been verified. '
+            errors.append(
+                'Your account has not yet been verified. '
                 'You should have received an email with a verification link. '
                 'Please check your mail (and your spam folder). If you have '
-                'not received the email, please contact admin.')
+                'not received the email, please contact admin.'
+            )
             data['contact'] = True
             self.render('login.html', **data)
             logging.warning('Login: unverified user attempted login. %s', user)
@@ -102,6 +104,51 @@ class Login(BaseUser):
         # user exists - set cookie and redirect
         self.set_cookie(user)
         self.redirect('/user/%d' % user.key.id())
+
+
+class LoginAs(BaseUser):
+    '''
+    Allow an admin user to login as another user. This will help when another
+    user asks an admin to upload a photograph.
+    '''
+    def get(self):
+        user_id, user = self.get_user()
+        if not user or not user.admin:
+            self.redirect('/')
+            return
+
+        self.render('login-as.html', page_title="Login As...")
+
+    def post(self):
+        email = self.request.get('email', '')
+        password = self.request.get('password', '')
+        other_username = self.request.get('other-user')
+
+        logging.info('%s, %s' % (email, other_username))
+
+        user = User.user_from_email(email)
+
+        if not user:
+            logging.info('not a valid email address')
+            self.render('error.html', **{'error_msg': 'You cannot do this'})
+            return
+        if not self.validate_user(user, password):
+            logging.info('username password fail')
+            self.render('error.html', **{'error_msg': 'You cannot do this'})
+            return
+        if not user.admin:
+            logging.info('Need to be admin to login as other user')
+            self.render('error.html', **{'error_msg': 'You cannot do this'})
+            return
+
+        other_user = User.user_from_name(other_username)
+
+        if not other_user:
+            logging.info('cannot find other user')
+            self.render('error.html', **{'error_msg': "Can't find other user"})
+
+        self.set_cookie(other_user)
+        self.redirect('/user/%d' % other_user.key.id())
 
 
 class Register(BaseUser):
@@ -138,8 +185,12 @@ class Register(BaseUser):
             # no errors so create new user
             hash_pass = generate_password_hash(password)
             verify_code = generate_random_string(length=30)
-            user = User(username=username, password=hash_pass, email=email,
-                verify_code=verify_code)
+            user = User(
+                username=username,
+                password=hash_pass,
+                email=email,
+                verify_code=verify_code
+            )
             user.put()
             logging.info('Register: successfully created user: %s', user)
             # send email to admin about new user
@@ -180,16 +231,19 @@ class Register(BaseUser):
             errors.append('You forgot to enter a username.')
             logging.warning('Register: forgot username.')
         elif not self.valid_name(username):
-            errors.append('A Valid user name can contain only the characters '
+            errors.append(
+                'A Valid user name can contain only the characters '
                 'a-z, A-Z, 0-9, _ (underscore) and - (dash) and must be at '
-                'least 3 characters long.')
+                'least 3 characters long.'
+            )
             logging.warning('Register: invalid username: %s.', username)
 
         user = User.user_from_name(username)
         if user:
             # user name already exists
-            errors.append('That user name already exists, please choose '
-                'another one.')
+            errors.append(
+                'That user name already exists, please choose another one.'
+            )
             logging.warning('Register: username already in use. %s', user)
 
         # email errors
@@ -428,6 +482,7 @@ class Contact(BaseHandler):
 
 routes = [
     ('/login', Login),
+    ('/login-as', LoginAs),
     ('/logout', Logout),
     ('/register', Register),
     ('/contact', Contact),
