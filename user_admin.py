@@ -142,10 +142,12 @@ class LoginAs(BaseUser):
             return
 
         other_user = User.user_from_name(other_username)
+        logging.info('Other user: %s' % other_user)
 
         if not other_user:
             logging.info('cannot find other user')
             self.render('error.html', **{'error_msg': "Can't find other user"})
+            return
 
         self.set_cookie(other_user)
         self.redirect('/user/%d' % other_user.key.id())
