@@ -29,6 +29,8 @@ POSITIONS = {0: 0, 1: FIRST, 2: SECOND, 3: THIRD}
 LAST = 2
 NOTE = 1
 GIVER = 10
+LOGIN = 2
+LOGOUT = 5
 
 
 class Stats(BaseHandler):
@@ -36,7 +38,7 @@ class Stats(BaseHandler):
         scores = []
         for user_stats in UserStats.query().fetch():
             user = user_stats.user.get()
-            score = self.total_score(user_stats)
+            score = self.total_score(user_stats, user)
             if score > 0:
                 scores.append((score, user.username))
 
@@ -44,28 +46,30 @@ class Stats(BaseHandler):
         logging.info('scores: %s' % scores)
 
         data = {
-            'page_title': 'Scoreboard',
+            'page_title': 'Secret Scoreboard',
             'scores': scores,
         }
 
         self.render('stats.html', **data)
 
-    def total_score(self, user):
+    def total_score(self, user_stat, user):
         '''Calculate the total score for a user.'''
         total = 0
-        total += user.comp_photos * PHOTO
-        total += user.comments_give * COMMENT_GIVE
-        total += user.comments_receive * COMMENT_RECEIVE
-        total += user.score_10_give * SCORE_10_GIVE
-        total += user.score_10_receive * SCORE_10_RECEIVE
-        total += user.score_0_give * SCORE_0_GIVE
-        total += user.score_0_receive * SCORE_0_RECEIVE
-        total += user.first_place * FIRST
-        total += user.second_place * SECOND
-        total += user.third_place * THIRD
-        total += user.notes * NOTE
-        total += user.giver * GIVER
-        total += user.total_points
+        total += user_stat.comp_photos * PHOTO
+        total += user_stat.comments_give * COMMENT_GIVE
+        total += user_stat.comments_receive * COMMENT_RECEIVE
+        total += user_stat.score_10_give * SCORE_10_GIVE
+        total += user_stat.score_10_receive * SCORE_10_RECEIVE
+        total += user_stat.score_0_give * SCORE_0_GIVE
+        total += user_stat.score_0_receive * SCORE_0_RECEIVE
+        total += user_stat.first_place * FIRST
+        total += user_stat.second_place * SECOND
+        total += user_stat.third_place * THIRD
+        total += user_stat.notes * NOTE
+        total += user_stat.giver * GIVER
+        total += user_stat.total_points
+        total += user.login_count * LOGIN
+        total += user.logout_count * LOGOUT
         return total
 
 
@@ -109,6 +113,7 @@ class StatsCalculator(BaseHandler):
         for note in Note.query().fetch():
             data[note.user.id()].notes += 1
 
+        # is this person a GIVER
         for user in data.values():
             if user.comments_give > user.comments_receive:
                 user.giver += 1

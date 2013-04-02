@@ -27,6 +27,8 @@ class User(ndb.Model):
     pass_reset_expire = ndb.DateTimeProperty()
     bio = ndb.TextProperty(default='')
     extra_photo_count = ndb.IntegerProperty(default=0)
+    login_count = ndb.IntegerProperty(default=0)
+    logout_count = ndb.IntegerProperty(default=0)
 
     @classmethod
     def user_from_name(cls, name):
