@@ -5,10 +5,13 @@ import webapp2
 from webapp2_extras.securecookie import SecureCookieSerializer
 
 from model import User
+from secret_key import SECRET
 
 template_dir = os.path.join(os.path.dirname(__file__), 'templates')
-env = jinja2.Environment(loader=jinja2.FileSystemLoader(template_dir),
-                               autoescape=True)
+env = jinja2.Environment(
+    loader=jinja2.FileSystemLoader(template_dir),
+    autoescape=True
+)
 
 
 class BaseHandler(webapp2.RequestHandler):
@@ -16,8 +19,7 @@ class BaseHandler(webapp2.RequestHandler):
     def initialize(self, request, response):
         super(BaseHandler, self).initialize(request, response)
         # initialise with secret key
-        secret_key = 'atubetcd483cehbte09otu4'
-        self.cookie_serializer = SecureCookieSerializer(secret_key)
+        self.cookie_serializer = SecureCookieSerializer(SECRET)
 
     def write(self, *args, **kwgs):
         self.response.out.write(*args, **kwgs)
@@ -32,7 +34,13 @@ class BaseHandler(webapp2.RequestHandler):
     def get_cookie(self):
         user_cookie = self.request.cookies.get('userid')
         if user_cookie:
-            user_cookie = self.cookie_serializer.deserialize('userid', user_cookie)
+            user_cookie = self.cookie_serializer.deserialize(
+                'userid',
+                user_cookie
+            )
+            if not user_cookie:
+                # invalid cookie signature
+                return None, ''
             user_id, username = user_cookie.split('|')
             user_id = int(user_id)
             return user_id, username
