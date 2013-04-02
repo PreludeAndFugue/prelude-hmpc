@@ -27,6 +27,8 @@ class User(ndb.Model):
     pass_reset_expire = ndb.DateTimeProperty()
     bio = ndb.TextProperty(default='')
     extra_photo_count = ndb.IntegerProperty(default=0)
+    login_count = ndb.IntegerProperty(default=0)
+    logout_count = ndb.IntegerProperty(default=0)
 
     @classmethod
     def user_from_name(cls, name):
@@ -70,6 +72,9 @@ class User(ndb.Model):
     def __str__(self):
         params = (self.username, self.email, self.verified, self.admin)
         return 'User(%s, %s, verified=%s, admin=%s)' % params
+
+    def __repr__(self):
+        return self.__str__()
 
 
 class Competition(ndb.Model):
@@ -600,3 +605,51 @@ def blob_exif(blob_key):
         else:
             data[key] = exif.get(key_exif, default)
     return data
+
+
+class UserStats(ndb.Model):
+    user = ndb.KeyProperty(kind=User, required=True)
+    comp_photos = ndb.IntegerProperty(default=0)
+    comments_give = ndb.IntegerProperty(default=0)
+    comments_receive = ndb.IntegerProperty(default=0)
+    score_10_give = ndb.IntegerProperty(default=0)
+    score_10_receive = ndb.IntegerProperty(default=0)
+    score_0_give = ndb.IntegerProperty(default=0)
+    score_0_receive = ndb.IntegerProperty(default=0)
+    total_points = ndb.IntegerProperty(default=0)
+    first_place = ndb.IntegerProperty(default=0)
+    second_place = ndb.IntegerProperty(default=0)
+    third_place = ndb.IntegerProperty(default=0)
+    notes = ndb.IntegerProperty(default=0)
+    giver = ndb.IntegerProperty(default=0)
+
+    @classmethod
+    def delete_all(cls):
+        data = cls.query().fetch(keys_only=True)
+        ndb.delete_multi(list(data))
+
+    def __str__(self):
+        format_string = (
+            '\nUserStats: %s, \n\tphotos: %d, c_g: %d, c_r: %d, points: %d'
+            '\n\t10_g: %d, 10_r: %d, 0_g: %d 0_r: %d'
+            '\n\t1st: %d, 2nd: %d, 3rd: %d, notes: %d\n'
+        )
+        data = (
+            self.user.get().username,
+            self.comp_photos,
+            self.comments_give,
+            self.comments_receive,
+            self.total_points,
+            self.score_10_give,
+            self.score_10_receive,
+            self.score_0_give,
+            self.score_0_receive,
+            self.first_place,
+            self.second_place,
+            self.third_place,
+            self.notes,
+        )
+        return format_string % data
+
+    def __repr__(self):
+        return self.__str__()

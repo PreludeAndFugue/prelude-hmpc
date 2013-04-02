@@ -42,6 +42,13 @@ class BaseUser(BaseHandler):
 
 class Logout(BaseHandler):
     def get(self):
+        user_id, user = self.get_user()
+
+        # reward time
+        if user:
+            user.logout_count += 1
+            user.put()
+
         self.response.delete_cookie('userid')
         self.redirect('/')
 
@@ -100,6 +107,10 @@ class Login(BaseUser):
             self.render('login.html', **data)
             logging.warning('Login: unverified user attempted login. %s', user)
             return
+
+        # reward time
+        user.login_count += 1
+        user.put()
 
         # user exists - set cookie and redirect
         self.set_cookie(user)
