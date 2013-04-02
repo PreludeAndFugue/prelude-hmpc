@@ -75,7 +75,7 @@ class ExifData(BaseHandler):
 
 routes = [
     (r'/help/comments', Comments),
-    (r'/help/exif', ExifData),
+    #(r'/help/exif', ExifData),
     (r'/help/exif/(\d+)', ExifData),
 ]
 app = webapp2.WSGIApplication(routes=routes, debug=True)

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Secret Scoreboard{% endblock %}
+{% block content %}
+    <table class="table">
+        <thead>
+            <tr>
+                <th class="span2">Score</th>
+                <th>Name</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for score, user in scores %}
+            <tr>
+                <td>{{score}}</td>
+                <td>{{user}}</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+<p>
+The method for calculating the scores will remain a secret until the end of the
+year. You are awarded points for using the website - all rewards are positive.
+You may even be rewarded for another's actions.
+</p>
+<p>
+The scoreboard is updated once per day at 3AM.
+</p>
+{% endblock %}
