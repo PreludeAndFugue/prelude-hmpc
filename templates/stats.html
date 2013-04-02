@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Statistics{% endblock %}
+{% block nav_login %}active{% endblock %}
+{% block content %}
+    <ol>
+        {% for score, user in scores %}
+            <li>{{user}} (score: {{score}})</li>
+        {% endfor %}
+    </ol>
+{% endblock %}

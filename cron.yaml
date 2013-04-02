@@ -1,0 +1,4 @@
+cron:
+- description: daily stats calculator
+  url: /stats-calc
+  schedule: every 24 hours
