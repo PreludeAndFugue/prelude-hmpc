@@ -2,6 +2,9 @@ test/photo*
 static/css/bootstrap*
 static/js/bootstrap*
 
+# don't upload the secret key to github
+secret_key.py
+
 # ignore markdown
 markdown
 
