@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Competitors{% endblock %}
+{% block nav_users%}active{% endblock %}
+{% block content %}
+
+{% for usr in users %}
+    <div>
+        <p><a href="/user/{{usr.user.id()}}">{{usr.user.get().username}}</a></p>
+        <p style="margin-left:20px;">
+            <img alt="Competition photographs" src="/static/img/photo_icon.gif">
+            {{usr.comp_photos}},
+
+            <img alt="First place" src="/static/img/gold.gif">
+            {{usr.first_place}},
+            <img alt="Second place" src="/static/img/silver.gif">
+            {{usr.second_place}},
+            <img alt="Third place" src="/static/img/bronze.gif">
+            {{usr.third_place}}
+        </p>
+    </div>
+{% endfor %}
+
+{% endblock %}

@@ -78,6 +78,10 @@ handlers:
   script: user.app
   secure: never
 
+- url: /competitors
+  script: user.app
+  secure: never
+
 - url: /photo/.*
   script: photo.app
   secure: never

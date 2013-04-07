@@ -1,5 +1,6 @@
 Add competitors page (alphabetical list)
-
+When a comment or note is edited - modify submit date - it pops to top of list
+Increase number of comments on homepage: 10
 
 DONE
 ----
