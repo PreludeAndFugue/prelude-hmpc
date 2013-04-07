@@ -1,0 +1,7 @@
+Add competitors page (alphabetical list)
+
+
+DONE
+----
+2013-04-07 Add 2012 competition to about page
+2013-04-07 Move comment info to a note
