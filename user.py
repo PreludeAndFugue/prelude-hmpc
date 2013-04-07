@@ -195,7 +195,7 @@ class Competitors(BaseHandler):
         user_id, user = self.get_user()
 
         users = list(UserStats.query().fetch())
-        users.sort(key=lambda u: u.user.get().username)
+        users.sort(key=lambda u: u.user.get().username.lower())
 
         data = {
             'page_title': 'Competitors',
