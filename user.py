@@ -7,7 +7,7 @@ import webapp2
 import logging
 
 from handler import BaseHandler
-from model import User, Photo, UserComp, Competition, blob_exif
+from model import User, Photo, UserComp, Competition, UserStats, blob_exif
 from helper import MONTHS, OPEN, MAX_EXTRA_PHOTO
 
 
@@ -189,9 +189,26 @@ class UserViewEdit(BaseHandler):
 
         self.redirect('/user/%d' % user_id)
 
+
+class Competitors(BaseHandler):
+    def get(self):
+        user_id, user = self.get_user()
+
+        users = list(UserStats.query().fetch())
+        users.sort(key=lambda u: u.user.get().username.lower())
+
+        data = {
+            'page_title': 'Competitors',
+            'user': user,
+            'users': users,
+        }
+
+        self.render('competitors.html', **data)
+
 routes = [
     (r'/user/(\d+)', UserView),
     (r'/upload', Upload),
     (r'/user/edit', UserViewEdit),
+    (r'/competitors', Competitors),
 ]
 app = webapp2.WSGIApplication(routes=routes, debug=True)

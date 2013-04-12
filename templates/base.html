@@ -44,6 +44,10 @@
 
                     {% endif %}
 
+                    <li id="nav-competitors" class="{% block nav_users %}{% endblock %}">
+                        <a href="/competitors">Competitors</a>
+                    </li>
+
                     {% if user %}
                     <li id="nav-user" class="{% block nav_user %}{% endblock %}">
                         <a href="/user/{{user.key.id()}}">User [{{user.username}}]</a>

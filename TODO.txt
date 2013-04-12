@@ -1,0 +1,9 @@
+When a comment or note is edited - modify submit date - it pops to top of list
+Increase number of comments on homepage: 10
+Add sort order to competitor page: alpha, medal count, ...?
+
+DONE
+----
+2013-04-07 Add 2012 competition to about page
+2013-04-07 Move comment info to a note
+2013-04-07 Add competitors page (alphabetical list)
