@@ -1,9 +1,18 @@
 When a comment or note is edited - modify submit date - it pops to top of list
 Increase number of comments on homepage: 10
 Add sort order to competitor page: alpha, medal count, ...?
+More stats (next to scoreboard): total photos, points, etc...?
+Scoreboard: points for using all extra photo quota.
+Badges...?
 
 DONE
 ----
 2013-04-07 Add 2012 competition to about page
 2013-04-07 Move comment info to a note
 2013-04-07 Add competitors page (alphabetical list)
+2013-04-12 Scoreboard: points for being the person with the most logouts.
+2013-04-12 Scoreboard: points for being the person with the most logins.
+2013-04-12 Scoreboard: points for being the person with the most notes.
+2013-04-12 Scoreboard: points for being the person with the most comments.
+2013-04-12 Scoreboard: points for entering all competitions.
+2013-04-12 Scoreboard: points for bio, extra photos.

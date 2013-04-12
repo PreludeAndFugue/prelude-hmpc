@@ -115,9 +115,15 @@ class Competition(ndb.Model):
     @classmethod
     def in_progress(cls):
         '''Return all competitions that are Open or Scoring.'''
-        query = cls.query(cls.finished == False)
+        finished = False
+        query = cls.query(cls.finished == finished)
         query = query.order(-cls.start)
         return query
+
+    @classmethod
+    def count(cls, status=COMPLETED):
+        '''Return the count of competitions for a particular status.'''
+        return cls.query(cls.status == status).count()
 
     def get_status(self):
         '''Return the status of the competition as a meaningful str.'''
@@ -568,17 +574,17 @@ def recently_completed_competitions():
 def blob_exif(blob_key):
     '''Extract EXIF data from the blob data.'''
     keys = (
-            ('make', 'Make', '?'),
-            ('model', 'Model', '?'),
-            ('datetime', 'DateTimeDigitized', '1990:01:01 00:00:00'),
-            ('iso', 'ISOSpeedRatings', 0),
-            ('focal_length', 'FocalLength', 0),
-            ('lens', 'Lens', '?'),
-            ('exposure_time', 'ExposureTime', 1),
-            ('exposure_time1', 'ExposureTime', 1.0),
-            ('aperture', ['ApertureValue', 'MaxApertureValue'], 0.0),
-            ('copyright', 'Copyright', '')
-        )
+        ('make', 'Make', '?'),
+        ('model', 'Model', '?'),
+        ('datetime', 'DateTimeDigitized', '1990:01:01 00:00:00'),
+        ('iso', 'ISOSpeedRatings', 0),
+        ('focal_length', 'FocalLength', 0),
+        ('lens', 'Lens', '?'),
+        ('exposure_time', 'ExposureTime', 1),
+        ('exposure_time1', 'ExposureTime', 1.0),
+        ('aperture', ['ApertureValue', 'MaxApertureValue'], 0.0),
+        ('copyright', 'Copyright', '')
+    )
     data = {}
     im = Image(blob_key=blob_key)
     im.rotate(0)
@@ -610,6 +616,7 @@ def blob_exif(blob_key):
 class UserStats(ndb.Model):
     user = ndb.KeyProperty(kind=User, required=True)
     comp_photos = ndb.IntegerProperty(default=0)
+    extra_photos = ndb.IntegerProperty(default=0)
     comments_give = ndb.IntegerProperty(default=0)
     comments_receive = ndb.IntegerProperty(default=0)
     score_10_give = ndb.IntegerProperty(default=0)
@@ -622,6 +629,15 @@ class UserStats(ndb.Model):
     third_place = ndb.IntegerProperty(default=0)
     notes = ndb.IntegerProperty(default=0)
     giver = ndb.IntegerProperty(default=0)
+    bio = ndb.IntegerProperty(default=0)
+    logins = ndb.IntegerProperty(default=0)
+    logouts = ndb.IntegerProperty(default=0)
+    most_logins = ndb.IntegerProperty(default=0)
+    most_logouts = ndb.IntegerProperty(default=0)
+    most_comments_give = ndb.IntegerProperty(default=0)
+    most_comments_receive = ndb.IntegerProperty(default=0)
+    most_notes = ndb.IntegerProperty(default=0)
+    all_comps = ndb.IntegerProperty(default=0)
 
     @classmethod
     def delete_all(cls):
