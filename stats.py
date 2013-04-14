@@ -44,13 +44,28 @@ MOST_LOGOUTS = 30
 BIO = 20
 ALL_COMPS = 50
 
+# pair the attributes of a UserStat object with the points
+PAIRINGS = [
+    ('comp_photos', PHOTO), ('extra_photos', EXTRA_PHOTO),
+    ('comments_give', COMMENT_GIVE), ('comments_receive', COMMENT_RECEIVE),
+    ('score_10_give', SCORE_10_GIVE), ('score_10_receive', SCORE_10_RECEIVE),
+    ('score_0_give', SCORE_0_GIVE), ('score_0_receive', SCORE_0_RECEIVE),
+    ('first_place', FIRST), ('second_place', SECOND), ('third_place', THIRD),
+    ('notes', NOTE), ('giver', GIVER), ('total_points', 1),
+    ('logins', LOGIN), ('logouts', LOGOUT), ('all_comps', ALL_COMPS),
+    ('most_comments_give', MOST_COMMENT_GIVE),
+    ('most_comments_receive', MOST_COMMENT_RECEIVE), ('most_notes', MOST_NOTES),
+    ('most_logins', MOST_LOGINS), ('most_logouts', MOST_LOGOUTS),
+]
+
 
 class Stats(BaseHandler):
     def get(self):
         scores = []
         for user_stats in UserStats.query().fetch():
             user = user_stats.user.get()
-            score = self.total_score(user_stats, user)
+            score = sum(getattr(user_stats, attr) * points
+                        for attr, points in PAIRINGS)
             if score > 0:
                 scores.append((score, user.username))
 
@@ -63,34 +78,6 @@ class Stats(BaseHandler):
         }
 
         self.render('stats.html', **data)
-
-    def total_score(self, user_stat, user):
-        '''Calculate the total score for a user.'''
-        total = 0
-        total += user_stat.comp_photos * PHOTO
-        total += user_stat.extra_photos * EXTRA_PHOTO
-        total += user_stat.comments_give * COMMENT_GIVE
-        total += user_stat.comments_receive * COMMENT_RECEIVE
-        total += user_stat.score_10_give * SCORE_10_GIVE
-        total += user_stat.score_10_receive * SCORE_10_RECEIVE
-        total += user_stat.score_0_give * SCORE_0_GIVE
-        total += user_stat.score_0_receive * SCORE_0_RECEIVE
-        total += user_stat.first_place * FIRST
-        total += user_stat.second_place * SECOND
-        total += user_stat.third_place * THIRD
-        total += user_stat.notes * NOTE
-        total += user_stat.giver * GIVER
-        total += user_stat.total_points
-        total += user_stat.logins * LOGIN
-        total += user_stat.logouts * LOGOUT
-        total += user_stat.all_comps * ALL_COMPS
-        # most
-        total += user_stat.most_comments_give * MOST_COMMENT_GIVE
-        total += user_stat.most_comments_receive * MOST_COMMENT_RECEIVE
-        total += user_stat.most_notes * MOST_NOTES
-        total += user_stat.most_logins * MOST_LOGINS
-        total += user_stat.most_logouts * MOST_LOGOUTS
-        return total
 
 
 class StatsCalculator(BaseHandler):
