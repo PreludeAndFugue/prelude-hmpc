@@ -100,6 +100,20 @@ section {
     background-color: #eeeeee;
 }
 
+.badge-hmpc {
+    background-position: center;
+    background-repeat: no-repeat;
+    width: 32px;
+    height: 32px;
+    text-align: center;
+    vertical-align: middle;
+    line-height: 32px;
+    font-weight: bold;
+    font-size: 190%;
+    display: inline-block;
+    color: white;
+}
+
 /* fix bootstrap blockquote p font-size */
 blockquote p {
     font-size: 14px;
