@@ -615,6 +615,7 @@ def blob_exif(blob_key):
 class UserStats(ndb.Model):
     user = ndb.KeyProperty(kind=User, required=True)
     comp_photos = ndb.IntegerProperty(default=0)
+    high_score_photo = ndb.IntegerProperty(default=0)
     extra_photos = ndb.IntegerProperty(default=0)
     comments_give = ndb.IntegerProperty(default=0)
     comments_receive = ndb.IntegerProperty(default=0)
@@ -636,6 +637,7 @@ class UserStats(ndb.Model):
     most_logouts = ndb.IntegerProperty(default=0)
     most_comments_give = ndb.IntegerProperty(default=0)
     most_comments_receive = ndb.IntegerProperty(default=0)
+    most_comments_photo = ndb.IntegerProperty(default=0)
     most_notes = ndb.IntegerProperty(default=0)
     most_last_place = ndb.IntegerProperty(default=0)
     all_comps = ndb.IntegerProperty(default=0)
@@ -647,21 +649,23 @@ class UserStats(ndb.Model):
 
     def __str__(self):
         format_string = (
-            '\nUserStats: %s, \n\tphotos: %d, c_g: %d, c_r: %d, points: %d'
+            '\nUserStats: %s, \n\tphotos: %d, hight_score_photo: %d'
+            '\n\tc_g: %d, c_r: %d, points: %d'
             '\n\t10_g: %d, 10_r: %d, 0_g: %d 0_r: %d'
             '\n\t1st: %d, 2nd: %d, 3rd: %d, last: %d, notes: %d'
             '\n\tgiver: %d, bio: %d, logins: %d, logouts: %d'
             '\n\tmost_logins: %d, most_logouts: %d, most_notes: %d'
-            '\n\tmost_last_place: %d, all_comps: %d\n'
+            '\n\tmost_comments_photo: %d, most_last_place: %d, all_comps: %d\n'
         )
         data = (
-            self.user.get().username, self.comp_photos, self.comments_give,
-            self.comments_receive, self.total_points, self.score_10_give,
-            self.score_10_receive, self.score_0_give, self.score_0_receive,
-            self.first_place, self.second_place, self.third_place,
-            self.last_place, self.notes, self.giver, self.bio, self.logins,
-            self.logouts, self.most_logins, self.most_logouts, self.most_notes,
-            self.most_last_place, self.all_comps
+            self.user.get().username, self.comp_photos, self.high_score_photo,
+            self.comments_give, self.comments_receive, self.total_points,
+            self.score_10_give, self.score_10_receive, self.score_0_give,
+            self.score_0_receive, self.first_place, self.second_place,
+            self.third_place, self.last_place, self.notes, self.giver, self.bio,
+            self.logins, self.logouts, self.most_logins, self.most_logouts,
+            self.most_notes, self.most_comments_photo, self.most_last_place,
+            self.all_comps
         )
         return format_string % data
 
