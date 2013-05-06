@@ -14,6 +14,7 @@ from model import (
     Competition,
 )
 from handler import BaseHandler
+from helper import COMPLETED
 
 # scores
 PHOTO = 10
@@ -32,7 +33,7 @@ FIRST = 10
 SECOND = 8
 THIRD = 6
 POSITIONS = {0: 0, 1: FIRST, 2: SECOND, 3: THIRD}
-LAST = 10
+LAST = 20
 NOTE = 5
 MOST_NOTES = 20
 # does this person submit more than receive comments and scores of 10
@@ -41,8 +42,23 @@ LOGIN = 2
 MOST_LOGINS = 20
 LOGOUT = 5
 MOST_LOGOUTS = 30
+MOST_LAST = 50
 BIO = 20
 ALL_COMPS = 50
+
+# pair the attributes of a UserStat object with the points
+PAIRINGS = [
+    ('comp_photos', PHOTO), ('extra_photos', EXTRA_PHOTO),
+    ('comments_give', COMMENT_GIVE), ('comments_receive', COMMENT_RECEIVE),
+    ('score_10_give', SCORE_10_GIVE), ('score_10_receive', SCORE_10_RECEIVE),
+    ('score_0_give', SCORE_0_GIVE), ('score_0_receive', SCORE_0_RECEIVE),
+    ('first_place', FIRST), ('second_place', SECOND), ('third_place', THIRD),
+    ('last_place', LAST), ('notes', NOTE), ('giver', GIVER), ('total_points', 1),
+    ('logins', LOGIN), ('logouts', LOGOUT), ('all_comps', ALL_COMPS),
+    ('most_comments_give', MOST_COMMENT_GIVE), ('most_last_place', MOST_LAST),
+    ('most_comments_receive', MOST_COMMENT_RECEIVE), ('most_notes', MOST_NOTES),
+    ('most_logins', MOST_LOGINS), ('most_logouts', MOST_LOGOUTS),
+]
 
 
 class Stats(BaseHandler):
@@ -50,7 +66,8 @@ class Stats(BaseHandler):
         scores = []
         for user_stats in UserStats.query().fetch():
             user = user_stats.user.get()
-            score = self.total_score(user_stats, user)
+            score = sum(getattr(user_stats, attr) * points
+                        for attr, points in PAIRINGS)
             if score > 0:
                 scores.append((score, user.username))
 
@@ -63,34 +80,6 @@ class Stats(BaseHandler):
         }
 
         self.render('stats.html', **data)
-
-    def total_score(self, user_stat, user):
-        '''Calculate the total score for a user.'''
-        total = 0
-        total += user_stat.comp_photos * PHOTO
-        total += user_stat.extra_photos * EXTRA_PHOTO
-        total += user_stat.comments_give * COMMENT_GIVE
-        total += user_stat.comments_receive * COMMENT_RECEIVE
-        total += user_stat.score_10_give * SCORE_10_GIVE
-        total += user_stat.score_10_receive * SCORE_10_RECEIVE
-        total += user_stat.score_0_give * SCORE_0_GIVE
-        total += user_stat.score_0_receive * SCORE_0_RECEIVE
-        total += user_stat.first_place * FIRST
-        total += user_stat.second_place * SECOND
-        total += user_stat.third_place * THIRD
-        total += user_stat.notes * NOTE
-        total += user_stat.giver * GIVER
-        total += user_stat.total_points
-        total += user_stat.logins * LOGIN
-        total += user_stat.logouts * LOGOUT
-        total += user_stat.all_comps * ALL_COMPS
-        # most
-        total += user_stat.most_comments_give * MOST_COMMENT_GIVE
-        total += user_stat.most_comments_receive * MOST_COMMENT_RECEIVE
-        total += user_stat.most_notes * MOST_NOTES
-        total += user_stat.most_logins * MOST_LOGINS
-        total += user_stat.most_logouts * MOST_LOGOUTS
-        return total
 
 
 class StatsCalculator(BaseHandler):
@@ -111,17 +100,18 @@ class StatsCalculator(BaseHandler):
 
         for photo in Photo.query().fetch():
             user_id = photo.user.id()
+            user_stat = data[user_id]
             if photo.competition is None:
-                data[user_id].extra_photos += 1
+                user_stat.extra_photos += 1
             else:
-                data[user_id].comp_photos += 1
-                data[user_id].total_points += photo.total_score
+                user_stat.comp_photos += 1
+                user_stat.total_points += photo.total_score
                 if photo.position == 1:
-                    data[user_id].first_place += 1
+                    user_stat.first_place += 1
                 elif photo.position == 2:
-                    data[user_id].second_place += 1
+                    user_stat.second_place += 1
                 elif photo.position == 3:
-                    data[user_id].third_place += 1
+                    user_stat.third_place += 1
 
         completed_comp_count = Competition.count()
         for user_stat in data.values():
@@ -138,14 +128,14 @@ class StatsCalculator(BaseHandler):
         for score in Scores.query().fetch():
             receiver = score.photo.get().user.id()
             if score.score == 10:
-                # give
+                # give 10
                 data[score.user_from.id()].score_10_give += 1
-                # receive
+                # receive 10
                 data[receiver].score_10_receive += 1
             elif score.score == 0:
-                # give
+                # give 0
                 data[score.user_from.id()].score_0_give += 1
-                # receive
+                # receive 0
                 data[receiver].score_0_recieve += 1
 
         for note in Note.query().fetch():
@@ -158,11 +148,15 @@ class StatsCalculator(BaseHandler):
             if user.score_10_give > user.score_10_receive:
                 user.giver += 1
 
+        # last place finishers
+        self._last_positions(data)
+
         self._most(data, 'comments_give')
         self._most(data, 'comments_receive')
         self._most(data, 'notes')
         self._most(data, 'logins')
         self._most(data, 'logouts')
+        self._most(data, 'last_place')
 
         UserStats.delete_all()
         for stat in data.values():
@@ -172,17 +166,26 @@ class StatsCalculator(BaseHandler):
         logging.info('stats calculator...finished')
 
     def _most(self, data, attr_name='login_count'):
-        '''Find the user with the highest value for a particular attribute.'''
-        best_user_id = None
-        best_count = 0
-        for user_id, user_stat in data.items():
-            attr_value = getattr(user_stat, attr_name)
-            if attr_value > best_count:
-                best_user_id = user_id
-                best_count = attr_value
-        if best_user_id:
-            user_stat = data[best_user_id]
-            setattr(user_stat, 'most_' + attr_name, 1)
+        '''Find the user(s) with the highest value for a particular
+        attribute.'''
+
+        best_count = max(getattr(user, attr_name) for user in data.values())
+        logging.info('best_count for %s: %d' % (attr_name, best_count))
+
+        if best_count:
+            for user in data.values():
+                if getattr(user, attr_name) == best_count:
+                    setattr(user, 'most_' + attr_name, 1)
+
+    def _last_positions(self, data):
+        '''Update UserStat records for all users who have a photo that was last
+        in a competition.'''
+        for comp in Competition.get_by_status(COMPLETED):
+            photos = list(Photo.competition_photos(comp))
+            last_position = max(photos, key=lambda x: x.position).position
+            #logging.info('%s: last: %d' % (comp, last_position))
+            for photo in filter(lambda x: x.position == last_position, photos):
+                data[photo.user.id()].last_place += 1
 
 
 routes = [

@@ -7,15 +7,10 @@
     <div>
         <p><a href="/user/{{usr.user.id()}}">{{usr.user.get().username}}</a></p>
         <p style="margin-left:20px;">
-            <img alt="Competition photographs" src="/static/img/polaroid.gif">
-            {{usr.comp_photos}},
-
-            <img alt="First place" src="/static/img/gold.gif">
-            {{usr.first_place}},
-            <img alt="Second place" src="/static/img/silver.gif">
-            {{usr.second_place}},
-            <img alt="Third place" src="/static/img/bronze.gif">
-            {{usr.third_place}}
+            <span class="badge-hmpc" style="background-image: url(/static/img/polaroid.png)">{{usr.comp_photos}}</span>
+            <span class="badge-hmpc" style="background-image: url(/static/img/gold.png);">{{usr.first_place}}</span>
+            <span class="badge-hmpc" style="background-image: url(/static/img/silver.png);">{{usr.second_place}}</span>
+            <span class="badge-hmpc" style="background-image: url(/static/img/bronze.png);">{{usr.third_place}}</span>
         </p>
     </div>
 {% endfor %}
