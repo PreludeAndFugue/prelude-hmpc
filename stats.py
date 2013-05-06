@@ -104,6 +104,10 @@ class StatsCalculator(BaseHandler):
             if photo.competition is None:
                 user_stat.extra_photos += 1
             else:
+                if photo.competition.get().status != COMPLETED:
+                    # not interested in competition photos for incomplete
+                    # competitions
+                    continue
                 user_stat.comp_photos += 1
                 user_stat.total_points += photo.total_score
                 if photo.position == 1:
