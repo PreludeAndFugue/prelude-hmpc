@@ -3,16 +3,21 @@
 {% block nav_users%}active{% endblock %}
 {% block content %}
 
-{% for usr in users %}
-    <div>
+<div class="row">
+{% for column in users|slice(2) %}
+    <div class="span6">
+        {% for usr in column %}
         <p><a href="/user/{{usr.user.id()}}">{{usr.user.get().username}}</a></p>
-        <p style="margin-left:20px;">
+        <p style="margin-left: 20px;">
             <span class="badge-hmpc" style="background-image: url(/static/img/polaroid.png)">{{usr.comp_photos}}</span>
             <span class="badge-hmpc" style="background-image: url(/static/img/gold.png);">{{usr.first_place}}</span>
             <span class="badge-hmpc" style="background-image: url(/static/img/silver.png);">{{usr.second_place}}</span>
             <span class="badge-hmpc" style="background-image: url(/static/img/bronze.png);">{{usr.third_place}}</span>
+            <span class="badge-hmpc" style="background-image: url(/static/img/last.png);">{{usr.last_place}}</span>
+        {% endfor %}
         </p>
     </div>
 {% endfor %}
+</div>
 
 {% endblock %}

@@ -3,6 +3,7 @@
 import webapp2
 
 import logging
+from collections import defaultdict
 
 from model import (
     User,
@@ -18,6 +19,7 @@ from helper import COMPLETED
 
 # scores
 PHOTO = 10
+HIGH_SCORE_PHOTO = 50
 EXTRA_PHOTO = 2
 # use up all your extra photo quota
 EXTRA_QUOTA = 30
@@ -25,6 +27,7 @@ COMMENT_GIVE = 2
 MOST_COMMENT_GIVE = 25
 COMMENT_RECEIVE = 4
 MOST_COMMENT_RECEIVE = 50
+MOST_COMMENT_PHOTO = 50
 SCORE_10_GIVE = 5
 SCORE_10_RECEIVE = 10
 SCORE_0_GIVE = 5
@@ -58,6 +61,8 @@ PAIRINGS = [
     ('most_comments_give', MOST_COMMENT_GIVE), ('most_last_place', MOST_LAST),
     ('most_comments_receive', MOST_COMMENT_RECEIVE), ('most_notes', MOST_NOTES),
     ('most_logins', MOST_LOGINS), ('most_logouts', MOST_LOGOUTS),
+    ('most_comments_photo', MOST_COMMENT_PHOTO),
+    ('high_score_photo', HIGH_SCORE_PHOTO)
 ]
 
 
@@ -104,6 +109,10 @@ class StatsCalculator(BaseHandler):
             if photo.competition is None:
                 user_stat.extra_photos += 1
             else:
+                if photo.competition.get().status != COMPLETED:
+                    # not interested in competition photos for incomplete
+                    # competitions
+                    continue
                 user_stat.comp_photos += 1
                 user_stat.total_points += photo.total_score
                 if photo.position == 1:
@@ -151,6 +160,9 @@ class StatsCalculator(BaseHandler):
         # last place finishers
         self._last_positions(data)
 
+        self._photo_with_most_comments(data)
+        self._photo_with_high_score(data)
+
         self._most(data, 'comments_give')
         self._most(data, 'comments_receive')
         self._most(data, 'notes')
@@ -186,6 +198,34 @@ class StatsCalculator(BaseHandler):
             #logging.info('%s: last: %d' % (comp, last_position))
             for photo in filter(lambda x: x.position == last_position, photos):
                 data[photo.user.id()].last_place += 1
+
+    def _photo_with_most_comments(self, data):
+        '''Find the photograph with the most comments.'''
+        comment_count = defaultdict(int)
+        for comment in Comment.query():
+            comment_count[comment.photo] += 1
+        max_comments = max(comment_count.values())
+        for photo, comments in comment_count.items():
+            if comments == max_comments:
+                user_id = photo.get().user.id()
+                data[user_id].most_comments_photo = 1
+
+    def _photo_with_high_score(self, data):
+        '''Find the photograph(s) with the highest score.
+
+        photo_score / (photos_in_comp - 1)
+
+        Note: only need to consider first placed photos.
+        '''
+        results = defaultdict(list)
+        for photo in Photo.query(Photo.position == 1):
+            comp = photo.competition.get()
+            photo_count = comp.users().count()
+            percent_score = photo.total_score / (10.0 * (photo_count - 1))
+            results[percent_score].append(photo)
+        max_score = max(results.keys())
+        for photo in results[max_score]:
+            data[photo.user.id()].high_score_photo += 1
 
 
 routes = [

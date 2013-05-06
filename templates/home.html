@@ -82,7 +82,11 @@
         </div>
 
         <div class="span6">
-            <h3>Recent Comments</h3>
+            <h3>Recent Comments
+                <small>
+                    <a href="/comments">View all comments</a>
+                </small>
+            </h3>
             {% for text, userid, user, photo_id, date in comments %}
                 <div>
                     <blockquote>
