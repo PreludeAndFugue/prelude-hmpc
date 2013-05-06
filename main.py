@@ -71,7 +71,7 @@ class Home(BaseHandler):
 
     def recent_comments(self):
         comments = []
-        for comment in Comment.recent_comments(7):
+        for comment in Comment.recent_comments(10):
             text = markdown.markdown(
                 comment.text,
                 output_format='html5',
