@@ -271,7 +271,7 @@ class Photo(ndb.Model):
             cls.competition == None,
             cls.user == user.key,
         )
-        query = query.order(cls.month)
+        query = query.order(cls.month, cls.upload_date)
         return query
 
     @classmethod

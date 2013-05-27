@@ -8,7 +8,7 @@ Scoreboard: person who has given out least points in a competition
 Extra photo comment - indicator on user's page of extra photo comments
 Email notification for all users who have commented on a photo
 Profile picture
-Check the order of display for extra photos.
+Activity and comment list: on home page, change comment list so that it also includes extra photo upload activity
 
 
 DONE
@@ -26,3 +26,4 @@ DONE
 2013-05-06 Scoreboard: photo with most comments
 2013-05-06 Scoreboard: highest scoring photo - photo_score/(photo_count_comp-1)
 2013-05-27 Photo data download as csv
+2013-05-27 Check the order of display for extra photos.
