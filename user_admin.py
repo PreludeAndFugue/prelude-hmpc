@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 
+"""Handlers for login, logout, login-as, registration, verification,
+password reset, and contact.
+"""
+
 import datetime
 from google.appengine.api import mail
 import logging

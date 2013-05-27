@@ -1,12 +1,14 @@
 #!/usr/bin/env python
 
+'''Photos: viewing, deleting and exporting data from the model.'''
+
 import webapp2
 import logging
 from google.appengine.api import mail
 
 from handler import BaseHandler
 from helper import OPEN, COMPLETED
-from model import Photo, Comment, UserComp
+from model import Photo, Comment, UserComp, csv_photos
 
 
 class PhotoView(BaseHandler):
@@ -242,8 +244,23 @@ class PhotoDelete(BaseHandler):
             return True
         return False
 
+
+class PhotoCSV(BaseHandler):
+    '''Create a CSV file of all the data in the Photo model.'''
+    def get(self):
+        user_id, user = self.get_user()
+        if not user or not user.admin:
+            self.redirect('/')
+            return
+
+        logging.info('User: %s downloading photo data' % user.username)
+        self.response.content_type = 'text/csv'
+        self.write(csv_photos())
+
+
 routes = [
     (r'/photo/(\d+)', PhotoView),
-    (r'/photo/delete/(\d+)', PhotoDelete)
+    (r'/photo/delete/(\d+)', PhotoDelete),
+    (r'/photo/photos.csv', PhotoCSV)
 ]
 app = webapp2.WSGIApplication(routes=routes, debug=True)
