@@ -204,6 +204,10 @@ class StatsCalculator(BaseHandler):
         comment_count = defaultdict(int)
         for comment in Comment.query():
             comment_count[comment.photo] += 1
+
+        if not comment_count:
+            return
+
         max_comments = max(comment_count.values())
         for photo, comments in comment_count.items():
             if comments == max_comments:

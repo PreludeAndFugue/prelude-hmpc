@@ -271,7 +271,7 @@ class Photo(ndb.Model):
             cls.competition == None,
             cls.user == user.key,
         )
-        query = query.order(cls.month)
+        query = query.order(cls.month, cls.upload_date)
         return query
 
     @classmethod
@@ -282,6 +282,16 @@ class Photo(ndb.Model):
             cls.user == user.key,
         )
         return query.get()
+
+    def commentators(self):
+        '''Return a list of all the commentators and photographer (User
+        instances) for a particular photo.'''
+        commentators = [self.user.get()]
+        for comment in Comment.query(Comment.photo == self.key):
+            user = comment.user.get()
+            if user not in commentators:
+                commentators.append(user)
+        return commentators
 
     def scores(self):
         '''Return a collection of all the scores for this photo as Scores
@@ -404,6 +414,7 @@ class Comment(ndb.Model):
 
     @classmethod
     def photo_comments(cls, photo):
+        '''Return all comments for a photo.'''
         query = cls.query(cls.photo == photo.key)
         query = query.order(cls.submit_date)
         for comment in query:
@@ -422,12 +433,14 @@ class Comment(ndb.Model):
 
     @classmethod
     def user_comments(cls, user):
+        '''Return all comments made by a particular user.'''
         query = cls.query(cls.user == user.key)
         query = query.order(-cls.submit_date)
         return query
 
     @classmethod
     def recent_comments(cls, limit=5, offset=0):
+        '''Return the most recent comments up to a certain limit.'''
         query = cls.query()
         query = query.order(-cls.submit_date)
         return query.fetch(limit, offset=offset)
