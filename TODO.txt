@@ -3,6 +3,13 @@ Add sort order to competitor page: alpha, medal count, ...?
 More stats (next to scoreboard): total photos, points, etc...?
 Scoreboard: points for using all extra photo quota.
 Badges...?
+Scoreboard: person who has given out most points in a competition
+Scoreboard: person who has given out least points in a competition
+Extra photo comment - indicator on user's page of extra photo comments
+Email notification for all users who have commented on a photo
+Profile picture
+Check the order of display for extra photos.
+
 
 DONE
 ----
@@ -17,4 +24,5 @@ DONE
 2013-04-12 Scoreboard: points for bio, extra photos.
 2013-05-06 Increase number of comments on homepage: 10
 2013-05-06 Scoreboard: photo with most comments
-2013-05-06 Scoreboard: highest scoring photo - photo_score/(photo_count_comp - 1)
+2013-05-06 Scoreboard: highest scoring photo - photo_score/(photo_count_comp-1)
+2013-05-27 Photo data download as csv

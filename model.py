@@ -555,6 +555,31 @@ def csv_scores(comp):
     return buf.getvalue()
 
 
+def csv_photos():
+    '''Create a csv file for all data in Photo model.'''
+    fieldnames = [
+        'Id', 'Username', 'Competition', 'Title', 'Upload date',
+        'Position', 'Total score', 'Make', 'Model', 'Datetime', 'ISO',
+        'Focal length', 'Lens', 'Aperture', 'Exposure time', 'Copyright',
+        'Comment count', 'Extra photo month'
+    ]
+
+    buf = StringIO.StringIO()
+    data = csv.writer(buf)
+    data.writerow(fieldnames)
+    for photo in Photo.query():
+        data.writerow([
+            photo.key.id(), photo.user.get().username,
+            photo.competition.get().title if photo.competition else '',
+            photo.title, photo.upload_date,
+            photo.position, photo.total_score, photo.make, photo.model,
+            photo.datetime, photo.iso, photo.focal_length, photo.lens,
+            photo.aperture, photo.exposure_time1, photo.copyright,
+            photo.comment_count, photo.month
+        ])
+    return buf.getvalue()
+
+
 def recently_completed_competitions():
     results = []
     comps = Competition.query(Competition.finished == True)
