@@ -117,25 +117,37 @@ class PhotoView(BaseHandler):
         photo.comment_count += 1
         photo.put()
 
-        # send an email to the photographer, letting them know of the new
-        # comment
-        photo_user = photo.user.get()
-        to = '{} <{}>'.format(photo_user.username, photo_user.email)
-        subject = 'HMPC: New photograph comment'
+        # send an email to the photographer and commentators, letting them
+        # know of the new comment
+        to = self._email_addresses(photo)
+        logging.info('New comment. email addresses: %s' % ', '.join(to))
         body = (
-            'You have received a new comment on one of your photographs.'
+            'Someone has made a comment on a photograph.'
             '\n\n'
             'From: {}\n\n'
             '{}'  # comment
             '\n\n'
-            "The following link will take you to your photograph's page.\n"
+            "The following link will take you to the photograph's page.\n"
             'http://prelude-hmpc.appspot.com/photo/{}'
         )
         body = body.format(user.username, comment, photo_id)
-        logging.info(body)
-        mail.send_mail('gdrummondk@gmail.com', to, subject, body)
 
+        email = mail.EmailMessage(
+            sender='HMPC Bot <gdrummondk@gmail.com>',
+            subject='HMPC: New photograph comment',
+            bcc=to,
+            body=body
+        )
+        email.send()
         self.redirect(self.request.path)
+
+    def _email_addresses(self, photo):
+        '''Return a list of email addresses for everyone who has made
+        a comment for a photo.'''
+        addresses = []
+        for commentator in photo.commentators():
+            addresses.append(commentator.email)
+        return addresses
 
 
 class PhotoDelete(BaseHandler):
