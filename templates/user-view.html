@@ -80,26 +80,28 @@
 
 <div id="comp-photos">
     <h4>Competition Photographs</h4>
-    <ul class="thumbnails">
-    {% for photo in photos %}
-        <li class="span3">
-            <a href="/photo/{{photo.key.id()}}" class="thumbnail" title="{{photo.title}}">
-                <img src="{{photo.thumb()}}" alt="{{photo.title}}" />
-            </a>
-            <p>
-                <em>{{photo.title|default('Untitled', true)}}</em>
-                <br />
-                {{photo.get_competition().title}}
-                {% if photo.position %}
+    {% for photo_row in photos|batch(4) %}
+        <ul class="thumbnails">
+            {% for photo in photo_row %}
+            <li class="span3">
+                <a href="/photo/{{photo.key.id()}}" class="thumbnail" title="{{photo.title}}">
+                    <img src="{{photo.thumb()}}" alt="{{photo.title}}" />
+                </a>
+                <p>
+                    <em>{{photo.title|default('Untitled', true)}}</em>
                     <br />
-                    Score: {{photo.total_score}}
-                    <br />
-                    Position: {{photo.ordinal_position()}}
-                {% endif %}
-            </p>
-        </li>
+                    {{photo.get_competition().title}}
+                    {% if photo.position %}
+                        <br />
+                        Score: {{photo.total_score}}
+                        <br />
+                        Position: {{photo.ordinal_position()}}
+                    {% endif %}
+                </p>
+            </li>
+            {% endfor %}
+        </ul>
     {% endfor %}
-    </ul>
     {% if not photos %}
         <p><em>No competition photographs.</em></p>
     {% endif%}

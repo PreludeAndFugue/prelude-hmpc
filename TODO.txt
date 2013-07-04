@@ -6,10 +6,14 @@ Badges...?
 Scoreboard: person who has given out most points in a competition
 Scoreboard: person who has given out least points in a competition
 Extra photo comment - indicator on user's page of extra photo comments
-Email notification for all users who have commented on a photo
 Profile picture
 Activity and comment list: on home page, change comment list so that it also includes extra photo upload activity
-
+Scoreboard: (at least) one of each (G, S, B, L) gets points
+Scoreboard: none of all (G, S, B, L) gets points
+Bug: user photos not aligned properly if a photo has long title (AllanP)
+Scoreboard: fullhouse - all of g, s, b, and last at least once
+Scoreboard: most gold, most silver, most bronze
+Scoreboard: largest total medal count (g, s, b, last)
 
 DONE
 ----
@@ -27,3 +31,4 @@ DONE
 2013-05-06 Scoreboard: highest scoring photo - photo_score/(photo_count_comp-1)
 2013-05-27 Photo data download as csv
 2013-05-27 Check the order of display for extra photos.
+2013-05-27 Email notification for all users who have commented on a photo
