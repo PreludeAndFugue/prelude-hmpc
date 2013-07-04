@@ -10,7 +10,6 @@ Profile picture
 Activity and comment list: on home page, change comment list so that it also includes extra photo upload activity
 Scoreboard: (at least) one of each (G, S, B, L) gets points
 Scoreboard: none of all (G, S, B, L) gets points
-Bug: user photos not aligned properly if a photo has long title (AllanP)
 Scoreboard: fullhouse - all of g, s, b, and last at least once
 Scoreboard: most gold, most silver, most bronze
 Scoreboard: largest total medal count (g, s, b, last)
@@ -32,3 +31,4 @@ DONE
 2013-05-27 Photo data download as csv
 2013-05-27 Check the order of display for extra photos.
 2013-05-27 Email notification for all users who have commented on a photo
+2013-07-04 Bug: user photos not aligned properly if a photo has long title (AllanP)
