@@ -331,7 +331,7 @@ class Photo(ndb.Model):
 
     def _exposure_time(self):
         et = self.exposure_time1
-        logging.info("exposure time: %d" % et)
+        #logging.info("exposure time: %d" % et)
         if et < 1:
             return '1/%ds' % round(1 / et)
         else:
