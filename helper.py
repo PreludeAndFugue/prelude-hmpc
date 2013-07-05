@@ -5,7 +5,7 @@ OPEN = 0
 SCORING = 1
 COMPLETED = 2
 # the total number of extra photos that can be uploaded
-MAX_EXTRA_PHOTO = 40
+MAX_EXTRA_PHOTO = 80
 
 MONTHS = {
     1: 'January',

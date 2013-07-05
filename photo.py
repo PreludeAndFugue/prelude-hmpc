@@ -5,6 +5,7 @@
 import webapp2
 import logging
 from google.appengine.api import mail
+from google.appengine.runtime.apiproxy_errors import OverQuotaError
 
 from handler import BaseHandler
 from helper import OPEN, COMPLETED
@@ -132,13 +133,24 @@ class PhotoView(BaseHandler):
         )
         body = body.format(user.username, comment, photo_id)
 
-        email = mail.EmailMessage(
-            sender='HMPC Bot <gdrummondk@gmail.com>',
-            subject='HMPC: New photograph comment',
-            bcc=to,
-            body=body
-        )
-        email.send()
+        try:
+            email = mail.EmailMessage(
+                sender='HMPC Bot <gdrummondk@gmail.com>',
+                subject='HMPC: New photograph comment',
+                bcc=to,
+                body=body
+            )
+            email.send()
+        except OverQuotaError, msg:
+            logging.error(msg)
+            # send a message to admin (me) then I can forward to users
+            new_body = body + '\n\nSend to:\n' + ', '.join(to)
+            mail.send_mail_to_admins(
+                sender='HMPC Bot <gdrummondk@gmail.com>',
+                subject='HMPC: New photograph comment (over quota)',
+                body=new_body
+            )
+
         self.redirect(self.request.path)
 
     def _email_addresses(self, photo):
