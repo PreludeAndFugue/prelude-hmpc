@@ -24,6 +24,7 @@
     {% endfor %}
     </ul>
 
+    <!-- the results -->
     <table class="table table-bordered">
         <thead>
             <tr>
@@ -67,6 +68,36 @@
             {% endfor %}
         </tbody>
     </table>
+
+
+    {% if user and user.admin %}
+    <!-- the break down of the scores -->
+    <table class="table table-bordered">
+        <caption>Score breakdown</caption>
+        <thead>
+            <tr>
+                <th>Recipient</th>
+                {% for username, scores1 in scores|dictsort %}
+                    <th style="text-align: center;">{{username}}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for username, scores2 in scores|dictsort %}
+            <tr>
+                <td>{{username}}</td>
+                {% for username2, score in scores2|dictsort %}
+                    {% if score == -1 %}
+                        <td></td>
+                    {% else %}
+                        <td style="text-align: center;">{{score}}</td>
+                    {% endif %}
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
 
 
 {% endblock %}

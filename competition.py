@@ -143,6 +143,7 @@ class CompetitionHandler(BaseHandler):
     def view_complete(self, user, comp_id, comp, data):
         '''Create the competition page when its status is Completed.'''
         data['photos'] = list(Photo.competition_result(comp))
+        data['scores'] = Scores.competition_scores(comp)
         self.render('competition-complete.html', **data)
 
     def parse_scores(self, scores):

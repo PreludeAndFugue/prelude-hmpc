@@ -33,3 +33,5 @@ DONE
 2013-05-27 Email notification for all users who have commented on a photo
 2013-07-04 Bug: user photos not aligned properly if a photo has long title (AllanP)
 2013-07-04 Increase extra photo limit
+2013-07-15 Add full list of scores for completed comps from this month
+2013-07-15 Detect logged in user on secret scoreboard page

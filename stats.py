@@ -68,6 +68,7 @@ PAIRINGS = [
 
 class Stats(BaseHandler):
     def get(self):
+        user_id, logged_user = self.get_user()
         scores = []
         for user_stats in UserStats.query().fetch():
             user = user_stats.user.get()
@@ -80,6 +81,7 @@ class Stats(BaseHandler):
         logging.info('scores: %s' % scores)
 
         data = {
+            'user': logged_user,
             'page_title': 'Secret Scoreboard',
             'scores': scores,
         }
