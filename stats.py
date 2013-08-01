@@ -227,6 +227,7 @@ class StatsCalculator(BaseHandler):
         for photo in Photo.query(Photo.position == 1):
             comp = photo.competition.get()
             photo_count = comp.users().count()
+            # max score for photo in a competition: 10 * (photo_count - 1)
             percent_score = photo.total_score / (10.0 * (photo_count - 1))
             results[percent_score].append(photo)
         max_score = max(results.keys())

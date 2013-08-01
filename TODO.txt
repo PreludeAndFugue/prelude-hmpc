@@ -9,7 +9,7 @@ Extra photo comment - indicator on user's page of extra photo comments
 Profile picture
 Activity and comment list: on home page, change comment list so that it also includes extra photo upload activity
 Scoreboard: (at least) one of each (G, S, B, L) gets points
-Scoreboard: none of all (G, S, B, L) gets points
+Scoreboard: none of all (G, S, B, L) gets points - emptyhouse
 Scoreboard: fullhouse - all of g, s, b, and last at least once
 Scoreboard: most gold, most silver, most bronze
 Scoreboard: largest total medal count (g, s, b, last)
@@ -35,3 +35,4 @@ DONE
 2013-07-04 Increase extra photo limit
 2013-07-15 Add full list of scores for completed comps from this month
 2013-07-15 Detect logged in user on secret scoreboard page
+2013-08-01 Display raw scores for months >= July
