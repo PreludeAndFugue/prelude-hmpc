@@ -8,10 +8,6 @@ Scoreboard: person who has given out least points in a competition
 Extra photo comment - indicator on user's page of extra photo comments
 Profile picture
 Activity and comment list: on home page, change comment list so that it also includes extra photo upload Activitys
-Scoreboard: none of all (G, S, B, L) gets points - emptyhouse
-Scoreboard: fullhouse - all of g, s, b, and last at least once
-Scoreboard: most gold, most silver, most bronze
-Scoreboard: largest total medal count (g, s, b, last)
 
 DONE
 ----
@@ -36,3 +32,7 @@ DONE
 2013-07-15 Detect logged in user on secret scoreboard page
 2013-08-01 Display raw scores for months >= July
 2013-08-02 Email notification: don't send to person who wrote comment.
+2013-08-02 Scoreboard: none of all (G, S, B, L) gets points - emptyhouse
+2013-08-02 Scoreboard: fullhouse - all of g, s, b, and last at least once
+2013-08-02 Scoreboard: largest total medal count (g, s, b, last)
+2013-08-02 Scoreboard: most gold, most silver, most bronze

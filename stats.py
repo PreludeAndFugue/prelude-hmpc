@@ -45,9 +45,15 @@ LOGIN = 2
 MOST_LOGINS = 20
 LOGOUT = 5
 MOST_LOGOUTS = 30
-MOST_LAST = 50
 BIO = 20
 ALL_COMPS = 50
+FULL_HOUSE = 100
+EMPTY_HOUSE = 150
+MOST_MEDALS = 100
+MOST_FIRST = 100
+MOST_SECOND = 80
+MOST_THIRD = 60
+MOST_LAST = 200
 
 # pair the attributes of a UserStat object with the points
 PAIRINGS = [
@@ -62,7 +68,10 @@ PAIRINGS = [
     ('most_comments_receive', MOST_COMMENT_RECEIVE), ('most_notes', MOST_NOTES),
     ('most_logins', MOST_LOGINS), ('most_logouts', MOST_LOGOUTS),
     ('most_comments_photo', MOST_COMMENT_PHOTO),
-    ('high_score_photo', HIGH_SCORE_PHOTO)
+    ('high_score_photo', HIGH_SCORE_PHOTO), ('full_house', FULL_HOUSE),
+    ('empty_house', EMPTY_HOUSE), ('most_medals', MOST_MEDALS),
+    ('most_first_place', MOST_FIRST), ('most_second_place', MOST_SECOND),
+    ('most_third_place', MOST_THIRD), ('most_last_place', MOST_LAST)
 ]
 
 
@@ -119,10 +128,13 @@ class StatsCalculator(BaseHandler):
                 user_stat.total_points += photo.total_score
                 if photo.position == 1:
                     user_stat.first_place += 1
+                    user_stat.medals += 1
                 elif photo.position == 2:
                     user_stat.second_place += 1
+                    user_stat.medals += 1
                 elif photo.position == 3:
                     user_stat.third_place += 1
+                    user_stat.medals += 1
 
         completed_comp_count = Competition.count()
         for user_stat in data.values():
@@ -164,12 +176,17 @@ class StatsCalculator(BaseHandler):
 
         self._photo_with_most_comments(data)
         self._photo_with_high_score(data)
+        self._houses(data)
 
         self._most(data, 'comments_give')
         self._most(data, 'comments_receive')
         self._most(data, 'notes')
         self._most(data, 'logins')
         self._most(data, 'logouts')
+        self._most(data, 'medals')
+        self._most(data, 'first_place')
+        self._most(data, 'second_place')
+        self._most(data, 'third_place')
         self._most(data, 'last_place')
 
         UserStats.delete_all()
@@ -199,7 +216,9 @@ class StatsCalculator(BaseHandler):
             last_position = max(photos, key=lambda x: x.position).position
             #logging.info('%s: last: %d' % (comp, last_position))
             for photo in filter(lambda x: x.position == last_position, photos):
-                data[photo.user.id()].last_place += 1
+                user_stat = data[photo.user.id()]
+                user_stat.last_place += 1
+                user_stat.medals += 1
 
     def _photo_with_most_comments(self, data):
         '''Find the photograph with the most comments.'''
@@ -233,6 +252,21 @@ class StatsCalculator(BaseHandler):
         max_score = max(results.keys())
         for photo in results[max_score]:
             data[photo.user.id()].high_score_photo += 1
+
+    def _houses(self, data):
+        '''Find users who have a full house - have at least one of all
+        medal types (G, S, B, L), or have an empty house - have won no
+        medals.'''
+        for user in data.values():
+            if not user.comp_photos:
+                continue
+            medals = [
+                user.first_place, user.second_place,
+                user.third_place, user.last_place]
+            if all(medals):
+                user.full_house = 1
+            elif not any(medals):
+                user.empty_house = 1
 
 
 routes = [
