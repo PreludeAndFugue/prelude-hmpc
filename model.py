@@ -536,6 +536,27 @@ class Scores(ndb.Model):
         )
         return query.get()
 
+    @classmethod
+    def competition_scores(cls, competition):
+        '''Return a dict of individual scores for all photos in a
+        competition.
+
+        Dict key is competitors username, the value is a dictionary
+        where each key is a competitor username and the value is the
+        score.
+        '''
+        result = {}
+        photos = Photo.competition_photos(competition)
+        for photo in photos:
+            photo_scores = {}
+            for score in photo.scores():
+                photo_scores[score.user_from.get().username] = score.score
+                # add a record for the person who took the photo, this
+                # will help with creating the table in the html
+            photo_scores[photo.user.get().username] = -1
+            result[photo.user.get().username] = photo_scores
+        return result
+
 
 # some functions that don't really fit in any particular model
 
@@ -550,7 +571,7 @@ def user_scores(user):
 def csv_scores(comp):
     '''Create a csv file for all the scores for a competition.'''
     photos = list(Photo.competition_photos(comp))
-    photos.sort(key=lambda p: p.user.get().username)
+    photos.sort(key=lambda p: p.user.get().username.lower())
 
     buf = StringIO.StringIO()
     fieldnames = ['Recipient'] + [p.user.get().username for p in photos]
