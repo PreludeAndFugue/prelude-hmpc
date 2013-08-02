@@ -700,6 +700,13 @@ class UserStats(ndb.Model):
     most_notes = ndb.IntegerProperty(default=0)
     most_last_place = ndb.IntegerProperty(default=0)
     all_comps = ndb.IntegerProperty(default=0)
+    full_house = ndb.IntegerProperty(default=0)
+    empty_house = ndb.IntegerProperty(default=0)
+    medals = ndb.IntegerProperty(default=0)
+    most_medals = ndb.IntegerProperty(default=0)
+    most_first_place = ndb.IntegerProperty(default=0)
+    most_second_place = ndb.IntegerProperty(default=0)
+    most_third_place = ndb.IntegerProperty(default=0)
 
     @classmethod
     def delete_all(cls):
@@ -714,17 +721,22 @@ class UserStats(ndb.Model):
             '\n\t1st: %d, 2nd: %d, 3rd: %d, last: %d, notes: %d'
             '\n\tgiver: %d, bio: %d, logins: %d, logouts: %d'
             '\n\tmost_logins: %d, most_logouts: %d, most_notes: %d'
-            '\n\tmost_comments_photo: %d, most_last_place: %d, all_comps: %d\n'
+            '\n\tmost_comments_photo: %d, all_comps: %d'
+            '\n\tfull_house: %d, empty_house: %d, medals: %d,'
+            '\n\tmost_medals: %d, most_first: %d, most_second: %d'
+            '\n\tmost_third: %d, most_last: %d\n'
         )
         data = (
             self.user.get().username, self.comp_photos, self.high_score_photo,
             self.comments_give, self.comments_receive, self.total_points,
             self.score_10_give, self.score_10_receive, self.score_0_give,
             self.score_0_receive, self.first_place, self.second_place,
-            self.third_place, self.last_place, self.notes, self.giver, self.bio,
-            self.logins, self.logouts, self.most_logins, self.most_logouts,
-            self.most_notes, self.most_comments_photo, self.most_last_place,
-            self.all_comps
+            self.third_place, self.last_place, self.notes, self.giver,
+            self.bio, self.logins, self.logouts, self.most_logins,
+            self.most_logouts, self.most_notes, self.most_comments_photo,
+            self.all_comps, self.full_house, self.empty_house, self.medals,
+            self.most_medals, self.most_first_place, self.most_second_place,
+            self.most_third_place, self.most_last_place
         )
         return format_string % data
 
