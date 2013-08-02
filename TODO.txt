@@ -7,8 +7,7 @@ Scoreboard: person who has given out most points in a competition
 Scoreboard: person who has given out least points in a competition
 Extra photo comment - indicator on user's page of extra photo comments
 Profile picture
-Activity and comment list: on home page, change comment list so that it also includes extra photo upload activity
-Scoreboard: (at least) one of each (G, S, B, L) gets points
+Activity and comment list: on home page, change comment list so that it also includes extra photo upload Activitys
 Scoreboard: none of all (G, S, B, L) gets points - emptyhouse
 Scoreboard: fullhouse - all of g, s, b, and last at least once
 Scoreboard: most gold, most silver, most bronze
