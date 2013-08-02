@@ -120,8 +120,15 @@ class PhotoView(BaseHandler):
 
         # send an email to the photographer and commentators, letting them
         # know of the new comment
-        to = self._email_addresses(photo)
-        logging.info('New comment. email addresses: %s' % ', '.join(to))
+        to = self._email_addresses(photo, user)
+
+        if not to:
+            # the commentator is also the photographer and there are
+            # no comments from other users - no email to send.
+            logging.info('Comment made, but no need to send email.')
+            self.redirect(self.request.path)
+            return
+
         body = (
             'Someone has made a comment on a photograph.'
             '\n\n'
@@ -153,12 +160,19 @@ class PhotoView(BaseHandler):
 
         self.redirect(self.request.path)
 
-    def _email_addresses(self, photo):
+    def _email_addresses(self, photo, user):
         '''Return a list of email addresses for everyone who has made
         a comment for a photo.'''
         addresses = []
         for commentator in photo.commentators():
             addresses.append(commentator.email)
+        # remove the person who wrote the comment from the list
+        if user.email in addresses:
+            addresses.remove(user.email)
+
+        logging.info('Send email to: %s', ', '.join(addresses))
+        logging.info('Comment written by: %s', user.email)
+
         return addresses
 
 
