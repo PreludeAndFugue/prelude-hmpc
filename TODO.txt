@@ -35,3 +35,4 @@ DONE
 2013-07-15 Add full list of scores for completed comps from this month
 2013-07-15 Detect logged in user on secret scoreboard page
 2013-08-01 Display raw scores for months >= July
+2013-08-02 Email notification: don't send to person who wrote comment.
