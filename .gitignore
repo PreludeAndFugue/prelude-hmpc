@@ -11,6 +11,9 @@ markdown
 # submlime text project files
 *.sublime*
 
+# an extra folder with files that shouldn't be tracked
+__info__
+
 #################
 ## Eclipse
 #################
